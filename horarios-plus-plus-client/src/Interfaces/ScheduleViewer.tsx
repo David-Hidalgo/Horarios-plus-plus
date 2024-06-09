@@ -15,29 +15,29 @@ const colors = [
   "#1672A3", "#0A498D", "#1D1D79", "#89355B"
 ]
 
-interface ISession {
+export interface ISession {
   section: ISection
   day: number
   start: Date
   end: Date
 }
 
-interface ISection {
+export interface ISection {
   sessionList: ISession[]
   subject: ISubject
   nrc: string
 }
 
-interface ISchedule {
+export interface ISchedule {
   sectionList: ISection[]
 }
 
-interface ISubject {
+export interface ISubject {
   color: string | undefined
   name: string
 }
 
-interface ScheduleViewerProperties {
+export interface ScheduleViewerProperties {
   loadedSchedule: ISchedule
 }
 
@@ -45,7 +45,7 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
   function assignMissingColors(subjectList: ISubject[]): ISubject[] {
     let colorlist = colors
     subjectList.map((subject) => {
-      let selectedColor = colorlist[Math.floor(Math.random() * colorlist.length)]
+      const selectedColor = colorlist[Math.floor(Math.random() * colorlist.length)]
       subject.color = selectedColor
       colorlist = colorlist.filter((color) => {return color != selectedColor})
       return subject
@@ -54,7 +54,7 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
   }
 
   function getSubjectsFromSectionList(): ISubject[] {
-    let ret = loadedSchedule.sectionList.map((value) => {
+    const ret = loadedSchedule.sectionList.map((value) => {
       return value.subject
     })
     assignMissingColors(ret)
@@ -69,9 +69,9 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
     return false
   }
 
-  function hourIsSame(time: Date, hour: number, minutes: number): Boolean {
-    if (time == undefined) return false
-    if (time.getHours() * 60 + time.getMinutes() == hour * 60 + minutes) {
+  function hourIsSame(time: Date, hour: number, minutes: number): boolean {
+    if (time === undefined) return false
+    if (time.getHours() * 60 + time.getMinutes() === hour * 60 + minutes) {
       return true
     }
     return false
@@ -82,7 +82,7 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
   }
 
   let remainingSkip = 0
-  let remaningSession = undefined
+  const remaningSession = undefined
 
   function CreateSubdivisions(sessionsToday: ISession[], hour: number): any {
 
@@ -93,7 +93,7 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
           return undefined
         }
 
-        let currentSession: ISession | undefined = sessionsToday.filter((session) => hourInBetween(session.start, session.end, hour + 6, parseInt(subsection)))?.at(0)
+        const currentSession: ISession | undefined = sessionsToday.filter((session) => hourInBetween(session.start, session.end, hour + 6, parseInt(subsection)))?.at(0)
         if (currentSession == undefined) {
           return <div style={{
             borderTop: subsection == "00" ? "1px solid " + borderColor : undefined,
@@ -105,7 +105,7 @@ export default function ScheduleViewer({ loadedSchedule }: ScheduleViewerPropert
         remainingSkip = (((currentSession.end.getHours() * 60 + currentSession.end.getMinutes()) -
           (currentSession.start.getHours() * 60 + currentSession.start.getMinutes())) / 15)
 
-        let color = currentSession?.section?.subject.color
+        const color = currentSession?.section?.subject.color
 
         
         return <>

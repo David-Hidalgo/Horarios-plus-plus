@@ -31,10 +31,10 @@ function DeveloperBox({ name, description, github_link } : DeveloperBoxContent) 
 function Developers() {
   return (
     <div className="developers-container">
-      <DeveloperBox name="Humberto Aleman" description="NONE" github_link="https://github.com"/>
-      <DeveloperBox name="Cristina Carnevali" description="NONE" github_link="https://github.com"/>
-      <DeveloperBox name="Daniel Castellanos" description="NONE" github_link="https://github.com"/>
-      <DeveloperBox name="David Hidalgo" description="NONE" github_link="https://github.com"/>
+      <DeveloperBox name="Humberto Aleman" description="NONE" github_link="https://github.com/HumbertoAlemanOdreman"/>
+      <DeveloperBox name="Cristina Carnevali" description="NONE" github_link="https://github.com/crisUni"/>
+      <DeveloperBox name="Daniel Castellanos" description="NONE" github_link="https://github.com/David-Hidalgo"/>
+      <DeveloperBox name="David Hidalgo" description="NONE" github_link="https://github.com/DanCas03"/>
     </div>
   )
 }

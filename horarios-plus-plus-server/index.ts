@@ -3,7 +3,7 @@ import mongoose, { type ConnectOptions } from 'mongoose';
 
 const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
 
-const uri = "mongodb+srv://humberto:cocosete@serverdata.64ryvhh.mongodb.net/?retryWrites=true&w=majority&appName=serverdata";
+const uri = "127.0.0.1/localhost:27017/test";
 const clientOptions: ConnectOptions = { };
 
 async function run() {
