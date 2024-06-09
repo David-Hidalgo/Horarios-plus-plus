@@ -1,0 +1,51 @@
+.navbar-container {
+  background: var(--background-light-color);
+  position: absolute;
+  top: 0;
+
+  display: flex;
+  flex-flow: row nowrap;
+
+  align-items: center;
+  justify-content: stretch;
+  justify-items: stretch;
+
+  width: 100vw;
+  max-width: 100vw;
+
+  height: var(--navbar-size);
+}
+
+.navbar-container div {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 15px;
+
+  pointer-events: none;
+  transition: background-color 0.3s cubic-bezier( 0.215, 0.61, 0.355, 1 );
+}
+
+.navbar-container div:hover  {
+  background-color: var(--foreground-hyperlink-color);
+}
+
+.navbar-container a {
+  color: white;
+  font-size: 1.5rem;
+  text-decoration: unset;
+  pointer-events: auto;
+}
+
+.navbar-container h1 {
+  margin: unset;
+  margin-left: 0.5rem;
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.navbar-container div + div {
+  margin-left: 1rem;
+}
