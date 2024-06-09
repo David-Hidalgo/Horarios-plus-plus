@@ -27,7 +27,7 @@ async function GenerateSchedules(sectionList, subjectCount) {
       if (passedArray.includes(originalArray.at(i))) { continue; }
       if (passedArray.some(value => value.subject.equals(originalArray.at(i).subject))) { continue; }
 
-      let sessionList = passedArray.concat(originalArray.at(i)).map(value => value.sessions).flat()
+      let sessionList = passedArray.concat(originalArray.at(i)).flatMap(value => value.sessions)
       sessionList = await Promise.all(sessionList.map(async id => {
         return await Session.findById(new mongoose.mongo.ObjectId(id))
       }))

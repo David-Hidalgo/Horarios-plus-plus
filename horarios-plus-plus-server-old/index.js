@@ -17,7 +17,7 @@ async function run() {
 
 run().catch(console.dir);
 
-let corsOptions = { origin : "*",  }
+const corsOptions = { origin : "*",  }
 app.use(cors(corsOptions)) 
 
 app.get('/', (req, res) => {

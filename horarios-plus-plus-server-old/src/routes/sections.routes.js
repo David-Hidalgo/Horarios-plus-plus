@@ -31,19 +31,19 @@ export function sectionRoutes(app) {
       }
 
     if (await Section.exists({ nrc: req.query.nrc })) {
-      console.log("El NRC ya se encuentra en la base de datos " + req.query.nrc)
+      console.log(`El NRC ya se encuentra en la base de datos ${req.query.nrc}`)
       res.send(undefined);
       return;
     }
 
     const subject = (await Subject.find({ name: req.query.subjectName })).at(0)
     if (subject === undefined) {
-      console.log("No se encontro " + req.query.subjectName)
+      console.log(`No se encontro ${req.query.subjectName}`)
       res.send(undefined);
       return;
     }
 
-    let newSection = new Section({
+    const newSection = new Section({
       _id: new mongoose.mongo.ObjectId,
       nrc: `${req.query.nrc}`,
       teacher: `${req.query.teacher}`,
@@ -57,7 +57,7 @@ export function sectionRoutes(app) {
   })
 
   app.get('/api/section/update_section', async(req, res) =>{
-    let oldNRC = req.query.oldnrc
+    const oldNRC = req.query.oldnrc
     if (oldNRC === undefined) {
       console.log("Could not update section, OLDNRC is undefined")
       res.send(undefined)
@@ -65,7 +65,7 @@ export function sectionRoutes(app) {
     }
 
     if (await Section.exists({ nrc: req.query.nrc })) {
-      console.log("El NRC ya se encuentra en la base de datos " + req.query.nrc)
+      console.log(`El NRC ya se encuentra en la base de datos ${req.query.nrc}`)
       res.send(undefined);
       return;
     }
@@ -84,7 +84,7 @@ export function sectionRoutes(app) {
   })
 
   app.get('/api/section/delete_section', async(req, res) =>{
-    let toDeleteNRC = req.query.nrc
+    const toDeleteNRC = req.query.nrc
     if (toDeleteNRC === undefined) {
       console.log("DELETE_SECTION ERROR: nrc is undefined ", toDeleteNRC)
       res.send(undefined)
@@ -98,7 +98,7 @@ export function sectionRoutes(app) {
       return 
     }
 
-    let schedules = await Schedule.find()
+    const schedules = await Schedule.find()
     schedules.forEach(async schedule => {
       if (schedule.sections.some(x => x.equals(section._id))) {
         await Schedule.deleteOne(schedule)
