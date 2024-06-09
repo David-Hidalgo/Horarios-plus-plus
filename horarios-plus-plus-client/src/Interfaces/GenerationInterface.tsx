@@ -264,16 +264,16 @@ export default function GenerationInterface() {
 
     if (sections.length === 0) { return undefined; }
     sections = sections.map(section => section.nrc)
-    let nrcString: string = sections.join(",")
+    const nrcString: string = sections.join(",")
 
-    let owner = email
+    const owner = email
     await fetch(`http://127.0.0.1:4000/api/schedules/generate_schedules?owner=${owner}&nrcs=${nrcString}`,
       { headers: { 'Accept': 'application/json' } })
       .then(response => response.json())
       .then(async data => {
         let scheduleList: ISchedule[] = []
         scheduleList = await Promise.all(data.map(async (schedule) => {
-          let newSchedule: ISchedule = {
+          const newSchedule: ISchedule = {
             sectionList: await Promise.all(schedule.map(async (section) => {
               let newSection: ISection = {
                 nrc: section.nrc,

@@ -1,4 +1,4 @@
-import { Section, Session, Subject, Schedule } from "./classes";
+import { Section, Session, Subject, Schedule } from "../models/classes";
 // Description: Archivo de funciones para el manejo de archivos
 
 function mismaMateria(section1: Section, section2: Section) {

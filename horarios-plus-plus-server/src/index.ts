@@ -2,7 +2,8 @@ import { Elysia } from "elysia";
 import mongoose, { type ConnectOptions } from 'mongoose';
 
 
-const app = new Elysia().get("/", () => "Hello Elysia").get('/', () => 'hello')
+const app = new Elysia().get("/", () => "Hello Elysia")
+  .get('/', () => 'hello')
   .post('/hi', () => 'hi')
   .listen(3000);
 

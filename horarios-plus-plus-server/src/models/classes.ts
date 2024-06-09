@@ -6,7 +6,7 @@ interface iSession {
 class Session implements iSession {
 	public start;
 	public end;
-	public day;
+	public day?: number;
 	constructor(start: Date, end: Date, day?: number) {
 		this.start = start;
 		this.end = end;

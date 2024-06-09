@@ -44,7 +44,6 @@ const scheduleSchema = new mongoose.Schema<iSchedule>({
 const ScheduleModel = mongoose.model("Schedule", scheduleSchema);
 type TScheduleSchema = mongoose.InferSchemaType<typeof scheduleSchema>;
 
-import { Schema, model, connect } from "mongoose";
 
 // 1. Create an interface representing a document in MongoDB.
 interface IUser {
@@ -55,7 +54,7 @@ interface IUser {
 }
 
 // 2. Create a Schema corresponding to the document interface.
-const userSchema = new Schema<IUser>({
+const userSchema = new mongoose.Schema<IUser>({
 	name: { type: String, required: true },
 	email: { type: String, required: true },
 	avatar: String,
@@ -63,30 +62,7 @@ const userSchema = new Schema<IUser>({
 });
 
 // 3. Create a Model.
-const UserModel = model<IUser>("User", userSchema);
+const UserModel = mongoose.model<IUser>("User", userSchema);
 type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
 
-run().catch((err) => console.log(err));
-
-import { getSchedules } from "./generadorDeHorarios";
-
-function createSchedule(sections: iSection[]): iSchedule {
-	const user = new UserModel({
-		name: "Bill",
-		email: "bill@initech.com",
-		avatar: "https://i.imgur.com/dM7Thhn.png",
-	});
-	const amigo=getSchedules(user.name, sections);
-	return amigo[0];
-}
-
-async function run() {
-	// 4. Connect to MongoDB
-	await connect("mongodb://127.0.0.1:27017/horariospp");
-
-
-
-	mongoose.disconnect();
-}
-
-export { SessionModel, CareerModel, SubjectModel, SectionModel };
+export { SessionModel, CareerModel, SubjectModel, SectionModel, ScheduleModel, UserModel };
