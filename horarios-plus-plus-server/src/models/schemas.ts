@@ -67,18 +67,26 @@ const UserModel = model<IUser>("User", userSchema);
 type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
 
 run().catch((err) => console.log(err));
-async function run() {
-	// 4. Connect to MongoDB
-	await connect("mongodb://127.0.0.1:27017/test");
 
+import { getSchedules } from "./generadorDeHorarios";
+
+function createSchedule(sections: iSection[]): iSchedule {
 	const user = new UserModel({
 		name: "Bill",
 		email: "bill@initech.com",
 		avatar: "https://i.imgur.com/dM7Thhn.png",
 	});
-	await user.save();
+	const amigo=getSchedules(user.name, sections);
+	return amigo[0];
+}
 
-	console.log(user.email); // 'bill@initech.com'
+async function run() {
+	// 4. Connect to MongoDB
+	await connect("mongodb://127.0.0.1:27017/horariospp");
+
+
+
+	mongoose.disconnect();
 }
 
 export { SessionModel, CareerModel, SubjectModel, SectionModel };
