@@ -64,9 +64,6 @@ class Section implements iSection {
 		this.subject = subject;
 		this.subject.sections.push(this);
 	}
-	get _subject() {
-		return this.subject;
-	}
 }
 interface iSchedule {
 	owner: string;

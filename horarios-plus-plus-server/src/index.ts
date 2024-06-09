@@ -1,9 +1,12 @@
 import { Elysia } from "elysia";
 import mongoose, { type ConnectOptions } from 'mongoose';
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
 
-const uri = "127.0.0.1/localhost:27017/test";
+const app = new Elysia().get("/", () => "Hello Elysia").get('/', () => 'hello')
+  .post('/hi', () => 'hi')
+  .listen(3000);
+
+const uri = "mongodb://127.0.0.1:27017/horariospp";
 const clientOptions: ConnectOptions = { };
 
 async function run() {
@@ -16,3 +19,5 @@ run().catch(console.dir);
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
+
+export type App = typeof app
