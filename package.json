@@ -1,15 +1,13 @@
 {
-  "name": "horarios-plus-plus",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@biomejs/biome": "^1.7.3",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "trustedDependencies": [
-    "@biomejs/biome"
-  ]
+	"name": "horarios-plus-plus",
+	"module": "index.ts",
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "^1.7.3",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"trustedDependencies": ["@biomejs/biome"]
 }

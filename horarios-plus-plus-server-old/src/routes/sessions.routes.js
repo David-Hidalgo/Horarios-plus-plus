@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { Schedule, Section, Session } from "../models/models.js"
+import type { isConstructorDeclaration } from "typescript";
 
 export function sessionRoutes(app) {  
   app.get('/api/session/get_sessions_from_id', async (req, res) => {
@@ -36,7 +37,7 @@ export function sessionRoutes(app) {
       return;
     }
 
-    let newSession = new Session({
+    const newSession = new Session({
       _id: new mongoose.mongo.ObjectId,
       day: 0,
       start: req.query.start,
@@ -61,7 +62,7 @@ export function sessionRoutes(app) {
     const oldSession = { day: oldDay, start: oldStart, end: oldEnd }
 
     if (oldDay === undefined || oldStart === undefined || oldEnd === undefined ||
-      newDay === undefined || newStart === undefined || newEnd === undefined || req.query.nrc == undefined) {
+      newDay === undefined || newStart === undefined || newEnd === undefined || req.query.nrc === undefined) {
       console.log("Could not update session, one of the arguments is undefined")
       res.send(undefined)
       return
@@ -93,12 +94,12 @@ export function sessionRoutes(app) {
   })
 
   app.get('/api/session/delete_session', async(req, res) =>{
-    let sectionNRC = req.query.nrc
-    let dayToDelete = req.query.day
-    let startToDelete = req.query.start
-    let endToDelete = req.query.end
+    const sectionNRC = req.query.nrc
+    const dayToDelete = req.query.day
+    const startToDelete = req.query.start
+    const endToDelete = req.query.end
 
-    let toDeleteSession = {
+    const toDeleteSession = {
       day: dayToDelete,
       start: startToDelete,
       end: endToDelete
@@ -117,7 +118,7 @@ export function sessionRoutes(app) {
       return 
     }
 
-    let schedules = await Schedule.find()
+    const schedules = await Schedule.find()
     schedules.forEach(async schedule => {
       if (schedule.sections.some(x => x.equals(section._id))) {
         await Schedule.deleteOne(schedule)
