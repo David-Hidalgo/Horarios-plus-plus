@@ -16,6 +16,8 @@ export default function SignUpInterface() {
       .then(response => response.json())
       .catch((e) => { console.log("Could not send sign up to database") })
       .then(data => { console.log(data) })
+      .finally(() => { window.location.href = "/login" })
+
   }
 
   return (
