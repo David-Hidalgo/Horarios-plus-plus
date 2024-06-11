@@ -8,9 +8,9 @@ import GenerationInterface from "./Interfaces/GenerationInterface.tsx";
 import LogInInterface from "./Interfaces/LogInInterface.tsx";
 import SignUpInterface from "./Interfaces/SignUpInterface.tsx";
 import MySheduleInterface from "./Interfaces/MyScheduleInterface.tsx";
+import TimeBlockInterface from "./Interfaces/TimeBlockInterface.tsx";
 
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import TimeBlockInterface from "./Interfaces/TimeBlockInterface.tsx";
 
 export default function App() {
 	return (

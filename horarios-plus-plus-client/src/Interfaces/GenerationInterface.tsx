@@ -221,13 +221,13 @@ export default function GenerationInterface() {
 		subject: ISubject,
 		id: string,
 	): Promise<ISection> {
-		let section: ISection = await fetch(
+		const section: ISection = await fetch(
 			`http://127.0.0.1:4000/api/section/get_sections_from_id?id=${id}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.then((data) => {
-				let newSection: ISection = {
+				const newSection: ISection = {
 					nrc: data.nrc,
 					teacher: data.teacher,
 					sessionList: [],
@@ -243,14 +243,14 @@ export default function GenerationInterface() {
 		if (Ids === undefined || Ids.length === 0) {
 			return [];
 		}
-		let promises = Ids.map(async (id) => {
+		const promises = Ids.map(async (id) => {
 			return loadSectionFromID(subject, id);
 		});
 		return Promise.all(promises);
 	}
 
 	async function loadFromServer(): Promise<ISubject[]> {
-		let subjects: Promise<ISubject>[] = await fetch(
+		const subjects: Promise<ISubject>[] = await fetch(
 			"http://127.0.0.1:4000/api/subjects/get_subjects",
 			{
 				headers: { Accept: "application/json" },
@@ -259,7 +259,7 @@ export default function GenerationInterface() {
 			.then((response) => response.json())
 			.then((data: any[]) => {
 				return data.map(async (subject) => {
-					let newSubject: ISubject = {
+					const newSubject: ISubject = {
 						name: subject.name,
 						sectionList: await loadSectionsFromIdList(
 							subject,
@@ -288,7 +288,7 @@ export default function GenerationInterface() {
 				console.error(e);
 			})
 			.then((data) => {
-				let newSession: ISession = {
+				const newSession: ISession = {
 					day: data.day,
 					start: new Date(data.start),
 					end: new Date(data.end),
@@ -313,7 +313,7 @@ export default function GenerationInterface() {
 				if (data === undefined) {
 					return;
 				}
-				let newSection: ISection = {
+				const newSection: ISection = {
 					nrc: section.nrc,
 					teacher: section.teacher,
 					subject: section.subject,
@@ -338,7 +338,7 @@ export default function GenerationInterface() {
 		)
 			.then((response) => response.json())
 			.then((data) => {
-				let newSubject: ISubject = {
+				const newSubject: ISubject = {
 					color: undefined,
 					enabled: true,
 					name: data.name,
