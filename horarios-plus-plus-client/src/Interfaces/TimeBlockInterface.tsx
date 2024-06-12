@@ -325,13 +325,13 @@ export default function TimeBlockInterface() {
 		subject: ISubject,
 		id: string,
 	): Promise<ISection> {
-		let section: ISection = await fetch(
+		const section: ISection = await fetch(
 			`http://127.0.0.1:4000/api/section/get_sections_from_id?id=${id}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.then((data) => {
-				let newSection: ISection = {
+				const newSection: ISection = {
 					nrc: data.nrc,
 					teacher: data.teacher,
 					sessionList: [],
@@ -346,14 +346,14 @@ export default function TimeBlockInterface() {
 		if (Ids === undefined || Ids.length === 0) {
 			return [];
 		}
-		let promises = Ids.map(async (id) => {
+		const promises = Ids.map(async (id) => {
 			return loadSectionFromID(subject, id);
 		});
 		return Promise.all(promises);
 	}
 
 	async function loadFromServer(): Promise<ISubject[]> {
-		let subjects: Promise<ISubject>[] = await fetch(
+		const subjects: Promise<ISubject>[] = await fetch(
 			"http://127.0.0.1:4000/api/subjects/get_subjects",
 			{
 				headers: { Accept: "application/json" },

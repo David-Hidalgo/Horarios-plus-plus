@@ -16,7 +16,7 @@ class Session implements iSession {
 }
 interface iSubject {
 	name: string;
-	sections: Section[];
+	sections: iSection[];
 	career: iCareer | string;
 }
 class Subject implements iSubject {
@@ -34,7 +34,7 @@ interface iCareer {
 	name: string;
 	subjects: iSubject[];
 }
-class Career implements Career {
+class Career implements iCareer {
 	name;
 	subjects;
 	constructor(name: string, subjects: Subject[]) {
@@ -57,8 +57,8 @@ class Section implements iSection {
 	constructor(
 		nrc: number,
 		teacher: string,
-		sessions: iSession[],
-		subject: iSubject,
+		sessions: Session[],
+		subject: Subject,
 	) {
 		this.nrc = nrc;
 		this.teacher = teacher;
@@ -70,12 +70,12 @@ class Section implements iSection {
 
 interface iSchedule {
 	owner: string;
-	sections: Section[];
+	sections: iSection[];
 }
-class Schedule {
+class Schedule implements iSchedule {
 	owner;
 	sections;
-	constructor(owner: string, sections: iSection[]) {
+	constructor(owner: string, sections: Section[]) {
 		this.owner = owner;
 		this.sections = sections;
 	}

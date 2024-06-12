@@ -1,6 +1,5 @@
 import mongoose from "mongoose"
 import { Schedule, Section, Session } from "../models/models.js"
-import type { isConstructorDeclaration } from "typescript";
 
 export function sessionRoutes(app) {  
   app.get('/api/session/get_sessions_from_id', async (req, res) => {
@@ -32,7 +31,7 @@ export function sessionRoutes(app) {
 
     const section = (await Section.find({ nrc: req.query.nrc })).at(0)
     if (section === undefined) {
-      console.log("No se encontro " + req.query.nrc)
+      console.log(`No se encontro ${req.query.nrc}`)
       res.send(undefined);
       return;
     }

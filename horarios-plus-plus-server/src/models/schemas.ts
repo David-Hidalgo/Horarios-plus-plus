@@ -55,16 +55,16 @@ type TScheduleSchema = mongoose.InferSchemaType<typeof scheduleSchema>;
 // 1. Create an interface representing a document in MongoDB.
 interface IUser {
 	name: string;
-	email: string;
-	avatar?: string;
+	email?: string;
+	password: string;
 	schedule?: iSchedule;
 }
 
 // 2. Create a Schema corresponding to the document interface.
 const userSchema = new mongoose.Schema<IUser>({
 	name: { type: String, required: true },
-	email: { type: String, required: true },
-	avatar: String,
+	email: { type: String, required: false },
+	password: { type: String, required: true },
 	schedule: { type: scheduleSchema, required: false },
 });
 
