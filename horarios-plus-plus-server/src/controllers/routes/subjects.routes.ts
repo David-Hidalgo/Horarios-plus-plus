@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
-import { Subject } from "../models/models.js";
+import { SubjectModel } from "../../models/schemas";
 
 export function subjectRoutes(app) {
 	app.get("/api/subjects/get_subjects", async (req, res) => {
-		const subject_list = await Subject.find({});
+		const subject_list = await SubjectModel.find({});
 		res.send(subject_list);
 	});
 	app.get("/api/subjects/create_subject", async (req, res) => {
 		let saved = false;
-		const newSubject = new Subject({
+		const newSubject = new SubjectModel({
 			_id: new mongoose.mongo.ObjectId(),
 			name: `${req.query.name}`,
 			sections: [],
@@ -30,7 +30,7 @@ export function subjectRoutes(app) {
 			return;
 		}
 
-		const subject = await Subject.findById(req.query.id);
+		const subject = await SubjectModel.findById(req.query.id);
 		if (subject === undefined) {
 			res.send(undefined);
 			return;

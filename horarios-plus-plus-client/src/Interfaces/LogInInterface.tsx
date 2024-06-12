@@ -1,10 +1,10 @@
-import NavigationBar from "./NavigationBar"
-import "./LogInInterface.css"
+import NavigationBar from "./NavigationBar";
+import "./LogInInterface.css";
 import React, { useState } from "react";
 
 export default function LogInInterface() {
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+	const [showError, setShowError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
   const [showSuccessful, setShowSuccesful] = useState(false);
   const [successfulMessage] = useState("Ha iniciado sesión correctamente")
@@ -37,7 +37,7 @@ export default function LogInInterface() {
       })
   }
 
-  const handleClick =async () => {
+  const handleClick =() => {
     SendLoginDatabase()
       .then(async(data) => {
         if (data.message === "successful") {
@@ -63,29 +63,39 @@ export default function LogInInterface() {
       });
   };
 
-  return (
-    <div>
-      <NavigationBar />
-      <div className="main-container">
-        <div className="login-container">
-          <div className="login-bg">
-            <div className="login-header">Inicio de Sesion</div>
-            {showError && <div className="login-error">{errorMessage}</div>}
+	return (
+		<div>
+			<NavigationBar />
+			<div className="main-container">
+				<div className="login-container">
+					<div className="login-bg">
+						<div className="login-header">Inicio de Sesion</div>
+						{showError && <div className="login-error">{errorMessage}</div>}
             {showSuccessful && <div className="login-succesful">{successfulMessage}</div>}
-            <div className="login-user">
-              <input value={email} onChange={handleEmail} placeholder="Email" type="text" />
-            </div>
-            <div className="login-password">
-              <input value={password} onChange={handlePassword} placeholder="Contraseña" type="text" />
-            </div>
-            <div className="login-button">
-              <button type="button" onClick={handleClick}>
-                Iniciar Sesion
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+						<div className="login-user">
+							<input
+								value={email}
+								onChange={handleEmail}
+								placeholder="Email"
+								type="text"
+							/>
+						</div>
+						<div className="login-password">
+							<input
+								value={password}
+								onChange={handlePassword}
+								placeholder="Contraseña"
+								type="text"
+							/>
+						</div>
+						<div className="login-button">
+							<button type="button" onClick={handleClick}>
+								Iniciar Sesion
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }

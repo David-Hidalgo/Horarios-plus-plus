@@ -4,8 +4,8 @@ interface iSession {
 	day?: number;
 }
 class Session implements iSession {
-	public start;
-	public end;
+	public start: Date;
+	public end: Date;
 	public day?: number;
 	constructor(start: Date, end: Date, day?: number) {
 		this.start = start;
@@ -16,8 +16,8 @@ class Session implements iSession {
 }
 interface iSubject {
 	name: string;
-	sections: Section[];
-	career: Career | string;
+	sections: iSection[];
+	career: iCareer | string;
 }
 class Subject implements iSubject {
 	public name;
@@ -29,11 +29,12 @@ class Subject implements iSubject {
 		this.career = career;
 	}
 }
+
 interface iCareer {
 	name: string;
-	subjects: Subject[];
+	subjects: iSubject[];
 }
-class Career implements Career {
+class Career implements iCareer {
 	name;
 	subjects;
 	constructor(name: string, subjects: Subject[]) {
@@ -41,11 +42,12 @@ class Career implements Career {
 		this.subjects = subjects;
 	}
 }
+
 interface iSection {
 	nrc: number;
 	teacher: string;
-	sessions: Session[];
-	subject: Subject;
+	sessions: iSession[];
+	subject: iSubject;
 }
 class Section implements iSection {
 	nrc;
@@ -65,11 +67,12 @@ class Section implements iSection {
 		this.subject.sections.push(this);
 	}
 }
+
 interface iSchedule {
 	owner: string;
-	sections: Section[];
+	sections: iSection[];
 }
-class Schedule {
+class Schedule implements iSchedule {
 	owner;
 	sections;
 	constructor(owner: string, sections: Section[]) {

@@ -2,126 +2,126 @@ import * as SchemaInterfaces from "./Schema";
 import { type TSession, type TSection } from "./Schema";
 //#MARK: Session
 export class Session implements SchemaInterfaces.ISession {
-  start: Date;
-  end: Date;
-  day: number;
+	start: Date;
+	end: Date;
+	day: number;
 
-  constructor(start: Date, end: Date, day?: number) {
-    this.start = start;
-    this.end = end;
-    this.day = day || start.getDay();
-  }
+	constructor(start: Date, end: Date, day?: number) {
+		this.start = start;
+		this.end = end;
+		this.day = day || start.getDay();
+	}
 
-  getDay() {
-    return this.start.getDay();
-  }
+	getDay() {
+		return this.start.getDay();
+	}
 
-  editDay(day: number) {
-    let distance: number = day - this.start.getDay();
-    this.start.setDate(this.start.getDate() + distance);
-    this.end.setDate(this.end.getDate() + distance);
-  }
-  editStartHour(hour: number) {
-    this.start.setHours(hour);
-  }
-  editStartMinute(minute: number) {
-    this.start.setHours(minute);
-  }
+	editDay(day: number) {
+		let distance: number = day - this.start.getDay();
+		this.start.setDate(this.start.getDate() + distance);
+		this.end.setDate(this.end.getDate() + distance);
+	}
+	editStartHour(hour: number) {
+		this.start.setHours(hour);
+	}
+	editStartMinute(minute: number) {
+		this.start.setHours(minute);
+	}
 
-  editEndHour(hour: number) {
-    this.end.setHours(hour);
-  }
-  editEndMinute(minute: number) {
-    this.end.setHours(minute);
-  }
-  public saveSession(): TSession {
-    // Convertir el objeto session1 a un formato que mongoose pueda entender
-    return {
-      start: this.start,
-      end: this.end,
-      day: this.day,
-      // Añade aquí cualquier otro campo necesario
-    };
-  }
+	editEndHour(hour: number) {
+		this.end.setHours(hour);
+	}
+	editEndMinute(minute: number) {
+		this.end.setHours(minute);
+	}
+	public saveSession(): TSession {
+		// Convertir el objeto session1 a un formato que mongoose pueda entender
+		return {
+			start: this.start,
+			end: this.end,
+			day: this.day,
+			// Añade aquí cualquier otro campo necesario
+		};
+	}
 }
 //#MARK: Section
 export class Section {
-  nrc: string;
-  hours: Array<Session> = [];
+	nrc: string;
+	hours: Array<Session> = [];
 
-  constructor(nrc: string, hours?: Array<Session>) {
-    this.nrc = nrc;
-    this.hours = hours || [];
-  }
+	constructor(nrc: string, hours?: Array<Session>) {
+		this.nrc = nrc;
+		this.hours = hours || [];
+	}
 
-  addHour() {
-    this.hours.push(new Session(new Date(0), new Date(1)));
-  }
+	addHour() {
+		this.hours.push(new Session(new Date(0), new Date(1)));
+	}
 
-  removeHour(value: Session) {
-    this.hours = this.hours.filter((hour) => hour !== value);
-  }
+	removeHour(value: Session) {
+		this.hours = this.hours.filter((hour) => hour !== value);
+	}
 }
 //#MARK: Subject
 export class Subject {
-  name: string;
-  pensumList: Array<string> = [];
-  sections: Array<Section> = [];
+	name: string;
+	pensumList: Array<string> = [];
+	sections: Array<Section> = [];
 
-  constructor(
-    name: string,
-    sections?: Array<Section>,
-    pensums?: Array<string>
-  ) {
-    this.name = name;
-    this.sections = sections || [];
-    this.pensumList = pensums || [];
-  }
+	constructor(
+		name: string,
+		sections?: Array<Section>,
+		pensums?: Array<string>,
+	) {
+		this.name = name;
+		this.sections = sections || [];
+		this.pensumList = pensums || [];
+	}
 
-  addEmptySection() {
-    this.sections.push(new Section("Section " + (this.sections.length + 1)));
-  }
-  addSection(section: Section) {
-    this.sections.push(section);
-  }
-  removeSection(value: Section) {
-    this.sections = this.sections.filter((sec) => sec !== value);
-  }
+	addEmptySection() {
+		this.sections.push(new Section("Section " + (this.sections.length + 1)));
+	}
+	addSection(section: Section) {
+		this.sections.push(section);
+	}
+	removeSection(value: Section) {
+		this.sections = this.sections.filter((sec) => sec !== value);
+	}
 }
 export class Schedule {
-  protected _correo: string;
-  protected _subjects: Array<Subject>;
-  constructor(correo: string, subjects: Array<Subject>) {
-    this._correo = correo;
-    this._subjects = subjects;
-  }
+	protected _correo: string;
+	protected _subjects: Array<Subject>;
+	constructor(correo: string, subjects: Array<Subject>) {
+		this._correo = correo;
+		this._subjects = subjects;
+	}
 
-  public get correo(): string {
-    return this._correo;
-  }
+	public get correo(): string {
+		return this._correo;
+	}
 
-  public set correo(v: string) {
-    this._correo = v;
-  }
+	public set correo(v: string) {
+		this._correo = v;
+	}
 
-  public get subjects(): Array<Subject> {
-    return this._subjects;
-  }
+	public get subjects(): Array<Subject> {
+		return this._subjects;
+	}
 
-  /**
-   * obtenerHorarios
-   */
-  public obtenerHorarios(subjects: Subject[],correos:string[]): Schedule[] {
-    const schedules = subjects.map((materia) => {
-      console.log(materia);
-      return new Schedule(correos[0], new Array<Subject>());
-    });
-    return schedules;
-  }
+	/**
+	 * obtenerHorarios
+	 */
+	public obtenerHorarios(subjects: Subject[], correos: string[]): Schedule[] {
+		const schedules = subjects.map((materia) => {
+			console.log(materia);
+			return new Schedule(correos[0], new Array<Subject>());
+		});
+		return schedules;
+	}
 }
 
 function main() {
-  /*const horas = new Array<[Date, Date]>();
+	/*const horas = new Array<[Date, Date]>();
   const mateA1: Seccion = new Seccion("n321", horas);
   const inicio = new Date(0);
   const fin = new Date(inicio.getTime() + 1000 * 60 * 60 * 2);

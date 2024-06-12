@@ -7,18 +7,18 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/react": "^18.3.1",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "assert": "^2.1.0",
-    "axios": "^1.6.8",
+    "axios": "^1.7.2",
     "bundle": "^2.1.0",
-    "mongoose": "^8.3.4",
+    "mongoose": "^8.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "tailwind": "^4.0.0",
-    "vite": "^5.2.11",
+    "vite": "^5.2.13",
     "web-vitals": "^2.1.4",
     "zod": "^3.23.8"
   },
@@ -29,17 +29,10 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": ["react-app", "react-app/jest"]
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
+    "production": [">0.2%", "not dead", "not op_mini all"],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
@@ -52,6 +45,6 @@
   "module": "index.ts",
   "type": "module",
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^4.9.5"
   }
 }
