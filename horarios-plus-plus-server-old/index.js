@@ -1,12 +1,20 @@
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
+import { subjectRoutes } from "./src/routes/subjects.routes.js";
+import { sectionRoutes } from "./src/routes/sections.routes.js";
+import { sessionRoutes } from "./src/routes/sessions.routes.js";
+import { schedulesRoutes } from "./src/routes/schedules.routes.js";
+import { userRoutes } from "./src/routes/user.routes.js";
 
 const app = express();
 const port = 4000;
 
-import mongoose from "mongoose";
-const uri =//"mongodb+srv://DanCas:queso@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority&appName=horariosplus";
-			"mongodb://127.0.0.1:27017";
+const username = encodeURIComponent("DanCas");
+const password = encodeURIComponent("queso");
+
+const uri =`mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+			//`mongodb://127.0.0.1:27017`;																//Conexión a la base de datos de manera local					
 const clientOptions = {
 	serverApi: { version: "1", strict: true, deprecationErrors: true },
 };
@@ -26,11 +34,6 @@ app.get("/", (req, res) => {
 	res.send("Hello World!");
 });
 
-import { subjectRoutes } from "./src/routes/subjects.routes.js";
-import { sectionRoutes } from "./src/routes/sections.routes.js";
-import { sessionRoutes } from "./src/routes/sessions.routes.js";
-import { schedulesRoutes } from "./src/routes/schedules.routes.js";
-import { userRoutes } from "./src/routes/user.routes.js";
 subjectRoutes(app);
 sectionRoutes(app);
 sessionRoutes(app);
