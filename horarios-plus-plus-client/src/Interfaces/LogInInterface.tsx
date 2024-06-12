@@ -6,12 +6,23 @@ export default function LogInInterface() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [showSuccessful, setShowSuccesful] = useState(false);
+  const [successfulMessage] = useState("Ha iniciado sesión correctamente")
+
   const [email, setEmail] = React.useState()
   const [password, setPassword] = React.useState()
 
-  function handleEmail(event: any) { setEmail(event.target.value) }
+  function regexHandler(params:any) {
+    const regexHandler = new RegExp(``);
+    
+  }
+  function handleEmail(event: any) { 
+    
+    setEmail(event.target.value) }
   function handlePassword(event: any) { setPassword(event.target.value) }
-
+  function timeout(delay: number) {
+    return new Promise( res => setTimeout(res, delay) );
+  }
   async function SendLoginDatabase() {
     return await fetch(`http://localhost:4000/api/login?email=${email}&password=${password}`,
       { headers: { 'Accept': 'application/json' } })
@@ -26,15 +37,17 @@ export default function LogInInterface() {
       })
   }
 
-  const handleClick = () => {
+  const handleClick =async () => {
     SendLoginDatabase()
-      .then((data) => {
+      .then(async(data) => {
         if (data.message === "successful") {
+          
           setShowError(false);
+          setShowSuccesful(true);
+          await timeout(1500);
           window.location.href = "/";
+          
         } else {
-
-          setShowError(true);
           if (data.message === "User doesn't exist") {
             setErrorMessage("Usuario no encontrado");
           } else if (data.message === "password doesn't match") {
@@ -42,6 +55,7 @@ export default function LogInInterface() {
           } else {
             setErrorMessage("Error desconocido");
           }
+          setShowError(true);
         }
       })
       .catch(() => {
@@ -55,8 +69,9 @@ export default function LogInInterface() {
       <div className="main-container">
         <div className="login-container">
           <div className="login-bg">
-            <div className="login-header">Horarios Plus Plus</div>
+            <div className="login-header">Inicio de Sesion</div>
             {showError && <div className="login-error">{errorMessage}</div>}
+            {showSuccessful && <div className="login-succesful">{successfulMessage}</div>}
             <div className="login-user">
               <input value={email} onChange={handleEmail} placeholder="Email" type="text" />
             </div>

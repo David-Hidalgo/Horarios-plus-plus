@@ -24,11 +24,14 @@
   background-color: var(--background-medium-color);
   padding: 50px;
   border-radius: 4px;
-  font-size: 80px;
+  font-size: 50px;
 }
 
 .login-header {
   margin-bottom: 30px;
+}
+.login-header{
+  font-size: 80px;
 }
 
 .login-user input, .login-password input {
@@ -57,4 +60,9 @@
 .login-error {
   color: red;
   font-size: 40%;
+}
+
+.login-succesful{
+color: rgb(6, 230, 6);
+font-size: 40%;
 }

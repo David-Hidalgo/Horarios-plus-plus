@@ -6,7 +6,7 @@ const app = express()
 const port = 4000
 
 import mongoose from 'mongoose';
-const uri = "mongodb+srv://DanCas:queso@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority&appName=horariosplus";
+const uri = "mongodb://127.0.0.1:27017";
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
 async function run() {
