@@ -18,7 +18,7 @@ export default function NavigationBar() {
 						<a href="/generation">Generar Horario Nuevo</a>
 					</div>
 					<div>
-						<a href="/time_blocks">Agregar Horario</a>
+						<a href="/time_blocks">Agregar Materia</a>
 					</div>
 				</>
 			)}
