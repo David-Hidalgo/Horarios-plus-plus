@@ -21,7 +21,7 @@ import {
 	User,
 } from "./../models/classes";
 
-import type { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 export class DBController {
 	public SectionModel;
@@ -29,9 +29,9 @@ export class DBController {
 	public UserModel;
 	public SubjectModel;
 	public ScheduleModel;
-	public db: Mongoose;
-	private constructor(mongoosea: Mongoose) {
-		this.db = mongoosea;
+	public db: mongoose.Mongoose;
+	private constructor(Mongoose: mongoose.Mongoose) {
+		this.db = Mongoose;
 		const sessionSchema = new this.db.Schema<iSession>({
 			start: { type: Date, required: true },
 			end: { type: Date, required: true },
@@ -44,11 +44,9 @@ export class DBController {
 		const sectionSchema = new this.db.Schema<iSection>({
 			nrc: { type: Number, required: true, unique: true },
 			teacher: { type: String, required: true },
-			sessions: { type: [sessionSchema], required: true },
+			sessions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Session", required: true }],
 			subject: {
-				type: this.db.Schema.Types.ObjectId,
-				ref: "Subject",
-				required: true,
+				type: this.db.Schema.Types.ObjectId, ref: "Subject", required: true,
 			},
 		});
 
@@ -57,11 +55,9 @@ export class DBController {
 
 		const subjectSchema = new this.db.Schema<iSubject>({
 			name: { type: String, required: true },
-			sections: { type: [sectionSchema], required: true },
+			sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 			career: {
-				type: this.db.Schema.Types.ObjectId,
-				ref: "Career",
-				required: true,
+				type: this.db.Schema.Types.ObjectId, ref: "Career", required: true,
 			},
 		});
 
@@ -70,14 +66,15 @@ export class DBController {
 
 		const careerSchema = new this.db.Schema({
 			name: { type: String, required: true },
-			subjects: { type: [subjectSchema], required: true },
+			subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
 		});
 
 		const CareerModel = this.db.model("Career", careerSchema);
 		// type TCareerSchema = this.db.InferSchemaType<typeof careerSchema>;
 
 		const scheduleSchema = new this.db.Schema<iSchedule>({
-			sections: { type: [sectionSchema], required: true },
+			owner: { type: String, required: true, unique: true },
+			sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 		});
 
 		const ScheduleModel = this.db.model("Schedule", scheduleSchema);
@@ -103,7 +100,7 @@ export class DBController {
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
 		const db = await require("mongoose");
-		
+
 		db.connect(uri);
 		await db.connection.db.admin().command({ ping: 1 });
 		console.log(
@@ -116,7 +113,7 @@ export class DBController {
 	public static async disconnect() {
 		const db = await require("mongoose");
 		db.disconnect();
-	} 
+	}
 	public createSchedule(sections: iSection[]): iSchedule {
 		const user = new this.UserModel({
 			name: "Bill",
