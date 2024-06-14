@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import type { iSchedule, iSession, iSection, iSubject } from "./classes";
+import type { iSchedule, iSession, iSection, iSubject, IUser } from "./classes";
+import { number } from "zod";
 
 const sessionSchema = new mongoose.Schema<iSession>({
 	start: { type: Date, required: true },
@@ -13,7 +14,9 @@ type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 const sectionSchema = new mongoose.Schema<iSection>({
 	nrc: { type: Number, required: true, unique: true },
 	teacher: { type: String, required: true },
-	sessions: { type: [sessionSchema], required: true },
+	sessions: [
+		{ type: mongoose.Schema.Types.ObjectId, ref: "Session", required: true },
+	],
 	subject: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Subject",
@@ -45,26 +48,20 @@ const careerSchema = new mongoose.Schema({
 const CareerModel = mongoose.model("Career", careerSchema);
 type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
+
 const scheduleSchema = new mongoose.Schema<iSchedule>({
-	sections: { type: [sectionSchema], required: true },
+	owner: { type: String, require: true, unique: true },
+	sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 });
 
 const ScheduleModel = mongoose.model("Schedule", scheduleSchema);
 type TScheduleSchema = mongoose.InferSchemaType<typeof scheduleSchema>;
 
-// 1. Create an interface representing a document in MongoDB.
-interface IUser {
-	name: string;
-	email?: string;
-	password: string;
-	schedule?: iSchedule;
-}
-
 // 2. Create a Schema corresponding to the document interface.
 const userSchema = new mongoose.Schema<IUser>({
-	name: { type: String, required: true },
 	email: { type: String, required: false },
 	password: { type: String, required: true },
+	tipo: { type: Number, default: 0 },
 	schedule: { type: scheduleSchema, required: false },
 });
 
@@ -79,4 +76,12 @@ export {
 	SectionModel,
 	ScheduleModel,
 	UserModel,
+};
+export type {
+	TSessionSchema,
+	TCareerSchema,
+	TSubjectSchema,
+	TSectionSchema,
+	TScheduleSchema,
+	TUserSchema,
 };

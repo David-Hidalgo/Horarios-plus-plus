@@ -3,7 +3,7 @@ import {
 	ScheduleModel,
 	SectionModel,
 	SessionModel,
-} from "./../../models/schemas";
+} from "../models/schemas";
 import Elysia from "elysia";
 
 export const pluginSession = <T extends string>(config: { prefix: T }) =>
@@ -13,59 +13,59 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 	})
 		.get(`${config.prefix}/hi`, () => "Hi")
 
-		.get("/api/session/get_sessions_from_id", async (req, res) => {
-			if (req.query.id === undefined) {
-				res.send(undefined);
-				return;
+		.get("/api/session/get_sessions_from_id", async ({query}) => {
+			if (query.id === undefined) {
+				return(undefined);
+				
 			}
 
-			const session = await SessionModel.findById(req.query.id);
+			const session = await SessionModel.findById(query.id);
 			if (session === undefined) {
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			res.send(session);
+			return(session);
 		})
 
-		.get("/api/session/get_sessions_from_section", async (req, res) => {
-			if (req.query.nrc === undefined) {
-				res.send(undefined);
-				return;
+		.get("/api/session/get_sessions_from_section", async ({query}) => {
+			if (query.nrc === undefined) {
+				return(undefined);
+				
 			}
 
-			const section = (await SectionModel.find({ nrc: req.query.nrc })).at(0);
+			const section = (await SectionModel.find({ nrc: query.nrc })).at(0);
 			if (section === undefined) {
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			res.send(section.sessions);
+			return(section.sessions);
 		})
 
-		.get("/api/session/add_session_to_section", async (req, res) => {
+		.get("/api/session/add_session_to_section", async ({query}) => {
 			if (
-				req.query.day === undefined ||
-				req.query.start === undefined ||
-				req.query.end === undefined
+				query.day === undefined ||
+				query.start === undefined ||
+				query.end === undefined
 			) {
 				console.log("Alguno de los argumentos es undefined");
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			const section = (await SectionModel.find({ nrc: req.query.nrc })).at(0);
+			const section = (await SectionModel.find({ nrc: query.nrc })).at(0);
 			if (section === undefined) {
-				console.log(`No se encontro ${req.query.nrc}`);
-				res.send(undefined);
-				return;
+				console.log(`No se encontro ${query.nrc}`);
+				return(undefined);
+				
 			}
 
 			const newSession = new SessionModel({
 				_id: new mongoose.mongo.ObjectId(),
 				day: 0,
-				start: req.query.start,
-				end: req.query.end,
+				start: query.start,
+				end: query.end,
 				section: new mongoose.mongo.ObjectId(section._id),
 			});
 			await newSession.save();
@@ -73,17 +73,17 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				sessions: section.sessions.concat(newSession),
 			});
 
-			res.send(newSession);
+			return(newSession);
 		})
 
-		.get("/api/session/updateSession", async (req, res) => {
-			const oldDay = req.query.oldday;
-			const oldStart = req.query.oldstart;
-			const oldEnd = req.query.oldend;
+		.get("/api/session/updateSession", async ({query}) => {
+			const oldDay = query.oldday;
+			const oldStart = query.oldstart;
+			const oldEnd = query.oldend;
 
-			const newDay = req.query.newday;
-			const newStart = req.query.newstart;
-			const newEnd = req.query.newend;
+			const newDay = query.newday;
+			const newStart = query.newstart;
+			const newEnd = query.newend;
 
 			const oldSession = { day: oldDay, start: oldStart, end: oldEnd };
 
@@ -94,27 +94,27 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				newDay === undefined ||
 				newStart === undefined ||
 				newEnd === undefined ||
-				req.query.nrc === undefined
+				query.nrc === undefined
 			) {
 				console.log(
 					"Could not update session, one of the arguments is undefined",
 				);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const newSession = { day: newDay, start: newStart, end: newEnd };
-			if (await SessionModel.exists({ ...newSession, nrc: req.query.nrc })) {
+			if (await SessionModel.exists({ ...newSession, nrc: query.nrc })) {
 				console.log("An identical session already exists");
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			const section = await SectionModel.findOne({ nrc: req.query.nrc });
+			const section = await SectionModel.findOne({ nrc: query.nrc });
 			if (section === undefined) {
 				console.log("No section with nrc ", nrc, " exists");
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const oldSessionObject = await SessionModel.findOneAndUpdate(
@@ -123,19 +123,19 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			);
 			if (oldSessionObject === undefined) {
 				console.log("Could not find and update oldSession: ", oldSession);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			console.log("Updated session ", oldSessionObject, " to ", newSession);
-			res.send(newSession);
+			return(newSession);
 		})
 
-		.get("/api/session/delete_session", async (req, res) => {
-			const sectionNRC = req.query.nrc;
-			const dayToDelete = req.query.day;
-			const startToDelete = req.query.start;
-			const endToDelete = req.query.end;
+		.get("/api/session/delete_session", async ({query}) => {
+			const sectionNRC = query.nrc;
+			const dayToDelete = query.day;
+			const startToDelete = query.start;
+			const endToDelete = query.end;
 
 			const toDeleteSession = {
 				day: dayToDelete,
@@ -153,15 +153,15 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 					"DELETE_SESSION ERROR: an item is undefined ",
 					toDeleteSession,
 				);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const section = await SectionModel.findOne({ nrc: sectionNRC });
 			if (section === undefined) {
 				console.log("DELETE_SECSION ERROR: no section has nrc ", sectionNRC);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const schedules = await ScheduleModel.find();
@@ -177,8 +177,8 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			});
 			if (session === undefined) {
 				console.log("DELETE_SESSION ERROR: doesn't exist ", toDeleteSession);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			await SectionModel.findOneAndUpdate(section, {
@@ -186,5 +186,5 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			});
 
 			const response = await SessionModel.deleteOne(session);
-			res.send(response);
+			return(response);
 		});

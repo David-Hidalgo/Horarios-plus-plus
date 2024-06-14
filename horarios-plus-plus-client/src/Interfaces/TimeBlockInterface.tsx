@@ -469,7 +469,7 @@ export default function TimeBlockInterface() {
 			subject: subject,
 			nrc: findFreeNRC().toString(),
 			sessionList: [],
-			teacher: "Por anunciar",
+			teacher: " ",
 		};
 		saveSectionToSubject(subject, createdSection);
 	}

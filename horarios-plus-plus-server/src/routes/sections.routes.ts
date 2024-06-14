@@ -4,7 +4,7 @@ import {
 	SubjectModel,
 	SectionModel,
 	SessionModel,
-} from "../../models/schemas";
+} from "../models/schemas";
 import Elysia from "elysia";
 
 export const pluginSection = <T extends string>(config: { prefix: T }) =>
@@ -13,68 +13,67 @@ export const pluginSection = <T extends string>(config: { prefix: T }) =>
 		seed: config,
 	})
 		.get(`${config.prefix}/hi`, () => "Hi")
-		.get("/api/section/get_sections_from_id", async (req, res) => {
-			if (req.query.id === undefined) {
-				res.send(undefined);
-				return;
+		.get("/api/section/get_sections_from_id", async ({query}) => {
+			if (query.id === undefined) {
+				return(undefined);
 			}
 
-			const section = await SectionModel.findById(req.query.id);
+			const section = await SectionModel.findById(query.id);
 			if (section === undefined) {
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			res.send(section);
+			return(section);
 		})
-		.get("/api/section/get_sections_from_subject", async (req, res) => {
-			if (req.query.subjectName === undefined) {
-				res.send(undefined);
-				return;
+		.get("/api/section/get_sections_from_subject", async ({query}) => {
+			if (query.subjectName === undefined) {
+				return(undefined);
+				
 			}
 
 			const subject = (
-				await SubjectModel.find({ name: req.query.subjectName })
+				await SubjectModel.find({ name: query.subjectName })
 			).at(0);
 			if (subject === undefined) {
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			res.send(subject.sections);
+			return(subject.sections);
 		})
-		.get("/api/section/add_section_to_subject", async (req, res) => {
+		.get("/api/section/add_section_to_subject", async ({query}) => {
 			if (
-				req.query.nrc === undefined ||
-				req.query.teacher === undefined ||
-				req.query.subjectName === undefined
+				query.nrc === undefined ||
+				query.teacher === undefined ||
+				query.subjectName === undefined
 			) {
 				console.log("Alguno de los argumentos es undefined");
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			if (await SectionModel.exists({ nrc: req.query.nrc })) {
+			if (await SectionModel.exists({ nrc: query.nrc })) {
 				console.log(
-					`El NRC ya se encuentra en la base de datos ${req.query.nrc}`,
+					`El NRC ya se encuentra en la base de datos ${query.nrc}`,
 				);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const subject = (
-				await SubjectModel.find({ name: req.query.subjectName })
+				await SubjectModel.find({ name: query.subjectName })
 			).at(0);
 			if (subject === undefined) {
-				console.log(`No se encontro ${req.query.subjectName}`);
-				res.send(undefined);
-				return;
+				console.log(`No se encontro ${query.subjectName}`);
+				return(undefined);
+				
 			}
 
 			const newSection = new SectionModel({
 				_id: new mongoose.mongo.ObjectId(),
-				nrc: `${req.query.nrc}`,
-				teacher: `${req.query.teacher}`,
+				nrc: `${query.nrc}`,
+				teacher: `${query.teacher}`,
 				subject: new mongoose.mongo.ObjectId(subject._id),
 				sessions: [],
 			});
@@ -83,28 +82,28 @@ export const pluginSection = <T extends string>(config: { prefix: T }) =>
 				sections: subject.sections.concat(newSection),
 			});
 
-			res.send(newSection);
+			return(newSection);
 		})
-		.get("/api/section/update_section", async (req, res) => {
-			const oldNRC = req.query.oldnrc;
+		.get("/api/section/update_section", async ({query}) => {
+			const oldNRC = query.oldnrc;
 			if (oldNRC === undefined) {
 				console.log("Could not update section, OLDNRC is undefined");
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
-			if (await SectionModel.exists({ nrc: req.query.nrc })) {
+			if (await SectionModel.exists({ nrc: query.nrc })) {
 				console.log(
-					`El NRC ya se encuentra en la base de datos ${req.query.nrc}`,
+					`El NRC ya se encuentra en la base de datos ${query.nrc}`,
 				);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const filter = { nrc: oldNRC };
 			const newSection = {
-				nrc: `${req.query.nrc}`,
-				teacher: `${req.query.teacher}`,
+				nrc: `${query.nrc}`,
+				teacher: `${query.teacher}`,
 			};
 			const oldSection = await SectionModel.findOneAndUpdate(
 				filter,
@@ -112,32 +111,34 @@ export const pluginSection = <T extends string>(config: { prefix: T }) =>
 			);
 			if (oldSection === undefined) {
 				console.log("Could not find and update oldNRC: ", oldNRC);
-				res.send(oldSection);
-				return;
+				return(oldSection);
+				
 			}
 
 			console.log("Updated section ", oldSection, " to ", newSection);
-			res.send(newSection);
+			return(newSection);
 		})
-		.get("/api/section/delete_section", async (req, res) => {
-			const toDeleteNRC = req.query.nrc;
+		.get("/api/section/delete_section", async ({query}) => {
+			const toDeleteNRC = query.nrc;
 			if (toDeleteNRC === undefined) {
 				console.log("DELETE_SECTION ERROR: nrc is undefined ", toDeleteNRC);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const section = await SectionModel.findOne({ nrc: toDeleteNRC });
-			if (section === undefined) {
+			if (section === undefined || section === null) {
 				console.log("DELETE_SECTION ERROR: no section has nrc ", toDeleteNRC);
-				res.send(undefined);
-				return;
+				return(undefined);
+				
 			}
 
 			const schedules = await ScheduleModel.find();
 			schedules.forEach(async (schedule) => {
-				if (schedule.sections.some((x) => x.equals(section._id))) {
-					await ScheduleModel.deleteOne(schedule);
+				if(schedule.sections != null && schedule != null) {
+					if (schedule.sections.some((x) => x.equals(section._id))) {
+						await ScheduleModel.deleteOne(schedule);
+					}
 				}
 			});
 
@@ -157,5 +158,5 @@ export const pluginSection = <T extends string>(config: { prefix: T }) =>
 				});
 			});
 			const response = await SectionModel.deleteOne({ nrc: toDeleteNRC });
-			res.send(response);
+			return(response);
 		});
