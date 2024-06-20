@@ -78,7 +78,7 @@ function Course({
 				<div className="course-name">{displayCourse.name}</div>
 				<div className="add-section">
 					<button onClick={addNewSection} type="button">
-						Add Section
+						Añadir Seccion
 					</button>
 				</div>
 			</div>
@@ -94,7 +94,7 @@ function Course({
 							<div className="delete-section">
 								<button onClick={() => removeExistingSection(value)}>
 									{" "}
-									TRASH{" "}
+									Remover{" "}
 								</button>
 							</div>
 						</div>
@@ -159,17 +159,18 @@ function DaySelector({ classBind, changeBind }: DaySelectorProperties) {
 
 	return (
 		<select value={classBind.day} onChange={handleDayChange}>
-			<option value="1">Monday</option>
-			<option value="2">Tuesday</option>
-			<option value="3">Wednesday</option>
-			<option value="4">Thursday</option>
-			<option value="5">Friday</option>
-			<option value="6">Saturday</option>
-			<option value="7">Sunday</option>
+			<option value="1">Lunes</option>
+			<option value="2">Martes</option>
+			<option value="3">Miercoles</option>
+			<option value="4">Jueves</option>
+			<option value="5">Viernes</option>
+			<option value="6">Sábado</option>
+			<option value="7">Domingo</option>
 		</select>
 	);
 }
-// hello i have no idea if this workkds vc conmigo :)?
+
+
 function TimeBlock({ changeBind, classBind }: TimeBlockProperties) {
 	function updateStart(start: Date) {
 		changeBind(classBind, { ...classBind, start: start });
@@ -205,7 +206,7 @@ function EditableSectionContainer({
 	removeClassBind,
 	updateClassBind,
 	saveDataBind,
-}: EditableSectionContainerProperties) {
+}: EditableSectionContainerProperties ){
 	function addNewClass() {
 		addClassBind(selectedSection);
 	}
@@ -260,7 +261,7 @@ function EditableSectionContainer({
 				/>
 			</div>
 			<div className="day-container">
-				Dias: <button onClick={() => addNewClass()}>ADD</button>
+				Dias: <button onClick={() => addNewClass()}>Añadir</button>
 			</div>
 			<div>
 				{selectedSection.sessionList.map((value) => {
@@ -268,7 +269,7 @@ function EditableSectionContainer({
 						<div className="day-buttons">
 							<TimeBlock changeBind={updateClassTime} classBind={value} />
 							<div className="delete-day">
-								<button onClick={() => removeClass(value)}> TRASH </button>
+								<button onClick={() => removeClass(value)}> Remover </button>
 							</div>
 						</div>
 					);
