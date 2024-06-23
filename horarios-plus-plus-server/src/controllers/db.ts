@@ -102,6 +102,7 @@ export class DBController {
 		// 4. Connect to MongoDB
 		const db = await require("mongoose");
 
+
 		db.connect(uri);
 		await db.connection.db.admin().command({ ping: 1 });
 		console.log(
