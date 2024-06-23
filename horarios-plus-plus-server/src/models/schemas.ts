@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type {  iSession, iSection, iSubject, iUser, iCareer } from "./classes";
+import type { iSession, iSection, iSubject, iUser, iCareer } from "./classes";
 
 const sessionSchema = new mongoose.Schema<iSession>({
 	start: { type: Date, required: true },
@@ -10,16 +10,20 @@ const sessionSchema = new mongoose.Schema<iSession>({
 const SessionModel = mongoose.model("Session", sessionSchema);
 type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 
-interface iSectionSchema extends iSection{
+interface iSectionSchema extends iSection {
 	sessions: mongoose.Types.ObjectId[];
 	subject: mongoose.Types.ObjectId;
-} 
+}
 
 const sectionSchema = new mongoose.Schema<iSectionSchema>({
 	nrc: { type: Number, required: true, unique: true },
 	teacher: { type: String, required: true },
 	sessions: [
-		{ type: mongoose.Schema.Types.ObjectId, ref: "Session", required: true },
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Session",
+			required: true,
+		},
 	],
 	subject: {
 		type: mongoose.Schema.Types.ObjectId,
@@ -31,7 +35,7 @@ const sectionSchema = new mongoose.Schema<iSectionSchema>({
 const SectionModel = mongoose.model<iSectionSchema>("Section", sectionSchema);
 type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
 
-interface iSubjectSchema extends iSubject{
+interface iSubjectSchema extends iSubject {
 	sections: mongoose.Types.ObjectId[];
 	career: mongoose.Types.ObjectId;
 }
@@ -49,7 +53,7 @@ const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 const SubjectModel = mongoose.model("Subject", subjectSchema);
 type TSubjectSchema = mongoose.InferSchemaType<typeof subjectSchema>;
 
-interface iCareerSchema extends iCareer{
+interface iCareerSchema extends iCareer {
 	subjects: mongoose.Types.ObjectId[];
 }
 
@@ -61,12 +65,20 @@ const careerSchema = new mongoose.Schema<iCareerSchema>({
 const CareerModel = mongoose.model("Career", careerSchema);
 type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
-interface iUserSchema extends iUser{
-	schedule: mongoose.Types.ObjectId[];
-}
+type THydratedUserDocument = mongoose.HydratedDocument<
+	iUser,
+	{
+		email: string;
+		password: string;
+		tipo: number;
+		schedule: mongoose.Types.DocumentArray<iSectionSchema>;
+	}
+>;
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
+type UserModelType = mongoose.Model<iUser, {}, {}, {}, THydratedUserDocument>;
 
 // 2. Create a Schema corresponding to the document interface.
-const userSchema = new mongoose.Schema<iUserSchema>({
+const userSchema = new mongoose.Schema<iUser, UserModelType>({
 	email: { type: String, required: true },
 	password: { type: String, required: true },
 	tipo: { type: Number, default: 0 },
@@ -74,16 +86,13 @@ const userSchema = new mongoose.Schema<iUserSchema>({
 });
 
 // 3. Create a Model.
-const UserModel = mongoose.model<iUserSchema>("User", userSchema);
+const UserModel = mongoose.model<iUser, THydratedUserDocument>(
+	"User",
+	userSchema,
+);
 type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
 
-export {
-	SessionModel,
-	CareerModel,
-	SubjectModel,
-	SectionModel,
-	UserModel,
-};
+export { SessionModel, CareerModel, SubjectModel, SectionModel, UserModel };
 export type {
 	TSessionSchema,
 	TCareerSchema,

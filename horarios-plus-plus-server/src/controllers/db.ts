@@ -96,7 +96,6 @@ export class DBController {
 		this.userModel = mongoose.model<iUser, THydratedUserDocument >("User", userSchema);
 		type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
 
-
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
