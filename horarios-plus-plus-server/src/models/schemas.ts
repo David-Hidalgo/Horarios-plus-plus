@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import type { iSchedule, iSession, iSection, iSubject, IUser } from "./classes";
-import { number } from "zod";
+import type {  iSession, iSection, iSubject, iUser, iCareer } from "./classes";
 
 const sessionSchema = new mongoose.Schema<iSession>({
 	start: { type: Date, required: true },
@@ -11,7 +10,12 @@ const sessionSchema = new mongoose.Schema<iSession>({
 const SessionModel = mongoose.model("Session", sessionSchema);
 type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 
-const sectionSchema = new mongoose.Schema<iSection>({
+interface iSectionSchema extends iSection{
+	sessions: mongoose.Types.ObjectId[];
+	subject: mongoose.Types.ObjectId;
+} 
+
+const sectionSchema = new mongoose.Schema<iSectionSchema>({
 	nrc: { type: Number, required: true, unique: true },
 	teacher: { type: String, required: true },
 	sessions: [
@@ -24,12 +28,17 @@ const sectionSchema = new mongoose.Schema<iSection>({
 	},
 });
 
-const SectionModel = mongoose.model("Section", sectionSchema);
+const SectionModel = mongoose.model<iSectionSchema>("Section", sectionSchema);
 type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
 
-const subjectSchema = new mongoose.Schema<iSubject>({
+interface iSubjectSchema extends iSubject{
+	sections: mongoose.Types.ObjectId[];
+	career: mongoose.Types.ObjectId;
+}
+
+const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 	name: { type: String, required: true },
-	sections: { type: [sectionSchema], required: true },
+	sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 	career: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Career",
@@ -40,33 +49,32 @@ const subjectSchema = new mongoose.Schema<iSubject>({
 const SubjectModel = mongoose.model("Subject", subjectSchema);
 type TSubjectSchema = mongoose.InferSchemaType<typeof subjectSchema>;
 
-const careerSchema = new mongoose.Schema({
+interface iCareerSchema extends iCareer{
+	subjects: mongoose.Types.ObjectId[];
+}
+
+const careerSchema = new mongoose.Schema<iCareerSchema>({
 	name: { type: String, required: true },
-	subjects: { type: [subjectSchema], required: true },
+	subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
 });
 
 const CareerModel = mongoose.model("Career", careerSchema);
 type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
-
-const scheduleSchema = new mongoose.Schema<iSchedule>({
-	owner: { type: String, require: true, unique: true },
-	sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
-});
-
-const ScheduleModel = mongoose.model("Schedule", scheduleSchema);
-type TScheduleSchema = mongoose.InferSchemaType<typeof scheduleSchema>;
+interface iUserSchema extends iUser{
+	schedule: mongoose.Types.ObjectId[];
+}
 
 // 2. Create a Schema corresponding to the document interface.
-const userSchema = new mongoose.Schema<IUser>({
-	email: { type: String, required: false },
+const userSchema = new mongoose.Schema<iUserSchema>({
+	email: { type: String, required: true },
 	password: { type: String, required: true },
 	tipo: { type: Number, default: 0 },
-	schedule: { type: scheduleSchema, required: false },
+	schedule: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 });
 
 // 3. Create a Model.
-const UserModel = mongoose.model<IUser>("User", userSchema);
+const UserModel = mongoose.model<iUserSchema>("User", userSchema);
 type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
 
 export {
@@ -74,7 +82,6 @@ export {
 	CareerModel,
 	SubjectModel,
 	SectionModel,
-	ScheduleModel,
 	UserModel,
 };
 export type {
@@ -82,6 +89,5 @@ export type {
 	TCareerSchema,
 	TSubjectSchema,
 	TSectionSchema,
-	TScheduleSchema,
 	TUserSchema,
 };

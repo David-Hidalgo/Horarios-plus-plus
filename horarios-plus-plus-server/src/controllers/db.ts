@@ -1,109 +1,107 @@
-// import {
-// 	ScheduleModel,
-// 	SectionModel,
-// 	SessionModel,
-// 	UserModel,
-// 	SubjectModel,
-// } from "./../models/schemas";
-// import type {
-// 	iSection,
-// 	iSchedule,
-// 	iSession,
-// 	iSubject,
-// } from "./../models/classes";
-import {
-	type iSchedule,
-	type iSession,
-	type iSection,
-	type iSubject,
-	type IUser,
-	Schedule,
-	User,
-} from "./../models/classes";
-
-import type { Mongoose } from "mongoose";
+import mongoose from "mongoose";
+import type { iSession, iSection, iSubject, iUser, iCareer, Section } from "./../models/classes";
+import { Schedule, User } from "./../models/classes";
 
 export class DBController {
-	public SectionModel;
-	public SessionModel;
-	public UserModel;
-	public SubjectModel;
-	public ScheduleModel;
-	public db: Mongoose;
-	private constructor(mongoosea: Mongoose) {
+	public sectionModel;
+	public sessionModel;
+	public userModel;
+	public subjectModel;
+	public careerModel;
+	public db: mongoose.Mongoose;
+	private constructor(mongoosea: mongoose.Mongoose) {
 		this.db = mongoosea;
-		const sessionSchema = new this.db.Schema<iSession>({
+
+		const sessionSchema = new mongoose.Schema<iSession>({
 			start: { type: Date, required: true },
 			end: { type: Date, required: true },
 			day: { type: Number, default: new Date().getDay() },
 		});
 
-		const SessionModel = this.db.model("Session", sessionSchema);
-		// type TSessionSchema = this.db.InferSchemaType<typeof sessionSchema>;
+		this.sessionModel = mongoose.model("Session", sessionSchema);
+		type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 
-		const sectionSchema = new this.db.Schema<iSection>({
+		interface iSectionSchema extends iSection {
+			sessions: mongoose.Types.ObjectId[];
+			subject: mongoose.Types.ObjectId;
+		}
+
+		const sectionSchema = new mongoose.Schema<iSectionSchema>({
 			nrc: { type: Number, required: true, unique: true },
 			teacher: { type: String, required: true },
-			sessions: { type: [sessionSchema], required: true },
+			sessions: [
+				{
+					type: mongoose.Schema.Types.ObjectId,
+					ref: "Session",
+					required: true,
+				},
+			],
 			subject: {
-				type: this.db.Schema.Types.ObjectId,
+				type: mongoose.Schema.Types.ObjectId,
 				ref: "Subject",
 				required: true,
 			},
 		});
 
-		const SectionModel = this.db.model("Section", sectionSchema);
-		// type TSectionSchema = this.db.InferSchemaType<typeof sectionSchema>;
+		this.sectionModel = mongoose.model<iSectionSchema>(
+			"Section",
+			sectionSchema,
+		);
+		type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
 
-		const subjectSchema = new this.db.Schema<iSubject>({
+		interface iSubjectSchema extends iSubject {
+			sections: mongoose.Types.ObjectId[];
+			career: mongoose.Types.ObjectId;
+		}
+
+		const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 			name: { type: String, required: true },
-			sections: { type: [sectionSchema], required: true },
+			sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 			career: {
-				type: this.db.Schema.Types.ObjectId,
+				type: mongoose.Schema.Types.ObjectId,
 				ref: "Career",
 				required: true,
 			},
 		});
 
-		const SubjectModel = this.db.model("Subject", subjectSchema);
-		// type TSubjectSchema = this.db.InferSchemaType<typeof subjectSchema>;
+		this.subjectModel = mongoose.model("Subject", subjectSchema);
+		type TSubjectSchema = mongoose.InferSchemaType<typeof subjectSchema>;
 
-		const careerSchema = new this.db.Schema({
+		interface iCareerSchema extends iCareer {
+			subjects: mongoose.Types.ObjectId[];
+		}
+
+		const careerSchema = new mongoose.Schema<iCareerSchema>({
 			name: { type: String, required: true },
-			subjects: { type: [subjectSchema], required: true },
+			subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
 		});
 
-		const CareerModel = this.db.model("Career", careerSchema);
-		// type TCareerSchema = this.db.InferSchemaType<typeof careerSchema>;
+		this.careerModel = mongoose.model("Career", careerSchema);
+		type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
-		const scheduleSchema = new this.db.Schema<iSchedule>({
-			sections: { type: [sectionSchema], required: true },
-		});
-
-		const ScheduleModel = this.db.model("Schedule", scheduleSchema);
-		// type TScheduleSchema = this.db.InferSchemaType<typeof scheduleSchema>;
+		
+		type THydratedUserDocument  = mongoose.HydratedDocument<iUser, {schedule:mongoose.Types.DocumentArray<iSectionSchema>}>
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
+		type UserModelType = mongoose.Model<iUser,{},{},{},THydratedUserDocument >;
 
 		// 2. Create a Schema corresponding to the document interface.
-		const userSchema = new this.db.Schema<IUser>({
-			email: { type: String, required: false },
+				const userSchema = new mongoose.Schema<iUser,UserModelType>({
+			email: { type: String, required: true },
 			password: { type: String, required: true },
 			tipo: { type: Number, default: 0 },
-			schedule: { type: scheduleSchema, required: false },
+			schedule: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 		});
 
 		// 3. Create a Model.
-		const UserModel = this.db.model<IUser>("User", userSchema);
-		// type TUserSchema = this.db.InferSchemaType<typeof userSchema>;
-		this.SectionModel = SectionModel;
-		this.SessionModel = SessionModel;
-		this.UserModel = UserModel;
-		this.SubjectModel = SubjectModel;
-		this.ScheduleModel = ScheduleModel;
+		this.userModel = mongoose.model<iUser, THydratedUserDocument >("User", userSchema);
+		type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
+
+
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
 		const db = await require("mongoose");
-		
+
 		db.connect(uri);
 		await db.connection.db.admin().command({ ping: 1 });
 		console.log(
@@ -116,14 +114,11 @@ export class DBController {
 	public static async disconnect() {
 		const db = await require("mongoose");
 		db.disconnect();
-	} 
-	public createSchedule(sections: iSection[]): iSchedule {
-		const user = new this.UserModel({
-			name: "Bill",
-			email: "bill@initech.com",
-			avatar: "https://i.imgur.com/dM7Thhn.png",
-		});
-		const amigo = User.getSchedules(user.email, sections);
+	}
+	public saveSchedule(user:iUser,sections: Section[]) {
+		
+		const usuario = new User(user.email, user.password, user.tipo);;
+		const amigo = usuario.setSchedules(sections);
 		return amigo[0];
 	}
 }

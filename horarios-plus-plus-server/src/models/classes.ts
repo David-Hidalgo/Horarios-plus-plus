@@ -17,14 +17,14 @@ class Session implements iSession {
 }
 interface iSubject {
 	name: string;
-	sections: iSection[];
-	career: iCareer | string;
+	// sections: iSection[];
+	// career: iCareer;
 }
 class Subject implements iSubject {
 	public name;
 	public sections;
 	public career;
-	constructor(name: string, sections: Section[], career: Career | string) {
+	constructor(name: string, sections: Section[], career: Career) {
 		this.name = name;
 		this.sections = sections;
 		this.career = career;
@@ -65,12 +65,12 @@ class Subject implements iSubject {
 
 interface iCareer {
 	name: string;
-	subjects: iSubject[];
+	// subjects?: iSubject[];
 }
 class Career implements iCareer {
 	name;
-	subjects;
-	constructor(name: string, subjects: Subject[]) {
+	subjects?: Subject[];
+	constructor(name: string, subjects?: Subject[]) {
 		this.name = name;
 		this.subjects = subjects;
 	}
@@ -79,8 +79,8 @@ class Career implements iCareer {
 interface iSection {
 	nrc: number;
 	teacher: string;
-	sessions: iSession[];
-	subject: iSubject;
+	// sessions: iSession[];
+	// subject: iSubject;
 }
 class Section implements iSection {
 	nrc;
@@ -128,14 +128,14 @@ class Section implements iSection {
 	}
 }
 
-interface iSchedule {
-	owner: string;
-	sections: iSection[];
-}
-class Schedule implements iSchedule {
-	owner;
+// interface iSchedule {
+// 	owner: iUser;
+// 	sections: iSection[];
+// }
+class Schedule {
+	owner: User;
 	sections;
-	constructor(owner: string, sections: Section[]) {
+	constructor(owner: User, sections: Section[]) {
 		this.owner = owner;
 		this.sections = sections;
 	}
@@ -182,23 +182,23 @@ class Schedule implements iSchedule {
 	}
 }
 // 1. Create an interface representing a document in MongoDB.
-interface IUser {
+interface iUser {
 	email: string;
 	password: string;
 	tipo: number;
-	schedule?: iSchedule;
+	schedule?: iSection[];
 }
-class User implements IUser {
+class User implements iUser {
 	email: string;
 	password: string;
 	tipo: number;
-	schedule?: iSchedule;
+	schedule?: iSection[];
 
 	constructor(
 		email: string,
 		password: string,
 		tipo: number,
-		schedule?: iSchedule,
+		schedule?: iSection[],
 	) {
 		this.email = email;
 		this.password = password;
@@ -217,11 +217,11 @@ class User implements IUser {
 			return 0; // Invalid email
 		}
 	}
-	public static getSchedules(owner: string, sections: Section[]):Schedule[] {
+	public setSchedules(sections: Section[]):Schedule[] {
 		let materias = Subject.obtenerMaterias(sections);
 		materias = Subject.sortSubjectsBySectionLength(materias);
 		let schedules = new Array();
-		const scheduleInicial = new Schedule(owner, []);
+		const scheduleInicial = new Schedule(this, []);
 		Schedule.recursiveSchedulePush(0, materias, scheduleInicial, schedules);
 		schedules = Schedule.filtrarHorariosPorMaterias(schedules, materias);
 		return schedules;
@@ -229,4 +229,4 @@ class User implements IUser {
 }
 
 export { Session, Subject, Career, Section, Schedule, User };
-export type { iSession, iSubject, iCareer, iSection, iSchedule, IUser };
+export type { iSession, iSubject, iCareer, iSection,  iUser };

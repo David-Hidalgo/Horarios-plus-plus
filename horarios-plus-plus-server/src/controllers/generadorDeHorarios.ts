@@ -1,15 +1,9 @@
-import { Section, Session, Subject, Schedule, User } from "../models/classes";
+import mongoose from "mongoose";
+import { Section, Session, Subject, Schedule, User, Career } from "../models/classes";
 // Description: Archivo de funciones para el manejo de archivos
+import {DBController} from './db';
 
-
-
-
-
-
-
-
-
-function main() {
+	const dbController:DBController =await DBController.run("mongodb://127.0.0.1/test");
 	const fecha1 = new Date(2024, 1, 1, 8, 0);
 	const fecha2 = new Date(2024, 1, 1, 10, 0);
 	const fecha3 = new Date(2024, 1, 1, 9, 0);
@@ -27,8 +21,11 @@ function main() {
 	const session4 = new Session(fecha7, fecha8, 1);
 	const session5 = new Session(fecha9, fecha10, 1);
 
-	const subject1 = new Subject("Matematica", [], "ing");
-	const subject2 = new Subject("Fisica", [], "ing");
+	const inf = new Career("informática");
+	const usuario = new User("email", "password", 0);
+
+	const subject1 = new Subject("Matematica", [],inf );
+	const subject2 = new Subject("Fisica", [], inf);
 
 	const section1 = new Section(1, "teacher1", [], subject1);
 	const section2 = new Section(2, "teacher2", [], subject2);
@@ -40,8 +37,7 @@ function main() {
 
 	const sections = [section1, section3];
 
-	const a = User.getSchedules("owner", sections);
+
+	const a = usuario.setSchedules(sections);
 
 	console.log(a);
-}
-main();

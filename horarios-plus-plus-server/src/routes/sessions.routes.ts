@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import {
-	ScheduleModel,
 	SectionModel,
 	SessionModel,
 } from "../models/schemas";
@@ -62,7 +61,6 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			}
 
 			const newSession = new SessionModel({
-				_id: new mongoose.mongo.ObjectId(),
 				day: 0,
 				start: query.start,
 				end: query.end,
