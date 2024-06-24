@@ -104,15 +104,14 @@ export class DBController {
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
-		const db = mongoose;
-
-		db.connect(uri);
-		await db.connection.db.admin().command({ ping: 1 });
+		await mongoose.connect(uri);
+		await mongoose.connection.db.admin().command({ ping: 1 });
 		console.log(
 			"Pinged your deployment. You successfully connected to MongoDB!",
 		);
-
-		return new DBController(db);
+		mongoose.connection.on("error", console.error.bind(console, "connection error:"));
+		const db = await require("mongoose");
+		return new DBController(new db.Mongoose());
 	}
 
 	public static async disconnect() {
