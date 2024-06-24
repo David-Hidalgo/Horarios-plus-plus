@@ -9,7 +9,13 @@ import { pluginSection } from "./routes/sections.routes";
 import { pluginSubject } from "./routes/subjects.routes";
 import { pluginUser } from "./routes/user.routes";
 
-const uri = "mongodb://127.0.0.1:27017/horariospp";
+
+const username = encodeURIComponent("DanCas");
+const password = encodeURIComponent("queso");
+
+const uri = //"mongodb://127.0.0.1:27017/horariospp";															//Conexión a base de datos de manera local
+			`mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+	
 const clientOptions: ConnectOptions = {};
 const controladordb:DBController = await DBController.run(uri);
 
