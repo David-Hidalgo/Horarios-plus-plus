@@ -11,7 +11,6 @@ const SessionModel = mongoose.model("Session", sessionSchema);
 type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 
 interface iSectionSchema extends iSection {
-	sessions: mongoose.Types.ObjectId[];
 	subject: mongoose.Types.ObjectId;
 }
 

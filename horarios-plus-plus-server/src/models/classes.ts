@@ -79,14 +79,14 @@ class Career implements iCareer {
 interface iSection {
 	nrc: number;
 	teacher: string;
-	// sessions: iSession[];
+	sessions: iSession[];
 	// subject: iSubject;
 }
 class Section implements iSection {
 	nrc;
 	teacher;
 	sessions;
-	public subject;
+	public subject: Subject;
 	constructor(
 		nrc: number,
 		teacher: string,
@@ -96,8 +96,8 @@ class Section implements iSection {
 		this.nrc = nrc;
 		this.teacher = teacher;
 		this.sessions = sessions;
-		this.subject = subject;
-		this.subject.sections.push(this);
+			this.subject = subject;
+			this.subject.sections.push(this);
 	}
 	public static mismaMateria(section1: Section, section2: Section) {
 		if (section1.subject === section2.subject) {

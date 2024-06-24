@@ -1,14 +1,25 @@
 import mongoose from "mongoose";
-import type { iSession, iSection, iSubject, iUser, iCareer, Section } from "./../models/classes";
+import type {
+	iSession,
+	iSection,
+	iSubject,
+	iUser,
+	iCareer,
+	Section,
+} from "./../models/classes";
 import { Schedule, User } from "./../models/classes";
 
+interface iSubjectSchema extends iSubject {
+			sections: mongoose.Types.ObjectId[];
+			career: mongoose.Types.ObjectId;
+		}
 export class DBController {
-	public sectionModel;
+	public db: mongoose.Mongoose;
 	public sessionModel;
-	public userModel;
+	public sectionModel;
 	public subjectModel;
 	public careerModel;
-	public db: mongoose.Mongoose;
+	public userModel;
 	private constructor(mongoosea: mongoose.Mongoose) {
 		this.db = mongoosea;
 
@@ -21,38 +32,28 @@ export class DBController {
 		this.sessionModel = mongoose.model("Session", sessionSchema);
 		type TSessionSchema = mongoose.InferSchemaType<typeof sessionSchema>;
 
-		interface iSectionSchema extends iSection {
-			sessions: mongoose.Types.ObjectId[];
-			subject: mongoose.Types.ObjectId;
-		}
+		type SectionHydratedDocument = mongoose.HydratedDocument< iSection,{ 
+			sessions: mongoose.Types.DocumentArray<iSession> }>;
 
-		const sectionSchema = new mongoose.Schema<iSectionSchema>({
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
+		type SectionModelType = mongoose.Model<iSection, {}, {}, {}, SectionHydratedDocument>;
+
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
+		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
 			nrc: { type: Number, required: true, unique: true },
 			teacher: { type: String, required: true },
 			sessions: [
-				{
-					type: mongoose.Schema.Types.ObjectId,
-					ref: "Session",
-					required: true,
-				},
+				sessionSchema
 			],
-			subject: {
-				type: mongoose.Schema.Types.ObjectId,
-				ref: "Subject",
-				required: true,
-			},
 		});
 
-		this.sectionModel = mongoose.model<iSectionSchema>(
+		this.sectionModel = mongoose.model<iSection,SectionModelType>(
 			"Section",
 			sectionSchema,
 		);
 		type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
 
-		interface iSubjectSchema extends iSubject {
-			sections: mongoose.Types.ObjectId[];
-			career: mongoose.Types.ObjectId;
-		}
+		
 
 		const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 			name: { type: String, required: true },
@@ -79,28 +80,31 @@ export class DBController {
 		this.careerModel = mongoose.model("Career", careerSchema);
 		type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
-		
-		type THydratedUserDocument  = mongoose.HydratedDocument<iUser, {schedule:mongoose.Types.DocumentArray<iSectionSchema>}>
+		type THydratedUserDocument = mongoose.HydratedDocument<
+			iUser,
+			{
+				schedule: mongoose.Types.DocumentArray<iSection>;
+			}
+		>;
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		type UserModelType = mongoose.Model<iUser,{},{},{},THydratedUserDocument >;
+		type UserModelType = mongoose.Model<iUser,{},{},{},THydratedUserDocument>;
 
-		// 2. Create a Schema corresponding to the document interface.
-				const userSchema = new mongoose.Schema<iUser,UserModelType>({
+		const userSchema = new mongoose.Schema<iUser, UserModelType>({
 			email: { type: String, required: true },
 			password: { type: String, required: true },
 			tipo: { type: Number, default: 0 },
-			schedule: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
+			schedule: [sectionSchema],
 		});
 
-		// 3. Create a Model.
-		this.userModel = mongoose.model<iUser, THydratedUserDocument >("User", userSchema);
+		this.userModel = mongoose.model<iUser, UserModelType>(
+			"User",
+			userSchema,
+		);
 		type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
-
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
 		const db = await require("mongoose");
-
 
 		db.connect(uri);
 		await db.connection.db.admin().command({ ping: 1 });
@@ -115,10 +119,41 @@ export class DBController {
 		const db = await require("mongoose");
 		db.disconnect();
 	}
-	public saveSchedule(user:iUser,sections: Section[]) {
-		
-		const usuario = new User(user.email, user.password, user.tipo);;
-		const amigo = usuario.setSchedules(sections);
-		return amigo[0];
+	//MARK: secciones
+	public async addSessionToSection(nrc: string, session: iSession) {
+		const result=await this.sectionModel.findOne({ 'nrc': nrc }, 'sections');
+		if (!result) {
+			throw new Error("Section not found");
+		}
+		const sessionDoc = new this.sectionModel(session);
+		result.sessions.push(sessionDoc);
+		await result.save();		
 	}
+	public async deleteSessionFromSection(nrc: string, session: iSession) {
+		const result=await this.sectionModel.findOne({ 'nrc': nrc }, 'sections');
+		if (!result) {
+			throw new Error("Section not found");
+		}
+		const sessionDoc=result.sessions.filter((s) => s.start === session.start && s.end === session.end && s.day === session.day);
+		sessionDoc[0].deleteOne();
+		await result.save();		
+	}
+	public saveSection(section: iSection) {
+		const seccion = new this.sectionModel(section);
+		return seccion.save();
+	}
+	public async getSections() {
+		return this.sectionModel.find();
+	}
+	//MARK: Subjects
+	public saveSubject(subject: iSubjectSchema) {
+		const materia = new this.subjectModel(subject);
+		return materia.save();
+	}
+	public async getSubjects() {
+		return this.subjectModel.find().populate<iSection>("sections");
+	}
+	//MARK: Careers
+
+	public saveSchedule(user: iUser, sections: Section[]) {}
 }

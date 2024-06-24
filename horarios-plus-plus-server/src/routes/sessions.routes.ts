@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
-import {
-	SectionModel,
-	SessionModel,
-} from "../models/schemas";
+import type { DBController } from "../controllers/db";
 import Elysia from "elysia";
+import { iSession, Section, type Subject } from "../models/classes";
 
-export const pluginSession = <T extends string>(config: { prefix: T }) =>
+export function plugginSessiones(db:DBController) {
+	const pluginSession = <T extends string>(config: { prefix: T }) =>
 	new Elysia({
 		name: "my-plugin",
 		seed: config,
@@ -18,7 +17,7 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				
 			}
 
-			const session = await SessionModel.findById(query.id);
+			const session = await db.sessionModel.findById(query.id);
 			if (session === undefined) {
 				return(undefined);
 				
@@ -33,7 +32,7 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				
 			}
 
-			const section = (await SectionModel.find({ nrc: query.nrc })).at(0);
+			const section = (await db.sectionModel.find({ nrc: query.nrc })).at(0);
 			if (section === undefined) {
 				return(undefined);
 				
@@ -42,7 +41,7 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			return(section.sessions);
 		})
 
-		.get("/api/session/add_session_to_section", async ({query}) => {
+		.post("/api/session/add_session_to_section", async ({query}) => {
 			if (
 				query.day === undefined ||
 				query.start === undefined ||
@@ -53,28 +52,24 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				
 			}
 
-			const section = (await SectionModel.find({ nrc: query.nrc })).at(0);
+			const section = (await db.sectionModel.find({ nrc: query.nrc })).at(0);
 			if (section === undefined) {
 				console.log(`No se encontro ${query.nrc}`);
 				return(undefined);
-				
 			}
 
-			const newSession = new SessionModel({
+			const newSession = new db.sessionModel({
 				day: 0,
 				start: query.start,
 				end: query.end,
-				section: new mongoose.mongo.ObjectId(section._id),
 			});
-			await newSession.save();
-			await SectionModel.findOneAndUpdate(section, {
-				sessions: section.sessions.concat(newSession),
-			});
-
+			
+			section.sessions.push(newSession);
+			section.save();
 			return(newSession);
 		})
 
-		.get("/api/session/updateSession", async ({query}) => {
+		.post("/api/session/updateSession", async ({query}) => {
 			const oldDay = query.oldday;
 			const oldStart = query.oldstart;
 			const oldEnd = query.oldend;
@@ -102,20 +97,20 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			}
 
 			const newSession = { day: newDay, start: newStart, end: newEnd };
-			if (await SessionModel.exists({ ...newSession, nrc: query.nrc })) {
+			if (await db.sessionModel.exists({ ...newSession, nrc: query.nrc })) {
 				console.log("An identical session already exists");
 				return(undefined);
 				
 			}
 
-			const section = await SectionModel.findOne({ nrc: query.nrc });
+			const section = await db.sectionModel.findOne({ nrc: query.nrc });
 			if (section === undefined) {
-				console.log("No section with nrc ", nrc, " exists");
+				console.log("No section with nrc ", query.nrc, " exists");
 				return(undefined);
 				
 			}
 
-			const oldSessionObject = await SessionModel.findOneAndUpdate(
+			const oldSessionObject = await db.sessionModel.findOneAndUpdate(
 				{ ...oldSession, section: new mongoose.mongo.ObjectId(section._id) },
 				newSession,
 			);
@@ -129,7 +124,7 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 			return(newSession);
 		})
 
-		.get("/api/session/delete_session", async ({query}) => {
+		.delete("/api/session/delete_session", async ({query}) => {
 			const sectionNRC = query.nrc;
 			const dayToDelete = query.day;
 			const startToDelete = query.start;
@@ -147,7 +142,7 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				endToDelete === undefined ||
 				sectionNRC === undefined
 			) {
-				console.log(
+				console.error(
 					"DELETE_SESSION ERROR: an item is undefined ",
 					toDeleteSession,
 				);
@@ -155,34 +150,28 @@ export const pluginSession = <T extends string>(config: { prefix: T }) =>
 				
 			}
 
-			const section = await SectionModel.findOne({ nrc: sectionNRC });
-			if (section === undefined) {
+			const section = await db.sectionModel.findOne({ nrc: sectionNRC });
+			if (section !== undefined &&  section!==null) {
+				const subject = new Array<Subject>();
+				const seccion = new Section(section.nrc, section?.teacher, section?.sessions, subject);
+			}else{
 				console.log("DELETE_SECSION ERROR: no section has nrc ", sectionNRC);
-				return(undefined);
-				
+				return(undefined);	
 			}
 
-			const schedules = await ScheduleModel.find();
-			schedules.forEach(async (schedule) => {
-				if (schedule.sections.some((x) => x.equals(section._id))) {
-					await ScheduleModel.deleteOne(schedule);
-				}
-			});
 
-			const session = await SessionModel.findOne({
-				...toDeleteSession,
-				section: new mongoose.mongo.ObjectId(section._id),
+			const session = await db.sessionModel.findOne({
+				toDeleteSession,
 			});
 			if (session === undefined) {
 				console.log("DELETE_SESSION ERROR: doesn't exist ", toDeleteSession);
 				return(undefined);
-				
 			}
 
-			await SectionModel.findOneAndUpdate(section, {
-				sessions: section.sessions.filter((id) => !id.equals(session._id)),
-			});
+			await db.deleteSessionFromSection(sectionNRC, session);
 
-			const response = await SessionModel.deleteOne(session);
+			const response = await db.sessionModel.deleteOne(session);
 			return(response);
 		});
+	return pluginSession;
+}

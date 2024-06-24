@@ -40,4 +40,15 @@ import {DBController} from './db';
 
 	const a = usuario.setSchedules(sections);
 
+	usuario.schedule = a[0].sections;
+
+	const b =new dbController.userModel({
+		email: usuario.email,
+		password: usuario.password,
+		tipo: usuario.tipo,
+		schedule: usuario.schedule
+	})
+
+	b.save();
+
 	console.log(a);
