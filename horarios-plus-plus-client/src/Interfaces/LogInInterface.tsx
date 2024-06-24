@@ -36,6 +36,8 @@ const regexHandler = new RegExp(regExpEmail);
       .then(response => response.json())
       .catch((e) => { console.log("Could not send login to database") })
       .then(data => {
+        console.log(data);
+        
         if (data.message === "successful") {
           sessionStorage.setItem('login', `${email}`);
         }

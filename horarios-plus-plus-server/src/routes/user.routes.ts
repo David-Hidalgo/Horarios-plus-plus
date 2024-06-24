@@ -57,7 +57,7 @@ export const pluginUser = <T extends string>(
 						}
 						return { message: "password doesn't match" };
 					}
-					return { message: "db.userModel doesn't exist" };
+					return { message: "User doesn't exist" };
 				} catch (error) {
 					return undefined;
 				}

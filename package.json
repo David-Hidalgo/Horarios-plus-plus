@@ -11,7 +11,6 @@
   "scripts": {
     "startOld": "bun run ./horarios-plus-plus-server-old./index.js; bun run ./horarios-plus-plus-client/src/index.js",
     "startnew": "bun run ./horarios-plus-plus-server./index.ts; bun run ./horarios-plus-plus-client/src/index.js"
-
   },
   "trustedDependencies": ["@biomejs/biome"],
   "type": "module"

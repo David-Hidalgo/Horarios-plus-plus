@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import mongoose, { type ConnectOptions } from "mongoose";
-
+import { cors } from "@elysiajs/cors";
 import {DBController} from "./controllers/db";
 
 import { plugin } from "./routes/schedules.routes";
@@ -20,6 +20,7 @@ const clientOptions: ConnectOptions = {};
 const controladordb:DBController = await DBController.run(uri);
 
 const app = new Elysia()
+	.use(cors())
 	.get("/", () => "Hello Elysia")
 	.post("/hi", () => "hi")
 	.use(plugin({ prefix: "Schedules" }))
