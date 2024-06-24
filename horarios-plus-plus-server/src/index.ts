@@ -31,7 +31,7 @@ const app = new Elysia()
 	.onError(({ code }) => {
 		if (code === "NOT_FOUND") return "Route not found :{";
 	})
-	.listen(3000);
+	.listen(4000);
 
 
 
