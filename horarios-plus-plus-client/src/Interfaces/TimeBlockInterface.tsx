@@ -239,6 +239,10 @@ function EditableSectionContainer({
 		updateSectionBind(selectedSection, newSection);
 	}
 
+	function saveData() {
+		update
+	}
+
 	return (
 		<div className="editable-section-container">
 			<div className="editable-section-header">

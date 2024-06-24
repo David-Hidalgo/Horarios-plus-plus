@@ -13,8 +13,8 @@ const port = 4000;
 const username = encodeURIComponent("DanCas");
 const password = encodeURIComponent("queso");
 
-const uri = //`mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
-			"mongodb://127.0.0.1:27017";																//Conexión a la base de datos de manera local					
+const uri = `mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+			//"mongodb://127.0.0.1:27017";																//Conexión a la base de datos de manera local					
 const clientOptions = {
 	serverApi: { version: "1", strict: true, deprecationErrors: true },
 };

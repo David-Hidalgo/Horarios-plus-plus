@@ -1,7 +1,8 @@
 import React from "react";
-import { regExpEmail } from  "./helpers.tsx";
+import { regExpEmail, regExpPassword } from  "./helpers.tsx";
 import NavigationBar from "./NavigationBar";
 import "./SignUpInterface.css";
+import { set } from "mongoose";
 
 export default function SignUpInterface() {
 	const [email, setEmail] = React.useState();
@@ -10,20 +11,32 @@ export default function SignUpInterface() {
 	const [errorMessage, setErrorMessage] = React.useState("");
 
 	const [showSuccessful, setShowSuccesful] = React.useState(false);
-	const successfulMessage = "Se ha creado la cuenta exitosamente. Redirigiendo a la página de inicio de sesión."
+	const [successfulMessage,setSuccesfulMessage] = React.useState("");
 
-	const [showMessage, setShowMessage] = React.useState(false);
+	const [showMessageE, setshowMessageE] = React.useState(false);
+	const [showMessageP, setshowMessageP] = React.useState(false);
 
-	const regexHandler = new RegExp(regExpEmail);
+	const regexHandlerEmail = new RegExp(regExpEmail);
+	const regexHandlerPassword = new RegExp(regExpPassword);
 
 	function handleEmail(event: any) {
 		setEmail(event.target.value);
-		if(regexHandler.test(event.target.value)) { 
-			setShowMessage(true);
-		  }else{setShowMessage(false)}
+		if(regexHandlerEmail.test(event.target.value)) { 
+			setshowMessageE(true);
+		  }else{setshowMessageE(false)}
 	}
 	function handlePassword(event: any) {
 		setPassword(event.target.value);
+		if (regexHandlerPassword.test(event.target.value)) {
+			setshowMessageP(true);
+			setShowError(false);
+			setSuccesfulMessage("Contraseña válida");
+			setShowSuccesful(true);
+		}else{
+			setshowMessageP(false);
+			setErrorMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número");
+			setShowError(true);
+		}
 	}
 
 	function timeout(delay: number) {
@@ -34,7 +47,7 @@ export default function SignUpInterface() {
 	async function SendCredentialsDatabase() {
 		return await fetch(
 			`http://127.0.0.1:4000/api/sign_up?email=${email}&password=${password}`,
-			{ method:"put", headers: { Accept: "application/json" } },
+			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -49,17 +62,23 @@ export default function SignUpInterface() {
 			});
 	}
 	const handleClick =() => {
-		if(!showMessage) { 
+		if(!showMessageE) { 
+			
 		  setErrorMessage("Por favor ingrese un correo valido");
 		  setShowError(true);
+		}else if(!showMessageP){
+			setErrorMessage("Contraseña invalida");
+			setShowError(true);
 		}else{
 		  SendCredentialsDatabase()
 			.then(async(data) => {
 				
 				if (data.message === "User created successfully") {
+					setShowError(false);
+					setSuccesfulMessage("Usuario registrado exitosamente. Redirigiendo a la página de inicio de sesión.");
 					setShowSuccesful(true);
 					await timeout(2000);
-					// window.location.href = "/login";
+					 window.location.href = "/login";
 				}else {
 					if (data.message === "User already exist") {
 						setErrorMessage("Este usuario ya está registrado");

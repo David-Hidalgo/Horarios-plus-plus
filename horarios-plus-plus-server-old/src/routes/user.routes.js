@@ -8,7 +8,7 @@ export function userRoutes(app) {
 
 		if (email === undefined || password === undefined) {
 			console.log("Failed to sign up: A value is undefined");
-			res.send(undefined);
+			res.send({ message: "Failed to sign up: A value is undefined"});
 			return;
 		}
 
@@ -16,7 +16,7 @@ export function userRoutes(app) {
 			console.log(
 				"El email ya se encuentra en la base de datos " + req.query.email,
 			);
-			res.send(undefined);
+			res.send({ message: "User already exist" });
 			return;
 		}
 
@@ -27,7 +27,7 @@ export function userRoutes(app) {
 		});
 		user.save();
 
-		res.send(user);
+		res.send({ message: "User created successfully"});
 		return;
 	});
 

@@ -81,12 +81,14 @@ export function sectionRoutes(app) {
 			return;
 		}
 
-		if (await Section.exists({ nrc: req.query.nrc })) {
-			console.log(
-				`El NRC ya se encuentra en la base de datos ${req.query.nrc}`,
-			);
-			res.send(undefined);
-			return;
+		if (oldNRC !== req.query.nrc){
+			if (await Section.exists({ nrc: req.query.nrc })) {
+				console.log(
+					`El NRC ya se encuentra en la base de datos ${req.query.nrc}`,
+				);
+				res.send(undefined);
+				return;
+			}
 		}
 
 		const filter = { nrc: oldNRC };
