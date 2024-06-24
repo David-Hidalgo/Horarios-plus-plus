@@ -11,7 +11,7 @@ export const pluginSubject = <T extends string>(
 		seed: config,
 	})
 		.get("/api/subjects/get_subjects", async ({ query }) => {
-			const subject_list = await db.subjectModel.find({});
+			const subject_list = await db.subjectModel.find({}).populate("sections").exec();
 			return subject_list;
 		})
 		.get(

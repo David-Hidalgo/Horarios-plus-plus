@@ -443,10 +443,11 @@ export default function TimeBlockInterface() {
 		}
 		return await fetch(
 			`http://127.0.0.1:4000/api/section/add_section_to_subject?nrc=${section.nrc}&teacher=${section.teacher}&subjectName=${subject.name}`,
-			{ headers: { Accept: "application/json" } },
+			{ method:"PUT",headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
+				console.error(e);
 				console.error("No se pudo agregar a la base de datos");
 			})
 			.then((data) => {
