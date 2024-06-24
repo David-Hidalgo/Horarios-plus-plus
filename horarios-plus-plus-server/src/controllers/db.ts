@@ -40,7 +40,7 @@ export class DBController {
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
-			nrc: { type: Number, required: true, unique: true},
+			nrc: { type: Number, required: true},
 			teacher: { type: String, required: true },
 			sessions: [
 				sessionSchema
