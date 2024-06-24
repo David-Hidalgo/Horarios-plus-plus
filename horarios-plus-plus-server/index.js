@@ -6,7 +6,12 @@ const app = express()
 const port = 4000
 
 import mongoose from 'mongoose';
-const uri = "mongodb+srv://humberto:cocosete@serverdata.64ryvhh.mongodb.net/?retryWrites=true&w=majority&appName=serverdata";
+
+const username = encodeURIComponent("DanCas");
+const password = encodeURIComponent("queso");
+
+const uri = `mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+			// "mongodb://127.0.0.1:27017";
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
 async function run() {
