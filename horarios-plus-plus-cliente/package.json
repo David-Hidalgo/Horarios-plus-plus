@@ -1,5 +1,5 @@
 {
-  "name": "horarios-plus-plus-client",
+  "name": "horarios-plus-plus",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,7 +9,9 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
-    "cors": "^2.8.5",
+    "assert": "^2.1.0",
+    "axios": "^1.6.8",
+    "bundle": "^2.1.0",
     "mongoose": "^8.3.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

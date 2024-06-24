@@ -1,0 +1,8 @@
+Example app listening on port 4000
+Pinged your deployment. You successfully connected to MongoDB!
+{
+  _id: new ObjectId('66431434d249254e4578e01a'),
+  owner: 'kimbix',
+  sections: [ new ObjectId('66430d99df39f99b2da4ea2f') ],
+  __v: 0
+}

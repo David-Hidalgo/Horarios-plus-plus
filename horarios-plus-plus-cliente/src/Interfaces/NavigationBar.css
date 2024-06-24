@@ -32,6 +32,8 @@
   background-color: var(--foreground-hyperlink-color);
 }
 
+.sign-up div { margin-left: auto; }
+
 .navbar-container a {
   color: white;
   font-size: 1.5rem;

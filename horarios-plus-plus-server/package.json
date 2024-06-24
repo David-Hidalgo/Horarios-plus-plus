@@ -1,17 +1,8 @@
 {
-  "name": "horarios-plus-plus-server",
-  "version": "1.0.50",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
-  },
+  "type": "module",
   "dependencies": {
-    "elysia": "latest",
-    "mongoose": "^8.4.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "module": "src/index.js"
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.4"
+  }
 }

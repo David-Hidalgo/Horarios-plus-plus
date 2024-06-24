@@ -15,29 +15,29 @@ const colors = [
   "#1672A3", "#0A498D", "#1D1D79", "#89355B"
 ]
 
-interface ISession {
+export interface ISession {
   section: ISection
   day: number
   start: Date
   end: Date
 }
 
-interface ISection {
+export interface ISection {
   sessionList: ISession[]
   subject: ISubject
   nrc: string
 }
 
-interface ISchedule {
+export interface ISchedule {
   sectionList: ISection[]
 }
 
-interface ISubject {
+export interface ISubject {
   color: string | undefined
   name: string
 }
 
-interface ScheduleViewerProperties {
+export interface ScheduleViewerProperties {
   loadedSchedule: ISchedule
 }
 

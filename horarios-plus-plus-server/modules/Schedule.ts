@@ -1,9 +1,7 @@
 import * as SchemaInterfaces from "./Schema";
 import { type TSession, type TSection } from "./Schema";
-
-
 //#MARK: Session
-export class Session {
+export class Session implements SchemaInterfaces.ISession {
   start: Date;
   end: Date;
   day: number;
@@ -66,30 +64,28 @@ export class Section {
 }
 //#MARK: Subject
 export class Subject {
-  name: string;
+  name: String;
   pensumList: Array<string> = [];
-  sectionList: Array<Section> = [];
+  sections: Array<Section> = [];
 
   constructor(
-    name: string,
+    name: String,
     sections?: Array<Section>,
     pensums?: Array<string>
   ) {
     this.name = name;
-    this.sectionList = sections || [];
+    this.sections = sections || [];
     this.pensumList = pensums || [];
   }
 
   addEmptySection() {
-    this.sectionList.push(
-      new Section("Section " + (this.sectionList.length + 1))
-    );
+    this.sections.push(new Section("Section " + (this.sections.length + 1)));
   }
   addSection(section: Section) {
-    this.sectionList.push(section);
+    this.sections.push(section);
   }
   removeSection(value: Section) {
-    this.sectionList = this.sectionList.filter((sec) => sec !== value);
+    this.sections = this.sections.filter((sec) => sec !== value);
   }
 }
 export class Schedule {
