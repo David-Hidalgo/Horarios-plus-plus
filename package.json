@@ -9,8 +9,9 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "startOld": "bun run ./horarios-plus-plus-server-old./index.js; bun run ./horarios-plus-plus-client/src/index.js",
-    "startnew": "bun run ./horarios-plus-plus-server./index.ts; bun run ./horarios-plus-plus-client/src/index.js"
+    "startOld": "bun run ./horarios-plus-plus-server-old/index.js",
+    "server": "bun run ./horarios-plus-plus-server/src/index.ts",
+    "client": "cd ./horarios-plus-plus-client;bun run start"
   },
   "trustedDependencies": ["@biomejs/biome"],
   "type": "module"

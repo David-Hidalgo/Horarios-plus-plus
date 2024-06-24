@@ -6,6 +6,7 @@ import "./SignUpInterface.css";
 export default function SignUpInterface() {
 	const [email, setEmail] = React.useState();
 	const [password, setPassword] = React.useState();
+	
 
 	function handleEmail(event: any) {
 		setEmail(event.target.value);
@@ -30,6 +31,36 @@ export default function SignUpInterface() {
 				window.location.href = "/login";
 			});
 	}
+	const handleClick =() => {
+		if(!showMessage) { 
+		  setErrorMessage("Por favor ingrese un correo valido");
+		  setShowError(true);
+		}else{
+		  SendLoginDatabase()
+			.then(async(data) => {
+			  if (data.message === "successful") {
+				
+				setShowError(false);
+				setShowSuccesful(true);
+				await timeout(1500);
+				window.location.href = "/";
+				
+			  } else {
+				 if (data.message === "User doesn't exist") {
+				  setErrorMessage("Usuario no encontrado");
+				} else if (data.message === "password doesn't match") {
+				  setErrorMessage("Contraseña incorrecta");
+				} else {
+				  setErrorMessage("Error desconocido");
+				}
+				setShowError(true);
+			  }
+			})
+			.catch(() => {
+			  setShowError(true);
+			});
+		}
+	  };
 
 	return (
 		<div>
@@ -55,7 +86,7 @@ export default function SignUpInterface() {
 							/>
 						</div>
 						<div className="signup-button">
-							<button onClick={SendCredentialsDatabase} type="button">
+							<button onClick={handleClick} type="button">
 								Crear Cuenta
 							</button>
 						</div>
