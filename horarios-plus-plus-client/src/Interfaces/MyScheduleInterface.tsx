@@ -1,7 +1,7 @@
 import React from "react"
 import { useState } from "react"
 
-import NavigationBar from "./NavigationBar"
+import NavigationBar from "./NavigationBar.tsx"
 import "./MyScheduleInterface.css"
 
 import { type ISchedule, type ISection, type ISubject } from "./ScheduleViewer.tsx"

@@ -1,7 +1,7 @@
 import React from "react"
 //MARK: Criss puedo importar la librería que pasé para la notificación de el error en la  contraseña?
-import NavigationBar from "./NavigationBar"
-import CourseSemesterContainer from "./CourseSemesterContainer"
+import NavigationBar from "./NavigationBar.tsx"
+import CourseSemesterContainer from "./CourseSemesterContainer.tsx"
 import "./GenerationInterface.css"
 import ScheduleViewer from "./ScheduleViewer.tsx"
 
