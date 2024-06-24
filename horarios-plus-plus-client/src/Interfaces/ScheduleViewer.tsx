@@ -88,7 +88,7 @@ export default function ScheduleViewer({
 				colorlist[Math.floor(Math.random() * colorlist.length)];
 			subject.color = selectedColor;
 			colorlist = colorlist.filter((color) => {
-				return color != selectedColor;
+				return color !== selectedColor;
 			});
 			return subject;
 		});
@@ -153,7 +153,7 @@ export default function ScheduleViewer({
 								session.start,
 								session.end,
 								hour + 6,
-								parseInt(subsection),
+								Number.parseInt(subsection),
 							),
 						)
 						?.at(0);
@@ -162,11 +162,11 @@ export default function ScheduleViewer({
 							<div
 								style={{
 									borderTop:
-										subsection == "00" ? "1px solid " + borderColor : undefined,
+										subsection === "00" ? "1px solid " + borderColor : undefined,
 									borderBottom:
-										subsection == "45" ? "1px solid " + borderColor : undefined,
+										subsection === "45" ? "1px solid " + borderColor : undefined,
 									backgroundColor:
-										hour % 2 == 0 ? evenBackgroundColor : oddBackgroundColor,
+										hour % 2 === 0 ? evenBackgroundColor : oddBackgroundColor,
 								}}
 							/>
 						);

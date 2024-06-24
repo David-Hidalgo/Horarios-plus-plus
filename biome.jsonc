@@ -19,6 +19,12 @@
 			"recommended": true,
 			"complexity": {
 				"noForEach": "warn"
+			},
+			"correctness": {
+				"useJsxKeyInIterable": "warn"
+			},
+			"style":{
+				"useTemplate": "warn"
 			}
 		}
 	}

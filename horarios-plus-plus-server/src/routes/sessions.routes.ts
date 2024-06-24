@@ -1,12 +1,10 @@
-import mongoose from "mongoose";
+import type mongoose from "mongoose";
 import type { DBController } from "../controllers/db";
-import Elysia from "elysia";
-import { iSession, Section, type Subject } from "../models/classes";
+import Elysia, { t } from "elysia";
 
-export function plugginSessiones(db:DBController) {
-	const pluginSession = <T extends string>(config: { prefix: T }) =>
+	export const pluginSession = <T extends string>(config: { prefix: T },db:DBController) =>
 	new Elysia({
-		name: "my-plugin",
+		name: "my-Session-plugin",
 		seed: config,
 	})
 		.get(`${config.prefix}/hi`, () => "Hi")
@@ -97,32 +95,41 @@ export function plugginSessiones(db:DBController) {
 			}
 
 			const newSession = { day: newDay, start: newStart, end: newEnd };
-			if (await db.sessionModel.exists({ ...newSession, nrc: query.nrc })) {
-				console.log("An identical session already exists");
-				return(undefined);
-				
-			}
-
+			
 			const section = await db.sectionModel.findOne({ nrc: query.nrc });
-			if (section === undefined) {
+			if (section === undefined || section === null) {
 				console.log("No section with nrc ", query.nrc, " exists");
 				return(undefined);
-				
 			}
-
-			const oldSessionObject = await db.sessionModel.findOneAndUpdate(
-				{ ...oldSession, section: new mongoose.mongo.ObjectId(section._id) },
-				newSession,
+			section.sessions.forEach((session) => {
+				if (
+					session.day === oldDay &&
+					session.start === oldStart &&
+					session.end === oldEnd
+				) {
+					session.day = newDay;
+					session.start = newStart;
+					session.end = newEnd;
+				}
+			}
 			);
-			if (oldSessionObject === undefined) {
-				console.log("Could not find and update oldSession: ", oldSession);
-				return(undefined);
-				
-			}
-
-			console.log("Updated session ", oldSessionObject, " to ", newSession);
+			console.log("Updated session  to ", newSession);
 			return(newSession);
-		})
+		},{
+        query: t.Object({
+            oldday: t.Number(),
+			oldstart: t.Date(),
+			oldend: t.Date(),
+			newday: t.Number(),
+			newstart: t.Date(),
+			newend: t.Date(),
+			nrc: t.String()
+
+        }),
+        params: t.Object({
+            id: t.Numeric()
+        })
+    	})
 
 		.delete("/api/session/delete_session", async ({query}) => {
 			const sectionNRC = query.nrc;
@@ -151,27 +158,36 @@ export function plugginSessiones(db:DBController) {
 			}
 
 			const section = await db.sectionModel.findOne({ nrc: sectionNRC });
-			if (section !== undefined &&  section!==null) {
-				const subject = new Array<Subject>();
-				const seccion = new Section(section.nrc, section?.teacher, section?.sessions, subject);
-			}else{
+			if (section === undefined || section===null) {
 				console.log("DELETE_SECSION ERROR: no section has nrc ", sectionNRC);
 				return(undefined);	
 			}
+			let response:mongoose.mongo.DeleteResult;
+			let found = false;
+			section.sessions.forEach((session) => {
+				if (
+					session.day === dayToDelete &&
+					session.start === startToDelete &&
+					session.end === endToDelete
+				) {
+					response=session.deleteOne();
+					found = true;
+					return(response);
+				}
+			}
+			);
 
-
-			const session = await db.sessionModel.findOne({
-				toDeleteSession,
-			});
-			if (session === undefined) {
-				console.log("DELETE_SESSION ERROR: doesn't exist ", toDeleteSession);
+			if(found===false){
+				console.log("DELETE_SESSION ERROR: Could not find session to delete");
 				return(undefined);
 			}
+			
+		},
+		{query: t.Object({
+            day: t.Number(),
+			start: t.Date(),
+			end: t.Date(),
+			nrc: t.String()
 
-			await db.deleteSessionFromSection(sectionNRC, session);
-
-			const response = await db.sessionModel.deleteOne(session);
-			return(response);
-		});
-	return pluginSession;
-}
+        })}
+	);

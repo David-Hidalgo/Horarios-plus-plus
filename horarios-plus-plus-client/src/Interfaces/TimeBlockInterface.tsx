@@ -634,7 +634,7 @@ export default function TimeBlockInterface() {
 		newSession: ISession,
 		section: ISection,
 	) {
-		let variables =
+		const variables =
 			`oldday=${oldSession.day}&` +
 			`oldstart=${oldSession.start.getTime()}&` +
 			`oldend=${oldSession.end.getTime()}&` +
