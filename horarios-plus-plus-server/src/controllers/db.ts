@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import type {
 	iSession,
 	iSection,
@@ -104,7 +104,7 @@ export class DBController {
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
-		const db = await require("mongoose");
+		const db = mongoose;
 
 		db.connect(uri);
 		await db.connection.db.admin().command({ ping: 1 });
