@@ -10,8 +10,7 @@ export const pluginUser = <T extends string>(
 		name: "userRoutes",
 		seed: config,
 	})
-		.get(
-			"/api/sign_up",
+		.put("/api/sign_up",
 			async ({ query }) => {
 				const email = query.email;
 				const password = query.password;
@@ -19,7 +18,7 @@ export const pluginUser = <T extends string>(
 				if (email === undefined || password === undefined) {
 					console.log("Failed to sign up: A value is undefined");
 
-					return undefined;
+					return { message: "Failed to sign up: A value is undefined"};
 				}
 
 				if (await db.userModel.exists({ email: query.email })) {
@@ -27,16 +26,17 @@ export const pluginUser = <T extends string>(
 						`El email ya se encuentra en la base de datos ${query.email}`,
 					);
 
-					return undefined;
+					return { message: "User already exist" };
 				}
 
-				const user = await db.userModel.create({
-					_id: new mongoose.mongo.ObjectId(),
+				const user = new db.userModel({
 					email: email,
 					password: password,
+					type: 0,
 				});
+				
 				user.save();
-				return user;
+				return { message: "User created successfully"};
 			},
 			{
 				query: t.Object({

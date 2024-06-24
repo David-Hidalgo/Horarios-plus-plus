@@ -40,7 +40,7 @@ export class DBController {
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
-			nrc: { type: Number, required: true, unique: true },
+			nrc: { type: Number, required: true, unique: true},
 			teacher: { type: String, required: true },
 			sessions: [
 				sessionSchema
@@ -93,7 +93,7 @@ export class DBController {
 			email: { type: String, required: true },
 			password: { type: String, required: true },
 			tipo: { type: Number, default: 0 },
-			schedule: [sectionSchema],
+			schedule: { type: [sectionSchema], required: false},
 		});
 
 		this.userModel = mongoose.model<iUser, UserModelType>(
