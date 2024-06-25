@@ -388,12 +388,12 @@ export default function GenerationInterface() {
 		if (sections.length === 0) {
 			return undefined;
 		}
-		sections = sections.map((section) => section.nrc);
-		const nrcString: string = sections.join(",");
+		let sectionsNRCs = sections.map((section) => section.nrc);
+		const nrcString: string = sectionsNRCs.join(",");
 
 		const owner = email;
 		await fetch(
-			`http://127.0.0.1:4000/api/schedules/generate_schedules?owner=${owner}&nrcs=${nrcString}`,
+			`http://127.0.0.1:4000/api/schedules/generate_schedules?owner=${owner}&sections=${sections}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
