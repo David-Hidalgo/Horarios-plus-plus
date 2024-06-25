@@ -253,7 +253,7 @@ export default function ScheduleViewer({
 				loadedSchedule.sectionList.forEach((section) => {
 					sessionsToday = sessionsToday.concat(
 						section.sessionList.filter((session) => {
-							return dayNames[session.day-1] === dayName;
+							return dayNames[session.day] == dayName;
 						}),
 					);
 				});
