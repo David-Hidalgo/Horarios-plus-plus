@@ -108,6 +108,10 @@
   margin-left: 15px;
 }
 
+.button-selected {
+  background-color: var(--foreground-hyperlink-color);
+}
+
 .action-buttons {
   flex-flow:column;
   margin-left: auto;

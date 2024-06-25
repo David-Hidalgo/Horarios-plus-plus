@@ -16,7 +16,6 @@ export default function CourseSemesterContainer() {
 			<div className="career-dropdown-container">
 				<select value={selectedCareer} onChange={handleCareerChange}>
 					<option value="ingenieria_informatica">Ingenieria Informatica</option>
-					<option value="theology">Teologia</option>
 				</select>
 			</div>
 		</div>

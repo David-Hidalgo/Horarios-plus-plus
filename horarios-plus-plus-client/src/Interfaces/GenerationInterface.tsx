@@ -67,18 +67,34 @@ function ScheduleContainer({
 	shownShedules,
 	saveScheduleBind,
 }: ScheduleContainerProperties) {
+	const [selectedButton1, setSelectedButton1] = React.useState("button");
+	const [selectedButton2, setSelectedButton2] = React.useState("button");
+	const [selectedButton3, setSelectedButton3] = React.useState("button");
+	const [selectedButton4, setSelectedButton4] = React.useState("button");
 	return (
 		<div className="schedule-container">
 			<div className="schedule-flex">
 				<div className="two-schedules">
 					{shownShedules[0] !== undefined && (
-						<button onClick={() => saveScheduleBind(shownShedules[0])}>
+						<button className={selectedButton1} onClick={() => {
+							saveScheduleBind(shownShedules[0]);
+							setSelectedButton1("button-selected");
+							setSelectedButton2("button");
+							setSelectedButton3("button");
+							setSelectedButton4("button");
+							
+						}}>
 							{" "}
 							<ScheduleViewer loadedSchedule={shownShedules[0]} />{" "}
 						</button>
 					)}
 					{shownShedules[1] !== undefined && (
-						<button onClick={() => saveScheduleBind(shownShedules[1])}>
+						<button className={selectedButton2} onClick={() => {saveScheduleBind(shownShedules[1]);
+							setSelectedButton1("button");
+							setSelectedButton2("button-selected");
+							setSelectedButton3("button");
+							setSelectedButton4("button");
+						}}>
 							{" "}
 							<ScheduleViewer loadedSchedule={shownShedules[1]} />{" "}
 						</button>
@@ -86,13 +102,23 @@ function ScheduleContainer({
 				</div>
 				<div className="two-schedules">
 					{shownShedules[2] !== undefined && (
-						<button onClick={() => saveScheduleBind(shownShedules[2])}>
+						<button className={selectedButton3} onClick={() => {saveScheduleBind(shownShedules[2]);
+							setSelectedButton1("button");
+							setSelectedButton2("button");
+							setSelectedButton3("button-selected");
+							setSelectedButton4("button");
+						}}>
 							{" "}
 							<ScheduleViewer loadedSchedule={shownShedules[0]} />{" "}
 						</button>
 					)}
 					{shownShedules[3] !== undefined && (
-						<button onClick={() => saveScheduleBind(shownShedules[3])}>
+						<button className={selectedButton4} onClick={() => {saveScheduleBind(shownShedules[3]);
+							setSelectedButton1("button");
+							setSelectedButton2("button");
+							setSelectedButton3("button");
+							setSelectedButton4("button-selected");
+						}}>
 							{" "}
 							<ScheduleViewer loadedSchedule={shownShedules[1]} />{" "}
 						</button>

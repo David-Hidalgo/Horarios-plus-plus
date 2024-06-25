@@ -37,6 +37,13 @@
   background-color: var(--background-medium-color);
   align-items: center;
 }
+.course input{
+
+}
+.name-error {
+  padding-bottom: 10px;
+  color: red;
+}
 
 .add-section {
   margin-left: auto;
@@ -95,9 +102,13 @@
   margin-left: auto;
 }
 
-.timeblock-container {
+.timeblock-container-selector {
   display: flex;
   flex-flow: row nowrap;
+}
+.time-error {
+  color: red;
+  
 }
 
 .timeblock-container button {
@@ -163,5 +174,81 @@
 
 li {
   list-style-type: none;
+}
+.save-subject {
+  display: flex;
+  flex-flow: column;
+  padding: 30px;
+  margin: 15px;
+  border-radius: 15px;
+  background-color: var(--background-semi-dark-color);
+}
+
+.save-subject-header {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.save-subject-header div:nth-child(2) {
+  margin-left: auto;
+}
+
+.save-subject-form {
+  display: flex;
+  flex-flow: column;
+  margin-top: 20px;
+}
+
+.save-subject-form input {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.save-subject-form button {
+  background-color: var(--background-semi-light-color);
+  padding: 10px 20px;
+  align-self: flex-start;
+}
+
+.save-subject-form button:hover {
+  background-color: var(--background-light-color);
+}
+.add-subject {
+  display: flex;
+  flex-flow: column;
+  padding: 30px;
+  margin: 15px;
+  border-radius: 15px;
+  background-color: var(--background-semi-dark-color);
+}
+
+.add-subject-header {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.add-subject-header div:nth-child(2) {
+  margin-left: auto;
+}
+
+.add-subject-form {
+  display: flex;
+  flex-flow: column;
+  margin-top: 20px;
+}
+
+.add-subject-form input {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.add-subject-form button {
+  background-color: var(--background-semi-light-color);
+  padding: 10px 20px;
+  align-self: flex-start;
+}
+
+.add-subject-form button:hover {
+  background-color: var(--background-light-color);
 }
 

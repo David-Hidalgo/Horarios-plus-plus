@@ -3,6 +3,8 @@ import React, { type MouseEventHandler } from "react";
 import CourseSemesterContainer from "./CourseSemesterContainer";
 import NavigationBar from "./NavigationBar";
 import "./TimeBlockInterface.css";
+import { set } from "mongoose";
+
 
 interface ISession {
 	day: number;
@@ -21,6 +23,12 @@ interface ISection {
 interface ISubject {
 	name: string;
 	sectionList: Array<ISection>;
+	career: Array<ICareer>
+}
+
+interface ICareer {
+	name: string;
+	subjects: Array<ISubject>
 }
 
 interface EditableSectionContainerProperties {
@@ -42,6 +50,9 @@ interface CourseProperties {
 	newSectionBind: any;
 	removeSectionBind: any;
 	selectSectionBind: any;
+	editable: boolean;
+	updateSelectedSubject: any;
+	removeSubjectBind: any;
 }
 
 interface DaySelectorProperties {
@@ -63,6 +74,9 @@ function Course({
 	newSectionBind,
 	removeSectionBind,
 	selectSectionBind,
+	editable,
+	updateSelectedSubject,
+	removeSubjectBind,
 }: CourseProperties) {
 	function addNewSection() {
 		displayCourse = newSectionBind(displayCourse);
@@ -72,15 +86,57 @@ function Course({
 		displayCourse = removeSectionBind(displayCourse, section);
 	}
 
+	const [nameError, setNameError] = React.useState(false);
+	const nameErrorMessage = "Nombre de curso ya existente";
+
+	function updateSubject(event: any) {
+		let newSubject = event.target.value;
+		let newCourse: ISubject = displayCourse;
+		newCourse = {
+			...newCourse,
+			name: newSubject,
+		};
+		if(updateSelectedSubject(displayCourse,newCourse)){
+			setNameError(false);
+			displayCourse = newCourse;
+		}else{
+			setNameError(true);
+		}
+	}
+
+	function deleteSubject() {
+		removeSubjectBind(displayCourse, displayCourse.sectionList[0]);
+	}
+
 	return (
 		<div>
 			<div className="course">
-				<div className="course-name">{displayCourse.name}</div>
+				{!editable && (
+				<><div className="course-name">{displayCourse.name}</div>
 				<div className="add-section">
 					<button onClick={addNewSection} type="button">
 						Añadir Seccion
 					</button>
-				</div>
+				</div></>
+				)}
+				{editable && (
+					<> 
+					<div className="inputs">
+						{nameError && <div className="name-error">{nameErrorMessage}</div>}
+						<input className="course-name"
+							value={displayCourse.name}
+							onChange={updateSubject}
+							placeholder="Nombre de la materia"
+							type="text"
+						/>
+					</div>
+					<div className="delete-section">
+						<button onClick={deleteSubject} type="button">
+							Remover Curso
+						</button>
+					</div></>
+				)}
+				
 			</div>
 			<div>
 				{displayCourse?.sectionList.map((value) => {
@@ -91,12 +147,15 @@ function Course({
 									NRC: {value.nrc}
 								</button>
 							</div>
+							{!editable && (
 							<div className="delete-section">
 								<button onClick={() => removeExistingSection(value)}>
 									{" "}
 									Remover{" "}
 								</button>
 							</div>
+						)}
+							
 						</div>
 					);
 				})}
@@ -172,20 +231,29 @@ function DaySelector({ classBind, changeBind }: DaySelectorProperties) {
 
 
 function TimeBlock({ changeBind, classBind }: TimeBlockProperties) {
+	const [showTimeError, setShowTimeError] = React.useState(false);
+	const timeErrorMessage = "La hora de inicio no puede ser mayor a la hora de fin";
 	function updateStart(start: Date) {
-		changeBind(classBind, { ...classBind, start: start });
+		if(changeBind(classBind, { ...classBind, start: start })===1){
+			setShowTimeError(true);
+		}else{setShowTimeError(false);}
 	}
 
 	function updateEnd(end: Date) {
-		changeBind(classBind, { ...classBind, end: end });
+		if(changeBind(classBind, { ...classBind, end: end })===1){
+			setShowTimeError(true);
+		}else{setShowTimeError(false);}
 	}
 
-	return (
-		<li className="timeblock-container">
-			<DaySelector changeBind={changeBind} classBind={classBind} />
-			<HourSelector changeBind={updateStart} dateBind={classBind.start} />
-			<HourSelector changeBind={updateEnd} dateBind={classBind.end} />
-		</li>
+	return (<><div className="timeblock-container">
+				{showTimeError && <div className="time-error">{timeErrorMessage}</div>}
+				<li className="timeblock-container-selector">
+					<DaySelector changeBind={changeBind} classBind={classBind} />
+					<HourSelector changeBind={updateStart} dateBind={classBind.start} />
+					<HourSelector changeBind={updateEnd} dateBind={classBind.end} />
+				</li>
+			</div>
+			</>
 	);
 }
 
@@ -207,6 +275,7 @@ function EditableSectionContainer({
 	updateClassBind,
 	saveDataBind,
 }: EditableSectionContainerProperties ){
+	
 	function addNewClass() {
 		addClassBind(selectedSection);
 	}
@@ -216,7 +285,9 @@ function EditableSectionContainer({
 	}
 
 	function updateClassTime(oldSession: ISession, newSession: ISession) {
-		updateClassBind(selectedSection, oldSession, newSession);
+		if(updateClassBind(selectedSection, oldSession, newSession)===undefined){
+			return 1;
+		}else{return 0}	
 	}
 
 	function updateSectionNRC(event: any) {
@@ -239,10 +310,7 @@ function EditableSectionContainer({
 		updateSectionBind(selectedSection, newSection);
 	}
 
-	function saveData() {
-		update
-	}
-
+	
 	return (
 		<div className="editable-section-container">
 			<div className="editable-section-header">
@@ -300,12 +368,10 @@ export default function TimeBlockInterface() {
 	function findFreeNRC(): Number {
 		let newNRC = 1;
 		let sectionNRC: string[] = [];
-		loadedSubjects?.map((x) => {
-			x.sectionList.map((w) => {
+		loadedSubjects?.forEach((x) => {
+			x.sectionList.forEach((w) => {
 				sectionNRC.push(w.nrc);
-				return undefined;
 			});
-			return undefined;
 		});
 		while (true) {
 			if (sectionNRC.includes(newNRC.toString())) {
@@ -368,6 +434,7 @@ export default function TimeBlockInterface() {
 			.then((data: any[]) => {
 				return data.map(async (subject) => {
 					let newSubject: ISubject = {
+						career: [],
 						name: subject.name,
 						sectionList: await loadSectionsFromIdList(
 							subject,
@@ -443,7 +510,7 @@ export default function TimeBlockInterface() {
 		}
 		return await fetch(
 			`http://127.0.0.1:4000/api/section/add_section_to_subject?nrc=${section.nrc}&teacher=${section.teacher}&subjectName=${subject.name}`,
-			{ method:"PUT",headers: { Accept: "application/json" } },
+			{headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -533,18 +600,29 @@ export default function TimeBlockInterface() {
 				allow_change = false;
 			})
 			.then((data) => {
+				if (data === undefined) {
+					console.error("No se pudo actualizar la seccion");
+					return;
+				}
 				console.log(data);
+				allow_change = true;
 			})
 			.finally(() => {
+				console.log("Updating section");
 				let newValue = allow_change ? newSection : oldSection;
-				setSelectedSection(newValue);
 				setLoadedSubjects(
 					loadedSubjects?.map((x) => {
-						if (!x.sectionList.includes(oldSection)) return x;
-						x.sectionList[x.sectionList.indexOf(oldSection)] = newValue;
+						x.sectionList.forEach(element => {
+							if (element.nrc===oldSection.nrc){ 
+								x.sectionList[x.sectionList.indexOf(element)] = newValue;
+								console.log("Se actualizo la seccion "+element.nrc+" a "+newValue.nrc);
+								}
+								
+							});
 						return x;
-					}),
+						})
 				);
+				setSelectedSection(newValue);
 				updating = false;
 			});
 	}
@@ -667,12 +745,12 @@ export default function TimeBlockInterface() {
 		section: ISection,
 		oldSession: ISession,
 		newSession: ISession,
-	): ISection {
+	) {
 		if (
 			newSession.start.getHours() * 60 + newSession.start.getMinutes() >=
 			newSession.end.getHours() * 60 + newSession.end.getMinutes()
 		) {
-			return section;
+			return undefined;
 		}
 		if (oldSession !== newSession) {
 			let newSection: ISection = section;
@@ -682,7 +760,84 @@ export default function TimeBlockInterface() {
 		}
 		return section;
 	}
+	const [editable, setEditable] = React.useState(false);
 
+	async function updateSubjectServer(oldSubject: ISubject, newSubject: ISubject) {
+		updating = true;
+		let allow_change = true;
+		const newName= newSubject.name;
+		console.log("Actualizando nombre de "+oldSubject.name+" a '"+newName+"'");
+		
+		return await fetch(
+			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldSubject.name}&newname=${newName}&section=${oldSubject.sectionList}`,
+			{ headers: { Accept: "application/json" } },
+		)
+			.then((response) => response.json())
+			.catch((e) => {
+				console.error("Error actualizando base de datos ", e);
+				allow_change = false;
+			})
+			.then((data) => {
+				console.log(data);
+			})
+			.finally(() => {
+				let newValue = allow_change ? newSubject : oldSubject;
+				setLoadedSubjects(
+					loadedSubjects?.map((x) => {
+						if (x !== oldSubject) return x;
+						return newValue;
+					})
+				);
+				updating = false;
+			});
+		
+	}
+	
+	function updateSubjectFromName(oldSubject: ISubject, newSubject: ISubject) {
+		if(oldSubject.name !== newSubject.name){
+			console.log("Nombre distinto");
+			if(loadedSubjects?.find((x) => x.name === newSubject.name) !== undefined){
+				console.log("Nombre repetido");
+				return false;
+			}else{
+				updateSubjectServer(oldSubject, newSubject);
+				return true;
+			}
+		}else{
+			console.log("Nombre igual");
+			updateSubjectServer(oldSubject, newSubject);
+			return true;
+		}
+	}
+
+	async function addSubjectServer(newSubject: ISubject) {
+		updating = true;
+		return await fetch(`http://127.0.0.1:4000/api/subjects/create_subject?name=${newSubject.name}`,
+			{ headers: { Accept: "application/json" } },)
+			.then((response) => response.json())
+			.catch((e) => {
+				console.error("Error al crear curso ", e);
+			})
+			.then((data) => {
+				if (data === undefined) {
+					console.error("No se pudo crear el curso");
+					return;
+				}
+				console.log(data);
+				setLoadedSubjects(loadedSubjects?.concat([newSubject]));
+			})
+	}
+
+	function addSubject(){
+		setEditable(true);
+		let newSubject: ISubject = {
+			career: [],
+			name: "Nuevo Curso",
+			sectionList: [],
+		};
+		addSubjectServer(newSubject);
+	
+	}
 	return (
 		<div>
 			<NavigationBar />
@@ -697,10 +852,26 @@ export default function TimeBlockInterface() {
 									newSectionBind={addSectionToCourse}
 									removeSectionBind={removeSectionFromCourse}
 									selectSectionBind={changeSelectedSection}
+									editable={editable}
+									updateSelectedSubject={updateSubjectFromName}
+									removeSubjectBind={() => {}}
 								/>
 							);
 						})}
 					</div>
+					{!editable && (<div className="add-subject">
+						<button onClick={() => {addSubject()}} type="button">
+							Añadir Curso
+						</button>
+
+					</div>)}
+					{editable && (<div className="save-subject">
+						<button onClick={() => {setEditable(false);}} type="button">
+							Guardar
+						</button>
+
+					</div>)}
+					
 				</div>
 				<div className="section-edit-container">
 					{selectedSection !== undefined && (
@@ -710,7 +881,7 @@ export default function TimeBlockInterface() {
 							addClassBind={addClassToSection}
 							removeClassBind={removeClassFromSection}
 							updateClassBind={updateClassFromSection}
-							saveDataBind={() => console.log("Peanis")}
+							saveDataBind={() => {window.location.href = "/time_blocks"}}
 						/>
 					)}
 				</div>
