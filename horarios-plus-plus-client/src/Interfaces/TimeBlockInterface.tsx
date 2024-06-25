@@ -23,7 +23,7 @@ interface ISection {
 interface ISubject {
 	name: string;
 	sectionList: Array<ISection>;
-	career: Array<ICareer>
+	//career: Array<ICareer>
 }
 
 interface ICareer {
@@ -401,6 +401,9 @@ export default function TimeBlockInterface() {
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
+			.catch((e) => {
+				console.error("No se pudo obtener la seccion", e);
+			})
 			.then((data) => {
 				const newSection: ISection = {
 					nrc: data.nrc,
@@ -434,7 +437,7 @@ export default function TimeBlockInterface() {
 			.then((data: any[]) => {
 				return data.map(async (subject) => {
 					let newSubject: ISubject = {
-						career: [],
+						//career: [],
 						name: subject.name,
 						sectionList: await loadSectionsFromIdList(
 							subject,
@@ -827,17 +830,54 @@ export default function TimeBlockInterface() {
 				setLoadedSubjects(loadedSubjects?.concat([newSubject]));
 			})
 	}
-
+	function generateName(){
+		let name = "Nuevo Curso ";
+		let i = 1;
+		while(loadedSubjects?.find((x) => x.name === name+i) !== undefined){
+			i++;
+		}
+		return name+i;
+	}
 	function addSubject(){
 		setEditable(true);
 		let newSubject: ISubject = {
-			career: [],
-			name: "Nuevo Curso",
+			//career: [],
+			name: generateName(),
 			sectionList: [],
 		};
 		addSubjectServer(newSubject);
 	
 	}
+
+	async function deleteSubjectFromDatabase(subject: ISubject){
+		return await fetch(`http://127.0.0.1:4000/api/subjects/delete_subject?subjectName=${subject.name}&subject=${subject}`,
+			{ headers: { Accept: "application/json" } },)
+			.then((response) => response.json())
+			.catch((e) => {
+				console.error("Error al eliminar curso ", e);
+			})
+			.then((data) => {
+				if (data === undefined) {
+					console.error("No se pudo eliminar el curso");
+					return;
+				}
+				if(data.message==="Subject deleted successfully")
+					console.log("Curso eliminado con exito");
+			})
+	}
+
+	function deleteSubject(subject: ISubject){
+		subject.sectionList.forEach((x) => {
+			if (x === selectedSection) {
+				setSelectedSection(undefined);
+			}
+		});
+		setLoadedSubjects(loadedSubjects?.filter((x) => x !== subject));
+		
+		 deleteSubjectFromDatabase(subject);
+
+	}
+
 	return (
 		<div>
 			<NavigationBar />
@@ -854,7 +894,7 @@ export default function TimeBlockInterface() {
 									selectSectionBind={changeSelectedSection}
 									editable={editable}
 									updateSelectedSubject={updateSubjectFromName}
-									removeSubjectBind={() => {}}
+									removeSubjectBind={() => {deleteSubject(value)}}
 								/>
 							);
 						})}

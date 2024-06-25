@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
-import { Subject } from "../models/models.js";
+import { Subject, Section } from "../models/models.js";
 
 export function subjectRoutes(app) {
 	app.get("/api/subjects/get_subjects", async (req, res) => {
+
 		const subject_list = await Subject.find({});
 		res.send(subject_list);
 	});
@@ -29,7 +30,45 @@ export function subjectRoutes(app) {
 			else res.send(undefined);
 		}
 	});
-	app.get("/api/subjects/delete_subject", async (req, res) => {});
+	app.get("/api/subjects/delete_subject", async (req, res) => {
+		if (req.query.subject === undefined) {
+			console.log("Could not delete subject, SUBJECT is undefined");
+			res.send(undefined);
+			return;
+		}
+		
+		const subject = await Subject.findOne({ name: req.query.subjectName });
+		if (subject === undefined) {
+			console.log(`No se encontro ${req.query.subjectName}`);
+			res.send(undefined);
+			return;
+		}
+		const sectionsIds = subject.sections.map((section) => section._id);
+		// Delete all sections
+		sectionsIds.forEach(async (sectionId) => {
+			const section = await Section.findById(sectionId);
+			if (section === undefined) {
+				console.log(`No se encontro ${sectionId}`);
+				return;
+			}
+			try {
+				await section.deleteOne();
+				console.log(`Deleted section successfully`);
+			} catch (e) {
+				console.error("Failed deleting section ", e);
+				return;
+			}})
+
+		try {
+			await subject.deleteOne();
+			res.send({message: "Subject deleted successfully"});
+		} catch (e) {
+			console.error("Failed deleting subject ", e);
+			res.send(undefined);
+			return;
+		}
+		return;
+	});
 	app.get("/api/subjects/update_subject", async (req, res) => {
 		const oldName = req.query.oldname;
 		const newName = req.query.newname;
@@ -65,6 +104,7 @@ export function subjectRoutes(app) {
 
 		const subject = await Subject.findById(req.query.id);
 		if (subject === undefined) {
+			console.log("Could not find subject with id ", req.query.id);
 			res.send(undefined);
 			return;
 		}

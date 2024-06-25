@@ -4,16 +4,17 @@ import { Schedule, Subject, Section, Session } from "../models/models.js";
 export function sectionRoutes(app) {
 	app.get("/api/section/get_sections_from_id", async (req, res) => {
 		if (req.query.id === undefined) {
+			console.log("GET_SECTIONS_FROM_ID ERROR: id is undefined");
 			res.send(undefined);
 			return;
 		}
 
 		const section = await Section.findById(req.query.id);
 		if (section === undefined) {
+			console.log("GET_SECTIONS_FROM_ID ERROR: no section has this id: ", req.query.id);
 			res.send(undefined);
 			return;
 		}
-
 		res.send(section);
 	});
 
@@ -132,7 +133,8 @@ export function sectionRoutes(app) {
 		const subject = await Subject.findById({
 			_id: new mongoose.mongo.ObjectId(section.subject),
 		});
-		if (subject !== undefined) {
+		console.log("Subject: ", subject);
+		if (subject !== undefined|| subject !== null) {
 			await Subject.findOneAndUpdate(
 				{ _id: new mongoose.mongo.ObjectId(subject._id) },
 				{ sections: subject.sections.filter((id) => !id.equals(section.id)) },

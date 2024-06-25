@@ -57,6 +57,15 @@
   background-color: var(--background-light-color);
 }
 
+.delete-section button {
+  font-size: 13px;
+  background-color: var(--background-semi-light-color);
+}
+
+.delete-section button:hover {
+  background-color: var(--background-light-color);
+}
+
 .section {
   display: flex;
   flex-flow: row;
