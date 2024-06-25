@@ -234,7 +234,7 @@ export function schedulesRoutes(app) {
 		// 	}),
 		// );
 		// sections = sections.flat();
-		getSchedules(owner, sections);
+		let schedules = getSchedules(owner, sections);
 		
 		console.log(schedules);
 		res.send(schedules);
