@@ -215,31 +215,63 @@ async function GenerateSchedules(sectionList, subjectCount) {
 	await generageCombination(sectionList, [], returnArray);
 	return returnArray;
 }
-
 export function schedulesRoutes(app) {
 	app.get("/api/schedules/generate_schedules", async (req, res) => {
 		const owner = req.query.owner;
-		const sections = req.query.sections;
+		const nrcs = req.query.nrcs;
 
-		if (owner === undefined || sections === undefined) {
+		if (owner === undefined || nrcs === undefined) {
 			console.log("FAILED TO GENERATE SCHEDULES: A value is undefined");
 			res.send(undefined);
 			return;
 		}
 
 		const failed = false;
-		// let sections = await Promise.all(
-		// 	nrcs.split(",").map(async (nrc) => {
-		// 		return await Section.find({ nrc: nrc });
-		// 	}),
-		// );
-		// sections = sections.flat();
-		let schedules = getSchedules(owner, sections);
-		
+		let sections = await Promise.all(
+			nrcs.split(",").map(async (nrc) => {
+				return await Section.find({ nrc: nrc });
+			}),
+		);
+		sections = sections.flat();
+
+		const schedules = await GenerateSchedules(
+			sections,
+			[...new Set(sections.map((section) => section.subject.toString()))]
+				.length,
+		);
 		console.log(schedules);
 		res.send(schedules);
-		
 	});
+// export function schedulesRoutes(app) {
+// 	app.get("/api/schedules/generate_schedules", async (req, res) => {
+// 		const owner = req.query.owner;
+// 		const sectionsNRC = req.query.sectionsNrc;
+
+// 		if (owner === undefined || sectionsNRC === undefined) {
+// 			console.log("FAILED TO GENERATE SCHEDULES: A value is undefined");
+// 			res.send(undefined);
+// 			return;
+// 		}
+
+// 		const failed = false;
+// 		let sections = await Promise.all(
+// 			sectionsNRC.split(",").map(async (nrc) => {
+// 				return await Section.find({ nrc: nrc }).populate("sessions").populate("subject").exec();
+// 			}),
+// 		);
+// 		sections = sections.flat();
+		
+// 		console.log(sections);
+
+// 		let schedules = getSchedules(owner, sections);
+// 		schedules=schedules.map( (schedule) => {
+// 			return schedule.sections;
+// 		});
+// 		console.log("Aquí lo que mando");
+// 		console.log(schedules);
+// 		res.send(schedules);
+		
+// 	});
 
 	app.get("/api/schedules/save_schedule", async (req, res) => {
 		const owner = req.query.owner;
