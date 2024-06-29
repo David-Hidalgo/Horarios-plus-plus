@@ -143,19 +143,19 @@ function Course({
 					return (
 						<div className="section">
 							<div>
-								<button onClick={() => selectSectionBind(value)}>
+								<button onClick={() => selectSectionBind(value)} type="button">
 									NRC: {value.nrc}
 								</button>
 							</div>
 							{!editable && (
-							<div className="delete-section">
-								<button onClick={() => removeExistingSection(value)}>
-									{" "}
-									Remover{" "}
-								</button>
-							</div>
-						)}
-							
+								<div className="delete-section">
+									<button
+										onClick={() => removeExistingSection(value)} type="button">
+										{" "}
+										Remover{" "}
+									</button>
+								</div>
+							)}
 						</div>
 					);
 				})}
@@ -169,14 +169,14 @@ function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
 	// Since we want to change it in the changeBind, not here
 
 	const handleHourChange = (event: any) => {
-		let toSend = new Date();
+		let toSend = new Date(0);
 		toSend.setHours(event.target.value);
 		toSend.setMinutes(dateBind.getMinutes());
 		changeBind(toSend);
 	};
 
 	const handleMinutesChange = (event: any) => {
-		let toSend = new Date();
+		let toSend = new Date(0);
 		toSend.setHours(dateBind.getHours());
 		toSend.setMinutes(event.target.value);
 		changeBind(toSend);
@@ -333,7 +333,7 @@ function EditableSectionContainer({
 				/>
 			</div>
 			<div className="day-container">
-				Dias: <button onClick={() => addNewClass()}>Añadir</button>
+				Dias: <button onClick={() => addNewClass()} type="button">Añadir</button>
 			</div>
 			<div>
 				{selectedSection.sessionList.map((value) => {
@@ -341,7 +341,10 @@ function EditableSectionContainer({
 						<div className="day-buttons">
 							<TimeBlock changeBind={updateClassTime} classBind={value} />
 							<div className="delete-day">
-								<button onClick={() => removeClass(value)}> Remover </button>
+								<button onClick={() => removeClass(value)} type="button">
+									{" "}
+									Remover{" "}
+								</button>
 							</div>
 						</div>
 					);
@@ -405,6 +408,8 @@ export default function TimeBlockInterface() {
 				console.error("No se pudo obtener la seccion", e);
 			})
 			.then((data) => {
+				console.log(data);
+				
 				const newSection: ISection = {
 					nrc: data.nrc,
 					teacher: data.teacher,
@@ -435,10 +440,13 @@ export default function TimeBlockInterface() {
 		)
 			.then((response) => response.json())
 			.then((data: any[]) => {
+				console.log("a ver si llego aquí",data);
+				
 				return data.map(async (subject) => {
 					let newSubject: ISubject = {
 						//career: [],
 						name: subject.name,
+						// sectionList: subject.sections
 						sectionList: await loadSectionsFromIdList(
 							subject,
 							subject.sections,
@@ -481,22 +489,35 @@ export default function TimeBlockInterface() {
 		)
 			.then((response) => response.json())
 			.catch((e) => {
-				console.error("No se pudo obtener las sessiones de la seccion");
+				console.error("No se pudo obtener las sessiones de la seccion", e);
 			})
 			.then(async (data) => {
 				if (data === undefined) {
+					console.error(data);
 					return;
 				}
 				let newSection: ISection = {
 					nrc: section.nrc,
 					teacher: section.teacher,
 					subject: section.subject,
-					sessionList: await Promise.all(
-						data.map(
-							async (id: string) => await fetchSessionFromId(id, section),
-						),
-					),
+					sessionList:data.map((aSession) => {
+						let newSession: ISession = {
+							day: aSession.day,
+							start: new Date(aSession.start),
+							end: new Date(aSession.end),
+							section: section,
+						};
+						return newSession;
+					}),
+					// sessionList: await Promise.all(
+					// 	data.map(async (aSession) => {
+					// 		console.log(aSession);
+					// 		await fetchSessionFromId(aSession._id, section);
+					// 	}),
+					// ),
+					
 				};
+				console.log(newSection.sessionList);
 				setSelectedSection(newSection);
 			});
 	}
@@ -553,7 +574,7 @@ export default function TimeBlockInterface() {
 	async function deleteSectionFromDatabase(section: ISection) {
 		await await fetch(
 			`http://127.0.0.1:4000/api/section/delete_section?nrc=${section.nrc}`,
-			{ headers: { Accept: "application/json" } },
+			{ method:"DELETE", headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -670,7 +691,10 @@ export default function TimeBlockInterface() {
 			}&start=${session.start.getTime()}&end=${session.end.getTime()}&nrc=${
 				section.nrc
 			}`,
-			{ headers: { Accept: "application/json" } },
+			{
+				method: "POST",
+				headers: { Accept: "application/json" },
+			},
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -720,7 +744,7 @@ export default function TimeBlockInterface() {
 		newSession: ISession,
 		section: ISection,
 	) {
-		const variables =
+		const variables:string =
 			`oldday=${oldSession.day}&` +
 			`oldstart=${oldSession.start.getTime()}&` +
 			`oldend=${oldSession.end.getTime()}&` +
@@ -729,9 +753,11 @@ export default function TimeBlockInterface() {
 			`newend=${newSession.end.getTime()}&` +
 			`nrc=${section.nrc}`;
 
+		const uri:string=`http://127.0.0.1:4000/api/session/updateSession?${variables}`
+		console.log(uri);
+		
 		let changed = true;
-		await fetch(
-			`http://127.0.0.1:4000/api/session/updateSession?${variables}`,
+		await fetch(uri,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
@@ -818,10 +844,11 @@ export default function TimeBlockInterface() {
 		return await fetch(`http://127.0.0.1:4000/api/subjects/create_subject?name=${newSubject.name}`,
 			{ headers: { Accept: "application/json" } },)
 			.then((response) => response.json())
-			.catch((e) => {
+			.catch((e) => {				
 				console.error("Error al crear curso ", e);
 			})
 			.then((data) => {
+				console.log(data);
 				if (data === undefined) {
 					console.error("No se pudo crear el curso");
 					return;

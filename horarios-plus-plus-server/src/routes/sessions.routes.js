@@ -20,7 +20,7 @@ export function sessionRoutes(app) {
     res.send(section.sessions)
   })
 
-  app.get('/api/session/add_session_to_section', async (req, res) => {
+  app.post('/api/session/add_session_to_section', async (req, res) => {
     if (req.query.day === undefined ||
       req.query.start === undefined ||
       req.query.end === undefined) {

@@ -108,7 +108,7 @@ export function sectionRoutes(app) {
 		res.send(newSection);
 	});
 
-	app.get("/api/section/delete_section", async (req, res) => {
+	app.delete("/api/section/delete_section", async (req, res) => {
 		const toDeleteNRC = req.query.nrc;
 		if (toDeleteNRC === undefined) {
 			console.log("DELETE_SECTION ERROR: nrc is undefined ", toDeleteNRC);

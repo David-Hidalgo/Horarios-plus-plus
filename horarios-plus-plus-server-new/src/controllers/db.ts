@@ -11,7 +11,7 @@ import { Schedule, User } from "./../models/classes";
 
 interface iSubjectSchema extends iSubject {
 			sections: mongoose.Types.ObjectId[];
-			career: mongoose.Types.ObjectId;
+			careers: mongoose.Types.ObjectId[];
 		}
 export class DBController {
 	public db: mongoose.Mongoose;
@@ -40,7 +40,7 @@ export class DBController {
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
-			nrc: { type: Number, required: true},
+			nrc: { type: String, required: true},
 			teacher: { type: String, required: true },
 			sessions: [
 				sessionSchema
@@ -58,11 +58,11 @@ export class DBController {
 		const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 			name: { type: String, required: true },
 			sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
-			career: {
+			careers: [{
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "Career",
 				required: true,
-			},
+			}],
 		});
 
 		this.subjectModel = mongoose.model("Subject", subjectSchema);
@@ -120,7 +120,7 @@ export class DBController {
 	}
 	//MARK: secciones
 	public async addSessionToSection(nrc: string, session: iSession) {
-		const result=await this.sectionModel.findOne({ 'nrc': nrc }, 'sections');
+		const result=await this.sectionModel.findOne({ nrc: nrc }, 'sections');
 		if (!result) {
 			throw new Error("Section not found");
 		}
@@ -129,7 +129,7 @@ export class DBController {
 		await result.save();		
 	}
 	public async deleteSessionFromSection(nrc: string, session: iSession) {
-		const result=await this.sectionModel.findOne({ 'nrc': nrc }, 'sections');
+		const result=await this.sectionModel.findOne({ nrc: nrc }, 'sections');
 		if (!result) {
 			throw new Error("Section not found");
 		}

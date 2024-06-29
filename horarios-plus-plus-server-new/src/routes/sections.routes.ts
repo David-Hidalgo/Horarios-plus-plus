@@ -8,16 +8,20 @@ export const pluginSection = <T extends string>(
 	new Elysia({ name: "sectionRoutes", seed: config })
 		.get(`${config.prefix}/hi`, () => "Hi")
 		.get("/api/section/get_sections_from_id", async ({ query }) => {
+			// console.log(Bun.inspect(query.id));
+
 			if (query.id === undefined) {
+				console.error("GET_SECTIONS_FROM_ID ERROR: id is undefined");
 				return undefined;
 			}
 
 			const section = await db.sectionModel.findById(query.id);
-			if (section === undefined) {
+			if (section === undefined|| section === null) {
+				console.log("GET_SECTIONS_FROM_ID ERROR: no section has this id: ",query.id);
 				return undefined;
 			}
 
-			return section;
+			return JSON.stringify(section);
 		})
 		.get("/api/section/get_sections_from_subject", async ({ query }) => {
 			if (query.subjectName === undefined) {
@@ -33,41 +37,52 @@ export const pluginSection = <T extends string>(
 
 			return subject.sections;
 		})
-		.put("/api/section/add_section_to_subject", async ({ query }) => {
-			if (
-				query.nrc === undefined ||
-				query.teacher === undefined ||
-				query.subjectName === undefined
-			) {
-				console.log("Alguno de los argumentos es undefined");
-				return undefined;
-			}
+		.get("/api/section/add_section_to_subject", async ({ query }) => {
+				if (
+					query.nrc === undefined ||
+					query.teacher === undefined ||
+					query.subjectName === undefined
+				) {
+					console.error("Alguno de los argumentos es undefined");
+					return undefined;
+				}
 
-			if (await db.sectionModel.exists({ nrc: query.nrc })) {
-				console.log(`El NRC ya se encuentra en la base de datos ${query.nrc}`);
-				return undefined;
-			}
+				if (await db.sectionModel.exists({ nrc: query.nrc })) {
+					console.error(
+						`El NRC ya se encuentra en la base de datos ${query.nrc}`,
+					);
+					return undefined;
+				}
 
-			const subject = (
-				await db.subjectModel.find({ name: query.subjectName })
-			).at(0);
-			if (subject === undefined) {
-				console.log(`No se encontro ${query.subjectName}`);
-				return undefined;
-			}
+				const subject = (
+					await db.subjectModel.find({ name: query.subjectName })
+				).at(0);
+				if (subject === undefined) {
+					console.error(`No se encontro ${query.subjectName}`);
+					return undefined;
+				}
 
-			const newSection = new db.sectionModel({
-				nrc: `${query.nrc}`,
-				teacher: `${query.teacher}`,
-				sessions: [],
-			});
-			await newSection.save();
+				const newSection = new db.sectionModel({
+					nrc: `${query.nrc}`,
+					teacher: `${query.teacher}`,
+					sessions: [],
+				});
+				await newSection.save();
 
-			subject.sections.push(newSection._id);
+				subject.sections.push(newSection._id);
+				await subject.save();
 
-			return newSection;
-		})
-		.post(
+				return JSON.stringify(newSection);
+			},
+			{ query:
+				t.Object({
+					nrc: t.String(),
+					teacher: t.String(),
+					subjectName: t.String(),
+				}),
+			 },
+		)
+		.get(
 			"/api/section/update_section",
 			async ({ query }) => {
 				const oldNRC = query.oldnrc;

@@ -77,7 +77,7 @@ class Career implements iCareer {
 }
 
 interface iSection {
-	nrc: number;
+	nrc: string;
 	teacher: string;
 	sessions: iSession[];
 	// subject: iSubject;
@@ -88,7 +88,7 @@ class Section implements iSection {
 	sessions;
 	public subject: Subject;
 	constructor(
-		nrc: number,
+		nrc: string,
 		teacher: string,
 		sessions: Session[],
 		subject: Subject,

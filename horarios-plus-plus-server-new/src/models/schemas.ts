@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+/* import mongoose from "mongoose";
 import type { iSession, iSection, iSubject, iUser, iCareer } from "./classes";
 
 const sessionSchema = new mongoose.Schema<iSession>({
@@ -45,7 +45,7 @@ const subjectSchema = new mongoose.Schema<iSubjectSchema>({
 	career: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Career",
-		required: true,
+		required: false,
 	},
 });
 
@@ -99,3 +99,4 @@ export type {
 	TSectionSchema,
 	TUserSchema,
 };
+ */

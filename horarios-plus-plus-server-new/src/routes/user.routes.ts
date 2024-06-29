@@ -10,7 +10,7 @@ export const pluginUser = <T extends string>(
 		name: "userRoutes",
 		seed: config,
 	})
-		.put("/api/sign_up",
+		.get("/api/sign_up",
 			async ({ query }) => {
 				const email = query.email;
 				const password = query.password;
