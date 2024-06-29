@@ -169,14 +169,14 @@ function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
 	// Since we want to change it in the changeBind, not here
 
 	const handleHourChange = (event: any) => {
-		let toSend = new Date();
+		let toSend = new Date(0);
 		toSend.setHours(event.target.value);
 		toSend.setMinutes(dateBind.getMinutes());
 		changeBind(toSend);
 	};
 
 	const handleMinutesChange = (event: any) => {
-		let toSend = new Date();
+		let toSend = new Date(0);
 		toSend.setHours(dateBind.getHours());
 		toSend.setMinutes(event.target.value);
 		changeBind(toSend);
