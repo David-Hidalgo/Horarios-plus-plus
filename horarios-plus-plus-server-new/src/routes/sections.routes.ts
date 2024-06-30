@@ -131,31 +131,27 @@ export const pluginSection = <T extends string>(
 				console.log("DELETE_SECTION ERROR: nrc is undefined ", toDeleteNRC);
 				return undefined;
 			}
-
-			const section = await db.sectionModel.findOne({ nrc: toDeleteNRC });
+			const section = await db.sectionModel
+				.findOne({ nrc: toDeleteNRC })
 			if (section === undefined || section === null) {
 				console.log("DELETE_SECTION ERROR: no section has nrc ", toDeleteNRC);
 				return undefined;
 			}
-
-			const users = await db.userModel.find();
-			users.forEach(async (user) => {
-				user.schedule.id(section.id)?.deleteOne();
-			});
-			db.subjectModel
-				.findOne({ sections: section.id })
-				.populate("sections")
-				.exec()
-				.then((subject) => {
-					if (subject === undefined || subject === null) {
-						console.log(
-							"DELETE_SECTION ERROR: no subject has section ",
-							section,
-						);
-						return undefined;
-					}
-					subject.id(section.id)?.deleteOne();
-				});
-			const response = await section.deleteOne();
-			return response;
+			console.log("Deleting section ", section);
+			await db.sectionModel.deleteOne({ nrc: toDeleteNRC });
+			const subject= await db.subjectModel.findOne({sections: section.id});
+			if (subject === undefined || subject === null) {
+				console.log(
+					"DELETE_SECTION ERROR: no subject has section ",
+					section,
+				);
+				return undefined;
+			}
+			await db.subjectModel.findOneAndUpdate(
+				{ sections: subject.sections.filter((id) => !id.equals(section.id)) },
+			);
+			console.log("Deleted section ", section, " from subject ", subject);
+			
+			subject.sections
+			return JSON.stringify(true);
 		});
