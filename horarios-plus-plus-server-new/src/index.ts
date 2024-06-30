@@ -3,7 +3,7 @@ import mongoose, { type ConnectOptions } from "mongoose";
 import { cors } from "@elysiajs/cors";
 import { DBController } from "./controllers/db";
 
-import { plugin } from "./routes/schedules.routes";
+import { pluginSchedule } from "./routes/schedules.routes";
 import { pluginSession } from "./routes/sessions.routes";
 import { pluginSection } from "./routes/sections.routes";
 import { pluginSubject } from "./routes/subjects.routes";
@@ -28,7 +28,7 @@ class main {
 			.use(cors())
 			.get("/", () => "Hello Elysia")
 			.post("/hi", () => "hi")
-			.use(plugin({ prefix: "Schedules" }))
+			.use(pluginSchedule({ prefix: "Schedules" }, controladordb))
 			.use(pluginSession({ prefix: "Sessions" }, controladordb))
 			.use(pluginSection({ prefix: "Sections" }, controladordb))
 			.use(pluginSubject({ prefix: "Sections" }, controladordb))
