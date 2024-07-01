@@ -355,7 +355,7 @@ function EditableSectionContainer({
 	);
 }
 
-export default function TimeBlockInterface() {
+export default function EventsInterface() {
 	const [selectedSection, setSelectedSection] = React.useState<ISection | undefined>(undefined);
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
 
@@ -497,12 +497,12 @@ export default function TimeBlockInterface() {
 					console.error(data);
 					return;
 				}
-				const newSection: ISection = {
+				let newSection: ISection = {
 					nrc: section.nrc,
 					teacher: section.teacher,
 					subject: section.subject,
 					sessionList:data.map((aSession) => {
-						const newSession: ISession = {
+						let newSession: ISession = {
 							day: aSession.day,
 							start: new Date(aSession.start),
 							end: new Date(aSession.end),

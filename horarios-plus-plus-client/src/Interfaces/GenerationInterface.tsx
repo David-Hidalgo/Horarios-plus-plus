@@ -340,9 +340,7 @@ export default function GenerationInterface() {
       });
   }
 
-  async function fetchSessionsFromSection(
-    section: ISection
-  ): Promise<ISection> {
+  async function fetchSessionsFromSection(section: ISection) {
     return await fetch(
       `http://127.0.0.1:4000/api/session/get_sessions_from_section?nrc=${section.nrc}`,
       { headers: { Accept: "application/json" } }
@@ -359,11 +357,15 @@ export default function GenerationInterface() {
           nrc: section.nrc,
           teacher: section.teacher,
           subject: section.subject,
-          sessionList: await Promise.all(
-            data.map(
-              async (id: string) => await fetchSessionFromId(id, section)
-            )
-          ),
+          sessionList:data.map((aSession) => {
+						const newSession: ISession = {
+							day: aSession.day,
+							start: new Date(aSession.start),
+							end: new Date(aSession.end),
+							section: section,
+						};
+						return newSession;
+					}),
           enabled: true,
         };
         return newSection;

@@ -48,7 +48,7 @@ export default function NavigationBar() {
 						<a href="/time_blocks">Agregar Materia</a>
 					</div>)}
 					{(tipo===1||tipo===3||tipo===4)&&(<div>
-						<a href="/eventos">Administrar Eventos</a>
+						<a href="/events">Administrar Eventos</a>
 					</div>)}
 					{(tipo===4)&&(<div>
 						<a href="/perms">Administrar Usuarios</a>

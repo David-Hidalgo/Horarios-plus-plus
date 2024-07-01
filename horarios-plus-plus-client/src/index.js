@@ -10,6 +10,7 @@ import SignUpInterface from "./Interfaces/SignUpInterface.tsx";
 import MySheduleInterface from "./Interfaces/MyScheduleInterface.tsx";
 import TimeBlockInterface from "./Interfaces/TimeBlockInterface.tsx";
 import PermsInterface from "./Interfaces/PermsPage.tsx";
+import EventsInterface from "./Interfaces/EventsInterface.tsx";
 
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
@@ -25,6 +26,7 @@ export default function App() {
 					<Route path="sign_up" element={<SignUpInterface />} />
 					<Route path="schedule" element={<MySheduleInterface />} />
 					<Route path="perms" element={<PermsInterface />} />
+					<Route path="events" element={<EventsInterface />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>
