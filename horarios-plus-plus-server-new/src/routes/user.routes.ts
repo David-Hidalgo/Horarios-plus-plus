@@ -14,29 +14,34 @@ export const pluginUser = <T extends string>(
 			const users = await db.userModel.find();
 			return JSON.stringify(users);
 		})
-		.put( "/api/update_types",
-			async ({ query }) => {
-				const email = query.email;
-				const password = query.password;
-				const type = query.type;
+		.put( "/api/update_users",
+			async ({body}) => {
+				const cuerpo = JSON.parse(body);
+				const changedUsers = cuerpo.usuarios;
+				console.log(changedUsers);
+				
 
-				if (email === undefined || password === undefined || type === undefined) {
+				if (changedUsers === undefined || changedUsers.length===0 || changedUsers === null) {
 					console.log("Failed to update user: A value is undefined");
 
 					return { message: "Failed to update user: A value is undefined"};
 				}
 
-				const user = await db.userModel.findOne({ email: email });
+				// biome-ignore lint/complexity/noForEach: <explanation>
+				changedUsers.forEach(async (usuarioACambiar) =>{
+					const email = usuarioACambiar.email;
+					const type = usuarioACambiar.tipo;
+					const user = await db.userModel.findOne({ email: email });
 
-				if (user === null) {
-					console.log("Failed to update user: User not found");
+					if (user === null) {
+						console.log("Failed to update user: User not found");
 
-					return { message: "Failed to update user: User not found"};
-				}
+						return { message: "Failed to update user: User not found"};
+					}
 
-				user.password = password;
-				user.tipo = type;
-				user.save();
+					user.tipo = type;
+					user.save();
+				});
 
 				return { message: "User updated successfully"};
 			}

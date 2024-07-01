@@ -42,6 +42,7 @@ function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 
 	function updatePermisionL(permiso:string){
 		updatePermision(user.email,permiso);
+
 	}
 
 	function updateRolL(rol:string){
@@ -68,7 +69,7 @@ function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 
 export default function PermsInterface() {
 	const [loadedUsers, setLoadedUsers] = React.useState<Array<IUser>>();
-	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
+	const [changedUsers, setChangedUsers] = React.useState<Array<IUser>>(new Array<IUser>());
 	const [editable, setEditable] = React.useState(false);
 
 		React.useEffect(() => {
@@ -120,11 +121,19 @@ export default function PermsInterface() {
 		return Promise.all(users);
 	}
 
+	function updateChangedUser(user:IUser){
+		if (!changedUsers?.includes(user)) {
+			setChangedUsers([...(changedUsers), user]);
+		}
+		console.log(changedUsers);
+	}
+
 	function updatePermision(email:string,permiso:string){
 		setLoadedUsers(
 			loadedUsers?.map((user)=>{
 				if(user.email===email){
 					user.permiso=permiso==="si";
+					updateChangedUser(user);
 				}
 				return user;
 			})
@@ -136,10 +145,25 @@ export default function PermsInterface() {
 			loadedUsers?.map((user)=>{
 				if(user.email===email){
 					user.tipo=rol;
+					updateChangedUser(user);
 				}
 				return user;
 			})
 		)
+	}
+
+	function transformarEnEnviar() {
+		return {
+			usuarios: changedUsers.map((user) => {
+				let tipo=0;
+				if (user.permiso) {
+					user.tipo === "estudiante" ? tipo=1 : user.tipo === "profesor" ? tipo=3 : tipo=4;
+				}else
+					user.tipo === "estudiante" ? tipo=0 : user.tipo === "profesor" ? tipo=2 : tipo=4;
+
+				return { email: user.email, tipo: tipo};
+			}),
+		};
 	}
 
 	function handleSubmit(e) {
@@ -153,11 +177,12 @@ export default function PermsInterface() {
 		console.log(formData.getAll('roles-usuario'));
 
 		// Puedes pasar formData como cuerpo del fetch directamente:
+		console.log(transformarEnEnviar());
+		
 
-
-    fetch('/`http://127.0.0.1:4000/api/update_user', { method: form.method, body: JSON.stringify(loadedUsers) });
+    fetch('http://127.0.0.1:4000/api/update_users', { method: "PUT", body: JSON.stringify(transformarEnEnviar()) });
     // Puedes generar una URL de él, como hace el navegador por defecto:
-  }
+	}
 
 	return (
 		<div>
@@ -167,7 +192,7 @@ export default function PermsInterface() {
 					<div className="Titulo"><h1>Permisos</h1></div>
 					
 					<section className="Usuarios">
-						<form id="formUsuarios" method="post" onSubmit={handleSubmit} >
+						<form id="formUsuarios" method="PUT" onSubmit={handleSubmit} >
 							<h2>Usuarios</h2>
 							{
 								loadedUsers?.map((user) => {
