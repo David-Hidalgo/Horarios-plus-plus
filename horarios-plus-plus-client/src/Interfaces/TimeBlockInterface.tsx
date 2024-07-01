@@ -437,11 +437,14 @@ export default function TimeBlockInterface() {
 			},
 		)
 			.then((response) => response.json())
+			.catch((e) => {
+				console.error("No se pudo obtener los cursos", e);
+			})
 			.then((data: any[]) => {
 				console.log("a ver si llego aquí",data);
 				
 				return data.map(async (subject) => {
-					let newSubject: ISubject = {
+					const newSubject: ISubject = {
 						//career: [],
 						name: subject.name,
 						// sectionList: subject.sections

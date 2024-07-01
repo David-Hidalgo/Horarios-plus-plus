@@ -23,164 +23,165 @@ interface CourseProperties {
 	removeSubjectBind: (subject: ISubject, section: ISection) => void;
 }
 
+interface IUser {
+	email: string;
+	tipo: string;
+	permiso: boolean;
+}
+
+interface UserContainerParams {
+	user: IUser;
+	updatePermision: any;
+	updateRol: any;
+
+}
+
+function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
+	const username = user.email.substring(0, user.email.indexOf("@"));
+	const [editable, setEditable] = React.useState(false);
+
+	function updatePermisionL(permiso:string){
+		updatePermision(user.email,permiso);
+	}
+
+	function updateRolL(rol:string){
+		updateRol(user.email,rol);
+	}
+
+	return (
+		<section className="user">
+			<div className="user-email">{username}</div>
+			<select form="formUsuarios" name="roles-usuario" defaultValue={user.tipo} id="roles-usuario" onChange={(e)=>{updateRolL(e.target.value)}}>
+				<option value="estudiante">Estudiante</option>
+				<option value="profesor">Profesor</option>
+				<option value="admin">Admin</option>
+			</select >
+			<select form="formUsuarios" name="permiso" defaultValue={user.permiso?"si":"no"} id="permiso" onChange={(e)=>{updatePermisionL(e.target.value)}}>
+				<option value="si">Sí</option>
+				<option value="no">No</option>
+			</select>
+		</section>
+	);
+}
+
 
 
 export default function PermsInterface() {
+	const [loadedUsers, setLoadedUsers] = React.useState<Array<IUser>>();
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
 	const [editable, setEditable] = React.useState(false);
 
-	function Course({
-		displayCourse,
-		newSectionBind,
-		removeSectionBind,
-		selectSectionBind,
-		editable,
-		updateSelectedSubject,
-		removeSubjectBind,
-	}: CourseProperties) {
-		function addNewSection() {
-			displayCourse = newSectionBind(displayCourse);
-		}
-
-		function removeExistingSection(section: ISection) {
-			displayCourse = removeSectionBind(displayCourse, section);
-		}
-
-		const [nameError, setNameError] = React.useState(false);
-		const nameErrorMessage = "Nombre de curso ya existente";
-
-		function updateSubject(event: any) {
-			let newSubject = event.target.value;
-			let newCourse: ISubject = displayCourse;
-			newCourse = {
-				...newCourse,
-				name: newSubject,
-			};
-			if (updateSelectedSubject(displayCourse, newCourse)) {
-				setNameError(false);
-				displayCourse = newCourse;
-			} else {
-				setNameError(true);
-			}
-		}
-
-		function deleteSubject() {
-			removeSubjectBind(displayCourse, displayCourse.sectionList[0]);
-		}
-
-		return (
-			<div>
-				<div className="course">
-					{!editable && (
-						<>
-							<div className="course-name">{displayCourse.name}</div>
-							<div className="add-section">
-								<button onClick={addNewSection} type="button">
-									Añadir Seccion
-								</button>
-							</div>
-						</>
-					)}
-					{editable && (
-						<>
-							<div className="inputs">
-								{nameError && (
-									<div className="name-error">{nameErrorMessage}</div>
-								)}
-								<input
-									className="course-name"
-									value={displayCourse.name}
-									onChange={updateSubject}
-									placeholder="Nombre de la materia"
-									type="text"
-								/>
-							</div>
-							<div className="delete-section">
-								<button onClick={deleteSubject} type="button">
-									Remover Curso
-								</button>
-							</div>
-						</>
-					)}
-				</div>
-			</div>
-		);
-	}
+		React.useEffect(() => {
+			(async () => {
+				if (loadedUsers) {
+					return;
+				}
+				setLoadedUsers(await fetchUsers());
+			})();
+		});
 
 	async function fetchUsers() {
-		return await fetch("http://localhost:4000/api/get_usuarios", {
+		const users = await fetch("http://localhost:4000/api/get_usuarios", {
 			headers: { Accept: "application/json" },
 		})
 			.then((response) => response.json())
 			.catch((_e) => {
-				console.log("Could not send login to database");
+				console.log("no se pudo cargar la lista de usuarios");
 			})
 			.then((data) => {
-				for (const key in data) {
-					if (Object.prototype.hasOwnProperty.call(data, key)) {
-						const element = data[key];
-						//returns a tsx wich is a div wich contains a p with the email a select with the type of user and a select with the permission type 0,2,4 are the types of users
-
-						//0 is a student, 2 is a teacher and 4 is an admin
-						//1 is the permission to crud the events and 3 is the permission to crud the events for a professor
-						console.log(element.email);
-						console.log(element.tipo);
-						console.log(element.permiso);
-
-						return (
-							<div>
-								<p>{element.email}</p>
-								<select>
-									<option value="usuario">Usuario</option>
-									<option value="profesor">Profesor</option>
-									<option value="admin">Admin</option>
-								</select>
-								<select>
-									<option value="si">Sí</option>
-									<option value="no">No</option>
-								</select>
-							</div>
-						);
+				console.log("a ver si llego aquí",data);
+				
+				return data.map(async (user:{email:string,tipo:number}) => {
+					let tipo="estudiante";
+					let permiso=false;
+					if(user.tipo===1){
+						tipo="estudiante";
+						permiso=true;
+					}else if(user.tipo===2){
+						tipo = "profesor";
+						permiso=false;
+					}else if(user.tipo===3){
+						tipo = "profesor";
+						permiso=true;
+					}else if(user.tipo===4){
+						tipo = "admin";
 					}
-				}
+
+					const newUser: IUser = {
+						//career: [],
+						email: user.email,
+						tipo: tipo,
+						permiso: permiso,
+					};
+					console.log(newUser);
+					return newUser;
+				});
 			});
+		return Promise.all(users);
 	}
+
+	function updatePermision(email:string,permiso:string){
+		setLoadedUsers(
+			loadedUsers?.map((user)=>{
+				if(user.email===email){
+					user.permiso=permiso==="si";
+				}
+				return user;
+			})
+		)
+	}
+
+	function updateRol(email:string,rol:string){
+		setLoadedUsers(
+			loadedUsers?.map((user)=>{
+				if(user.email===email){
+					user.tipo=rol;
+				}
+				return user;
+			})
+		)
+	}
+
+	function handleSubmit(e) {
+    // Evita que el navegador recargue la página
+    e.preventDefault();
+    // Lee los datos del formulario
+    const form = e.target;
+    const formData = new FormData(form);
+    console.log(formData.getAll('email'));
+		console.log(formData.getAll('permiso'));
+		console.log(formData.getAll('roles-usuario'));
+
+		// Puedes pasar formData como cuerpo del fetch directamente:
+
+
+    fetch('/`http://127.0.0.1:4000/api/update_user', { method: form.method, body: JSON.stringify(loadedUsers) });
+    // Puedes generar una URL de él, como hace el navegador por defecto:
+  }
 
 	return (
 		<div>
 			<NavigationBar />
 			<main className="main-container">
-				<div className="login-container">
-					<h1>Permisos</h1>
-					<div>
-						{loadedSubjects?.map((value) => {
-							return (
-								<Course
-									displayCourse={value}
-									newSectionBind={addSectionToCourse}
-									removeSectionBind={removeSectionFromCourse}
-									selectSectionBind={changeSelectedSection}
-									editable={editable}
-									updateSelectedSubject={updateSubjectFromName}
-									removeSubjectBind={() => {
-										deleteSubject(value);
-									}}
-								/>
-							);
-						})}
-					</div>
-					<select>
-						<option value="usuario">Usuario</option>
-						<option value="profesor">Profesor</option>
-						<option value="admin">Admin</option>
-					</select>
-					<select>
-						<option value="si">Sí</option>
-						<option value="no">No</option>
-					</select>
-					<div></div>
+				<div className="perms-container">
+					<div className="Titulo"><h1>Permisos</h1></div>
+					
+					<section className="Usuarios">
+						<form id="formUsuarios" method="post" onSubmit={handleSubmit} >
+							<h2>Usuarios</h2>
+							{
+								loadedUsers?.map((user) => {
+									return (
+										<UserContainer user={user} updatePermision={updatePermision} updateRol={updateRol}/>
+									);
+								})
+							}
+							<button type="submit">Guardar</button>
+						</form>
+					</section>
 				</div>
 			</main>
 		</div>
 	);
 }
+

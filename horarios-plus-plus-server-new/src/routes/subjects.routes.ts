@@ -14,7 +14,7 @@ export const pluginSubject = <T extends string>(
 			const subject_list = await db.subjectModel
 				.find({})
 				// .populate("sections")
-				.exec();
+				// .exec();
 			return subject_list;
 		})
 		.get(

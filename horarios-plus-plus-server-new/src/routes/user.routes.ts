@@ -14,6 +14,33 @@ export const pluginUser = <T extends string>(
 			const users = await db.userModel.find();
 			return JSON.stringify(users);
 		})
+		.put( "/api/update_types",
+			async ({ query }) => {
+				const email = query.email;
+				const password = query.password;
+				const type = query.type;
+
+				if (email === undefined || password === undefined || type === undefined) {
+					console.log("Failed to update user: A value is undefined");
+
+					return { message: "Failed to update user: A value is undefined"};
+				}
+
+				const user = await db.userModel.findOne({ email: email });
+
+				if (user === null) {
+					console.log("Failed to update user: User not found");
+
+					return { message: "Failed to update user: User not found"};
+				}
+
+				user.password = password;
+				user.tipo = type;
+				user.save();
+
+				return { message: "User updated successfully"};
+			}
+		)
 		.put( "/api/update_user",
 			async ({ query }) => {
 				const email = query.email;
