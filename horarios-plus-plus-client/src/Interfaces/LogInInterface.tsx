@@ -32,16 +32,20 @@ const regexHandler = new RegExp(regExpEmail);
 
   async function SendLoginDatabase() {
     return await fetch(`http://localhost:4000/api/login?email=${email}&password=${password}`,
-      { headers: { 'Accept': 'application/json' } })
+      { headers: { Accept: 'application/json' } })
       .then(response => response.json())
       .catch((e) => { console.log("Could not send login to database") })
-      .then(data => {
+      .then(data => { 
         console.log(data);
-        
+        console.log("tipo: ",data.tipo);
+        console.log(data.message);
+        const tipo = data.tipo;
+        console.log("tipo: ",tipo);
+              
         if (data.message === "successful") {
           sessionStorage.setItem('login', `${email}`);
+          sessionStorage.setItem('tipo', `${tipo}`);
         }
-        console.log(data)
         return data;
       })
   }

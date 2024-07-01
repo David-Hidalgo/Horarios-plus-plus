@@ -1,6 +1,8 @@
 // plugin.ts
 import { Elysia } from "elysia";
 import type { DBController } from "../controllers/db";
+import { number } from "zod";
+import { forEachChild } from "typescript";
 
 async function GenerateSchedules(sectionList, subjectCount) {
 	function hourIntersects(x, y) {
@@ -22,7 +24,8 @@ async function GenerateSchedules(sectionList, subjectCount) {
 			finalArray.push(passedArray);
 			return;
 		}
-
+		console.log('el array que se anda pasando\n',passedArray,'\n y el original',originalArray,'\n y el final',finalArray);
+		
 		for (let i = 0; i < originalArray.length; i++) {
 			if (passedArray.includes(originalArray.at(i))) {
 				continue;
@@ -35,14 +38,8 @@ async function GenerateSchedules(sectionList, subjectCount) {
 				continue;
 			}
 
-			let sessionList = passedArray
-				.concat(originalArray.at(i))
-				.flatMap((value) => value.sessions);
-			sessionList = await Promise.all(
-				sessionList.map(async (id) => {
-					return await Session.findById(new mongoose.mongo.ObjectId(id));
-				}),
-			);
+			const sessionList = passedArray.at(i).sessions
+
 			if (sessionList.length === 0) {
 				continue;
 			}
@@ -66,7 +63,10 @@ async function GenerateSchedules(sectionList, subjectCount) {
 	}
 
 	const returnArray = [];
+	console.log(returnArray);
+	
 	await generageCombination(sectionList, [], returnArray);
+	console.log(returnArray);
 	return returnArray;
 }
 
@@ -88,36 +88,58 @@ export const pluginSchedule = <T extends string>(
 			}
 
 			const failed = false;
-			let sections = await Promise.all(
+			const sections = await Promise.all(
 				nrcs.split(",").map(async (nrc) => {
 					return await db.sectionModel.find({ nrc: nrc });
 				}),
 			);
-			sections = sections.flat();
+			const sectionsArr = sections.flat();
+			
+			//una busqueda en db.subjectModel para buscar el número de materias que contengan las secciones
+			let numeroSec = 0;
+			let numeroSub = 0;
+			const materias = await db.subjectModel.find({});
+			for await (const materia of materias) {
+				await materia.populate("sections");
+				for await (const section of materia.sections) {
+					for await (const sección of sectionsArr) {
+						if (section._id.equals(sección._id)) {
+							numeroSec++;
+						}
+					}
+				}
+				if (numeroSec > 0) {
+					numeroSub++;
+				}
+				numeroSec = 0;
+			}
 
-			const schedules = await GenerateSchedules(
-				sections,
-				[...new Set(sections.map((section) => section.subject.toString()))]
-					.length,
-			);
+			if(numeroSub < 1){
+				console.log("FAILED TO GENERATE SCHEDULES: A subject is not found");
+				return JSON.stringify(undefined);
+			}
+			console.log(`Numero de materias: ${numeroSub}`, `Numero de secciones: ${sectionsArr.length}`);
+			
+			const schedules = await GenerateSchedules(sectionsArr, numeroSub);
+
 			console.log(schedules);
 			return JSON.stringify(schedules);
 		})
 		.get("/api/schedules/save_schedule", async ({ query }) => {
 			const owner = query.owner;
-			let nrcs = query.nrcs;
+			const nrcs = query.nrcs;
 
 			if (owner === undefined || nrcs === undefined) {
 				console.log("FAILED TO SAVE SCHEDULE: A value is undefined");
 				return JSON.stringify(undefined);
 			}
 
-			nrcs = nrcs.split(",");
+			const nrcsArr = nrcs.split(",");
 
 			const newSchedule = await new Schedule({
 				owner: owner,
 				sections: await Promise.all(
-					nrcs.map(async (nrc) => {
+					nrcsArr.map(async (nrc) => {
 						return await db.sectionModel.findOne({ nrc: nrc });
 					}),
 				),

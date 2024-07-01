@@ -356,9 +356,7 @@ function EditableSectionContainer({
 }
 
 export default function TimeBlockInterface() {
-	const [selectedSection, setSelectedSection] = React.useState<
-		ISection | undefined
-	>(undefined);
+	const [selectedSection, setSelectedSection] = React.useState<ISection | undefined>(undefined);
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
 
 	let updating = false;
@@ -551,6 +549,7 @@ export default function TimeBlockInterface() {
 						return { ...x, sectionList: x.sectionList.concat([section]) };
 					}),
 				);
+				setSelectedSection(section);
 			})
 			.finally(() => {
 				updating = false;
@@ -602,7 +601,7 @@ export default function TimeBlockInterface() {
 		deleteSectionFromDatabase(section);
 
 		if (section === selectedSection) {
-			setSelectedSection(undefined);
+			setSelectedSection(loadedSubjects?.[0]?.sectionList[0]);
 		}
 		return ret;
 	}
@@ -795,10 +794,10 @@ export default function TimeBlockInterface() {
 		updating = true;
 		let allow_change = true;
 		const newName= newSubject.name;
-		console.log("Actualizando nombre de "+oldSubject.name+" a '"+newName+"'");
+		console.log(`Actualizando nombre de ${oldSubject.name} a '${newName}'`);
 		
 		return await fetch(
-			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldSubject.name}&newname=${newName}&section=${oldSubject.sectionList}`,
+			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldSubject.name}&newname=${newName}&section=i`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
@@ -810,7 +809,7 @@ export default function TimeBlockInterface() {
 				console.log(data);
 			})
 			.finally(() => {
-				let newValue = allow_change ? newSubject : oldSubject;
+				const newValue = allow_change ? newSubject : oldSubject;
 				setLoadedSubjects(
 					loadedSubjects?.map((x) => {
 						if (x !== oldSubject) return x;
@@ -824,19 +823,15 @@ export default function TimeBlockInterface() {
 	
 	function updateSubjectFromName(oldSubject: ISubject, newSubject: ISubject) {
 		if(oldSubject.name !== newSubject.name){
-			console.log("Nombre distinto");
 			if(loadedSubjects?.find((x) => x.name === newSubject.name) !== undefined){
-				console.log("Nombre repetido");
 				return false;
-			}else{
-				updateSubjectServer(oldSubject, newSubject);
-				return true;
 			}
-		}else{
-			console.log("Nombre igual");
 			updateSubjectServer(oldSubject, newSubject);
 			return true;
 		}
+		updateSubjectServer(oldSubject, newSubject);
+		return true;
+	
 	}
 
 	async function addSubjectServer(newSubject: ISubject) {
@@ -901,8 +896,7 @@ export default function TimeBlockInterface() {
 		});
 		setLoadedSubjects(loadedSubjects?.filter((x) => x !== subject));
 		
-		 deleteSubjectFromDatabase(subject);
-
+		deleteSubjectFromDatabase(subject);
 	}
 
 	return (
@@ -937,9 +931,8 @@ export default function TimeBlockInterface() {
 							Guardar
 						</button>
 
-					</div>)}
-					
-				</div>
+						</div>)}
+					</div>
 				<div className="section-edit-container">
 					{selectedSection !== undefined && (
 						<EditableSectionContainer

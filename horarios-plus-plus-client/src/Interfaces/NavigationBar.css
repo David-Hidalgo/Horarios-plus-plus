@@ -57,3 +57,17 @@
 }
 
 
+.username {
+  color: rgb(255, 255, 255); /* Ejemplo de color */
+  font-weight: bold; /* Texto en negrita */
+  text-decoration: none; /* Sin subrayado */
+  padding: 0.25rem 0.5rem; /* Espaciado interno */
+  font-size: 1.25rem; /* Tamaño de fuente */
+  border-radius: 4px; /* Bordes redondeados */
+}
+
+.estudiante {color: rgb(255, 255, 255);}
+.estudiante-eventos {color : rgb(255, 252, 68);}
+.profesor {color: rgb(95, 255, 95);}
+.profesor-eventos {color: rgb(255, 160, 18);}	
+.admin {color: rgb(255, 0, 0);}

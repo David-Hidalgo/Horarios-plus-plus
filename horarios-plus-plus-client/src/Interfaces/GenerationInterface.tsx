@@ -85,7 +85,7 @@ function ScheduleContainer({
                 setSelectedButton3("button");
                 setSelectedButton4("button");
               }}
-            >
+              type="button">
               {" "}
               <ScheduleViewer loadedSchedule={shownShedules[0]} />{" "}
             </button>
@@ -100,7 +100,7 @@ function ScheduleContainer({
                 setSelectedButton3("button");
                 setSelectedButton4("button");
               }}
-            >
+              type="button">
               {" "}
               <ScheduleViewer loadedSchedule={shownShedules[1]} />{" "}
             </button>
@@ -117,7 +117,7 @@ function ScheduleContainer({
                 setSelectedButton3("button-selected");
                 setSelectedButton4("button");
               }}
-            >
+              type="button" >
               {" "}
               <ScheduleViewer loadedSchedule={shownShedules[0]} />{" "}
             </button>
@@ -132,7 +132,7 @@ function ScheduleContainer({
                 setSelectedButton3("button");
                 setSelectedButton4("button-selected");
               }}
-            >
+              type="button"  >
               {" "}
               <ScheduleViewer loadedSchedule={shownShedules[1]} />{" "}
             </button>
@@ -154,7 +154,7 @@ function GenerateButton({ generationBind }: GenerateButtonProperties) {
 
   return (
     <div className="generate-button-container">
-      <button onClick={sendGenerateSignal}> GENERAR </button>
+      <button onClick={sendGenerateSignal} type="button"> GENERAR </button>
     </div>
   );
 }
@@ -216,6 +216,8 @@ export default function GenerationInterface() {
       setLoadedSubjects(await loadFromServer());
     })();
   });
+
+  const [selectedSchedule, setSelectedSchedule] = React.useState<ISchedule>();
 
   const [scheduleIndex, setScheduleIndex] = React.useState<number>(0);
 
@@ -450,7 +452,7 @@ export default function GenerationInterface() {
 	}
 
   async function saveScheduleToServer(schedule: ISchedule) {
-    let nrcs = schedule.sectionList.map((section) => section.nrc).join(",");
+    const nrcs = schedule.sectionList.map((section) => section.nrc).join(",");
     await fetch(
       `http://127.0.0.1:4000/api/schedules/save_schedule?owner=${email}&nrcs=${nrcs}`,
       { headers: { Accept: "application/json" } }
@@ -463,6 +465,17 @@ export default function GenerationInterface() {
 
   function generateSchedules() {
     getSchedulesFromServer();
+  }
+
+  function saveSchedule(schedule?: ISchedule) {
+    if (schedule === undefined) {
+      return async () => {
+        console.error("No se ha seleccionado un horario");
+      };
+    }
+    return async () => {
+      await saveScheduleToServer(schedule);
+    }
   }
 
   return (
@@ -493,7 +506,7 @@ export default function GenerationInterface() {
             </div>
 
             <ScheduleContainer
-              saveScheduleBind={saveScheduleToServer}
+              saveScheduleBind={setSelectedSchedule}
               shownShedules={generatedSchedules.slice(
                 scheduleIndex,
                 scheduleIndex + 4
@@ -517,7 +530,7 @@ export default function GenerationInterface() {
                 </button>
               </div>
               <div className="m-button">
-                <button type="button">Guardar</button>
+                <button onClick={saveSchedule(selectedSchedule)} type="button">Guardar</button>
               </div>
               <div className="r-button">
                 <button
