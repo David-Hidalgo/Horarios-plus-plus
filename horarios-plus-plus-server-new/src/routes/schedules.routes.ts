@@ -198,7 +198,7 @@ export const pluginSchedule = <T extends string>(
 			}
 
 			const user = await db.userModel.findOne({ email: query.owner });
-			if (user === undefined) {
+			if (user === undefined || user === null) {
 				return JSON.stringify(undefined);
 			}
 
