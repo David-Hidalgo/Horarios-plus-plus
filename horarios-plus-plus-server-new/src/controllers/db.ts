@@ -36,7 +36,7 @@ export class DBController {
 			sessions: mongoose.Types.DocumentArray<iSession> }>;
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		type SectionModelType = mongoose.Model<iSection, {}, {}, {}, SectionHydratedDocument>;
+		type SectionModelType = mongoose.Model<iSection, {}, {}, {}, SectionHydratedDocument,iSection>;
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
@@ -80,27 +80,15 @@ export class DBController {
 		this.careerModel = mongoose.model("Career", careerSchema);
 		type TCareerSchema = mongoose.InferSchemaType<typeof careerSchema>;
 
-		type THydratedUserDocument = mongoose.HydratedDocument<
-			iUser,
-			{
-				schedule: mongoose.Types.DocumentArray<iSection>;
-			}
-		>;
-		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		type UserModelType = mongoose.Model<iUser,{},{},{},THydratedUserDocument>;
 
-		const userSchema = new mongoose.Schema<iUser, UserModelType>({
+		const userSchema = new mongoose.Schema<iUser>({
 			email: { type: String, required: true },
 			password: { type: String, required: true },
 			tipo: { type: Number, default: 0 },
-			schedule: { type: [sectionSchema], required: false},
+			schedule: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
 		});
 
-		this.userModel = mongoose.model<iUser, UserModelType>(
-			"User",
-			userSchema,
-		);
-		type TUserSchema = mongoose.InferSchemaType<typeof userSchema>;
+		this.userModel = mongoose.model<iUser>("User",userSchema,);
 	}
 	public static async run(uri: string) {
 		// 4. Connect to MongoDB
