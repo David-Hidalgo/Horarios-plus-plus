@@ -123,7 +123,8 @@ export default function PermsInterface() {
 
 	function updateChangedUser(user:IUser){
 		if (!changedUsers?.includes(user)) {
-			setChangedUsers([...(changedUsers), user]);
+			console.log("entré");
+			setChangedUsers([...changedUsers, user]);
 		}
 		console.log(changedUsers);
 	}
