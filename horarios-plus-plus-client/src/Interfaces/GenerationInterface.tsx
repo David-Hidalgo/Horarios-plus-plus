@@ -4,6 +4,7 @@ import NavigationBar from "./NavigationBar";
 import CourseSemesterContainer from "./CourseSemesterContainer";
 import "./GenerationInterface.css";
 import ScheduleViewer from "./ScheduleViewer.tsx";
+import { Subject, type Schedule, type Section } from "../../../horarios-plus-plus-server-new/src/models/classes.ts";
 
 const email = sessionStorage.getItem("login");
 
@@ -119,7 +120,7 @@ function ScheduleContainer({
               }}
               type="button" >
               {" "}
-              <ScheduleViewer loadedSchedule={shownShedules[0]} />{" "}
+              <ScheduleViewer loadedSchedule={shownShedules[2]} />{" "}
             </button>
           )}
           {shownShedules[3] !== undefined && (
@@ -134,7 +135,7 @@ function ScheduleContainer({
               }}
               type="button"  >
               {" "}
-              <ScheduleViewer loadedSchedule={shownShedules[1]} />{" "}
+              <ScheduleViewer loadedSchedule={shownShedules[3]} />{" "}
             </button>
           )}
         </div>
@@ -427,21 +428,30 @@ export default function GenerationInterface() {
 			.then((response) => response.json())
 			.then(async (data) => {
 				let scheduleList: ISchedule[] = [];
+        console.log(data);
 				scheduleList = await Promise.all(
-					data.map(async (schedule) => {
+					data.map(async (schedule:Schedule) => {
 						const newSchedule: ISchedule = {
 							sectionList: await Promise.all(
-								schedule.map(async (section) => {
+								schedule.sections.map(async (section:Section) => {
 									let newSection: ISection = {
 										nrc: section.nrc,
 										teacher: section.teacher,
 										enabled: true,
+                    sessionList: [],
+                    subject: {name: section.subject.name, sectionList: [], color: undefined, enabled: true},
 									};
-									newSection.subject = await fetchSubjectFromId(
-										section.subject,
-										section,
-									);
-									newSection = await fetchSessionsFromSection(newSection);
+                  newSection.subject = {name: section.subject.name, sectionList: [newSection], color: undefined, enabled: true};
+									// newSection.subject = await fetchSubjectFromId(
+									// 	section.subject,
+									// 	section,
+									// );
+									const sectionConSesiones = await fetchSessionsFromSection(newSection);
+                  if (sectionConSesiones !== undefined) {
+                    newSection = sectionConSesiones;
+                  }else{
+                    console.error("No se pudo obtener las sessiones de la seccion");
+                  }
 									return newSection;
 								}),
 							),
@@ -450,6 +460,7 @@ export default function GenerationInterface() {
 					}),
 				);
 				setGeneratedSchedules(scheduleList);
+        console.log(scheduleList);
 			});
 	}
 

@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import type { DBController } from "../controllers/db";
 import { number } from "zod";
 import { forEachChild } from "typescript";
-import { Session } from "../models/classes";
+import { Career, Schedule, Section, Session, Subject, User } from "../models/classes";
 
 // async function GenerateSchedules(sectionList, subjectCount) {
 // 	function hourIntersects(x, y) {
@@ -65,26 +65,48 @@ import { Session } from "../models/classes";
 
 // 	const returnArray = [];
 // 	console.log(returnArray);
-	
+
 // 	await generageCombination(sectionList, [], returnArray);
 // 	console.log(returnArray);
 // 	return returnArray;
 // }
 
-function instanciarSessiones(arraySession) {
-	
-}
 
-function instanciarSecciones(arraySecciones) {
-	
-}
+async function instanciarTodo(materias:Array<any>, sectionsArr:Array<any>) {
+	const a =new Career("Ingeniería en Computación");
+	let numeroSec = 0;
+	let numeroSub = 0;
+	const materiasArr = [];
+	let sessionsArr: Session[] = [];
+	let sectionsArrTemp = [];
+	for await (const materia of materias) {
+		await materia.populate("sections");
+		const materiaTemp=new Subject(materia.name, [], a);
+		sessionsArr = [];
+		for await (const section of materia.sections) {
+			for await (const sección of sectionsArr) {
+				if (section._id.equals(sección._id)) {
+					numeroSec++;
+					sección.sessions.forEach((session:any) => {
+						sessionsArr.push(new Session(session.day, session.start, session.end));
+					});
+					sectionsArrTemp.push(new Section(sección.nrc, sección.teacher, sessionsArr, materiaTemp));
+				}
+			}
+		}
+		if (numeroSec > 0) {
+			materiaTemp.sections = sectionsArrTemp;
+			numeroSub++;
+			materiasArr.push(materiaTemp);
+		}
+		sectionsArrTemp = [];
+		numeroSec = 0;
+	}
 
-function instanciarMaterias(arrayMaterias) {
-	
-}
-
-function instanciarTodo() {
-	
+	if(numeroSub < 1){
+		throw new Error("FAILED TO GENERATE SCHEDULES: A subject is not found");
+	}
+	return materiasArr;
 }
 
 export const pluginSchedule = <T extends string>(
@@ -111,36 +133,27 @@ export const pluginSchedule = <T extends string>(
 				}),
 			);
 			const sectionsArr = sections.flat();
-			
 			//una busqueda en db.subjectModel para buscar el número de materias que contengan las secciones
-			let numeroSec = 0;
-			let numeroSub = 0;
 			const materias = await db.subjectModel.find({});
-			for await (const materia of materias) {
-				await materia.populate("sections");
-				for await (const section of materia.sections) {
-					for await (const sección of sectionsArr) {
-						if (section._id.equals(sección._id)) {
-							instanciarSessiones(sección)
-							numeroSec++;
-						}
-					}
-				}
-				if (numeroSec > 0) {
-					numeroSub++;
-				}
-				numeroSec = 0;
-			}
 
-			if(numeroSub < 1){
-				console.error("FAILED TO GENERATE SCHEDULES: A subject is not found");
-				return JSON.stringify(undefined);
-			}
+			const materiasArr=await instanciarTodo(materias, sectionsArr);
+
 			// console.error(`Numero de materias: ${numeroSub}`, `Numero de secciones: ${sectionsArr.length}`);
+			console.log(materiasArr);
+			let schedules = new Array();
+			const scheduleInicial = new Schedule(new User(owner,"algo",4,[]), []);
+			Schedule.recursiveSchedulePush(0, materiasArr, scheduleInicial, schedules);
+			schedules = Schedule.filtrarHorariosPorMaterias(schedules, materiasArr);
+			console.log("horarios\n",Bun.inspect(schedules,{colors:true,depth: 4}));
 			
 			// const schedules = await GenerateSchedules(sectionsArr, numeroSub);
+			for (const schedule of schedules) {
+				for (const section of schedule.sections) {
+					section.subject =[];
+				}
+			}
 
-			return JSON.stringify([]);
+			return JSON.stringify(schedules);
 		})
 		.get("/api/schedules/save_schedule", async ({ query }) => {
 			const owner = query.owner;
@@ -178,7 +191,7 @@ export const pluginSchedule = <T extends string>(
 
 			user.save();
 
-			return JSON.stringify(newSchedule);
+			return JSON.stringify([]);
 		})
 		.get("/api/schedule/get_schedule_from_id", async ({ query }) => {
 			if (query.id === undefined) {
