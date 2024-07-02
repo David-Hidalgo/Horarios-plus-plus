@@ -207,6 +207,8 @@ function Course({
 export default function GenerationInterface() {
   const [loadedSubjects, setLoadedSubjects] = React.useState<ISubject[]>();
   const [generatedSchedules, setGeneratedSchedules] =
+  React.useState<ISchedule[]>();
+  const [originalSchedules, setOriginalSchedules] =
     React.useState<ISchedule[]>();
 
   React.useEffect(() => {
@@ -460,6 +462,7 @@ export default function GenerationInterface() {
 					}),
 				);
 				setGeneratedSchedules(scheduleList);
+        setOriginalSchedules(scheduleList);
         console.log(scheduleList);
 			});
 	}
@@ -491,6 +494,24 @@ export default function GenerationInterface() {
     }
   }
 
+  function cambiarDiasLibres(dia: string){
+    const día = Number.parseInt(dia);
+    setGeneratedSchedules(
+      originalSchedules?.filter((schedule) => {
+      let va=true
+      // biome-ignore lint/complexity/noForEach: <explanation>
+      schedule.sectionList.forEach((section) => {
+        section.sessionList.forEach((session) => {
+          if(session.day===día){
+            va=false;
+          }
+        });
+      });
+      return va;
+    }
+    ))
+  }
+
   return (
     <div>
       <NavigationBar />
@@ -513,9 +534,16 @@ export default function GenerationInterface() {
         {generatedSchedules !== undefined && (
           <div className="schedule-box">
             <div className="action-buttons">
-              <button className="filter-button" type="button">
-                filter
-              </button>
+              <select className="filter-button" onChange={(e)=>{cambiarDiasLibres(e.target.value)}}>
+                filtro Días Libres
+                <option value="1">Lunes</option>
+                <option value="2">Martes</option>
+                <option value="3">Miercoles</option>
+                <option value="4">Jueves</option>
+                <option value="5">Viernes</option>
+                <option value="6">Sabado</option>
+                <option value="0">Domingo</option>
+              </select>
             </div>
 
             <ScheduleContainer
