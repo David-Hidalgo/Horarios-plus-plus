@@ -483,6 +483,7 @@ export default function GenerationInterface() {
   function saveSchedule(schedule?: ISchedule) {
     if (schedule === undefined) {
       return async () => {
+        // pushNotification("No se ha seleccionado un horario", "error");tr
         console.error("No se ha seleccionado un horario");
       };
     }

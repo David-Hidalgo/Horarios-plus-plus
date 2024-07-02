@@ -902,6 +902,10 @@ export default function TimeBlockInterface() {
 		deleteSubjectFromDatabase(subject);
 	}
 
+	function saveToServer(){
+
+	}
+
 	return (
 		<div>
 			<NavigationBar />
@@ -944,7 +948,7 @@ export default function TimeBlockInterface() {
 							addClassBind={addClassToSection}
 							removeClassBind={removeClassFromSection}
 							updateClassBind={updateClassFromSection}
-							saveDataBind={() => {window.location.href = "/time_blocks"}}
+							saveDataBind={() => {saveToServer()}}
 						/>
 					)}
 				</div>
