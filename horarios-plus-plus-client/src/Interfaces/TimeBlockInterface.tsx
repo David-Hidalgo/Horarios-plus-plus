@@ -5,6 +5,7 @@ import NavigationBar from "./NavigationBar";
 import "./TimeBlockInterface.css";
 import { set } from "mongoose";
 import { string } from "zod";
+import toast, {Toaster} from "react-hot-toast";
 
 
 interface ISession {
@@ -56,6 +57,8 @@ interface EditableSectionContainerProperties {
 interface HourSelectorProperties {
 	changeBind: any;
 	dateBind: Date;
+	cambio: boolean;
+	setCambio: any;
 }
 
 interface CourseProperties {
@@ -72,11 +75,15 @@ interface CourseProperties {
 interface DaySelectorProperties {
 	changeBind: any;
 	classBind: ISession;
+	cambio: boolean
+	setCambio: any;
 }
 
 interface TimeBlockProperties {
 	changeBind: any;
 	classBind: ISession;
+	cambio: boolean;
+	setCambio: any;
 }
 
 interface ActionableButton {
@@ -182,12 +189,22 @@ function Course({
 	);
 }
 
-function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
+function HourSelector({ changeBind, dateBind , cambio, setCambio}: HourSelectorProperties) {
 	// we use new Date() to avoid changing it HERE by reference
 	// Since we want to change it in the changeBind, not here
+	const [hours, setHours] = React.useState(dateBind.getHours());
+	const [minutes, setMinutes] = React.useState(dateBind.getMinutes());
 
+	React.useEffect(() => {
+		if(cambio){
+			setHours(dateBind.getHours());
+			setMinutes(dateBind.getMinutes());
+			setCambio(false);
+		}
+	}, [cambio]);
 	const handleHourChange = (event: any) => {
 		let toSend = new Date(0);
+		setHours(event.target.value);
 		toSend.setHours(event.target.value);
 		toSend.setMinutes(dateBind.getMinutes());
 		changeBind(toSend);
@@ -196,13 +213,14 @@ function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
 	const handleMinutesChange = (event: any) => {
 		let toSend = new Date(0);
 		toSend.setHours(dateBind.getHours());
+		setMinutes(event.target.value);
 		toSend.setMinutes(event.target.value);
 		changeBind(toSend);
 	};
 
 	return (
 		<div className="hour-selection-container">
-			<select value={dateBind.getHours()} onChange={handleHourChange}>
+			<select value={hours} onChange={handleHourChange}>
 				<option value="6">6</option>
 				<option value="7">7</option>
 				<option value="8">8</option>
@@ -219,7 +237,7 @@ function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
 				<option value="19">19</option>
 				<option value="20">20</option>
 			</select>
-			<select value={dateBind.getMinutes()} onChange={handleMinutesChange}>
+			<select value={minutes} onChange={handleMinutesChange}>
 				<option value="00">00</option>
 				<option value="15">15</option>
 				<option value="30">30</option>
@@ -229,13 +247,23 @@ function HourSelector({ changeBind, dateBind }: HourSelectorProperties) {
 	);
 }
 
-function DaySelector({ classBind, changeBind }: DaySelectorProperties) {
+function DaySelector({ classBind, changeBind, cambio, setCambio }: DaySelectorProperties) {
+	const [day, setDay] = React.useState(classBind.day);
+
+	React.useEffect(() => {
+		if(cambio){
+			setDay(classBind.day);
+			setCambio(false);
+		}
+	}, [cambio]);
+
 	const handleDayChange = (event: any) => {
+		setDay(event.target.value);
 		changeBind(classBind, { ...classBind, day: event.target.value });
 	};
 
 	return (
-		<select value={classBind.day} onChange={handleDayChange}>
+		<select value={day} onChange={handleDayChange}>
 			<option value="1">Lunes</option>
 			<option value="2">Martes</option>
 			<option value="3">Miercoles</option>
@@ -248,27 +276,47 @@ function DaySelector({ classBind, changeBind }: DaySelectorProperties) {
 }
 
 
-function TimeBlock({ changeBind, classBind }: TimeBlockProperties) {
-	const [showTimeError, setShowTimeError] = React.useState(false);
-	const timeErrorMessage = "La hora de inicio no puede ser mayor a la hora de fin";
+function TimeBlock({ changeBind, classBind, cambio, setCambio }: TimeBlockProperties) {
+	 const [showTimeError, setShowTimeError] = React.useState(false);
+	// const timeErrorMessage = "La hora de inicio no puede ser mayor a la hora de fin";
 	function updateStart(start: Date) {
 		if(changeBind(classBind, { ...classBind, start: start })===1){
-			setShowTimeError(true);
+			toast.error(
+				(t) => (
+				  <span className="Not-Error">
+					La hora de inicio no puede ser mayor a la hora de fin{"		"}
+					<button onClick={() => toast.dismiss(t.id)}>OK</button>
+				  </span>
+				),
+				{
+				  duration: Infinity
+				}
+			  );
 		}else{setShowTimeError(false);}
 	}
 
 	function updateEnd(end: Date) {
 		if(changeBind(classBind, { ...classBind, end: end })===1){
-			setShowTimeError(true);
+			toast.error(
+				(t) => (
+				  <span className="Not-Error">
+					La hora de inicio no puede ser mayor a la hora de fin{"		"}
+					<button onClick={() => toast.dismiss(t.id)}>OK</button>
+				  </span>
+				),
+				{
+				  duration: Infinity
+				}
+			  );
 		}else{setShowTimeError(false);}
 	}
 
 	return (<><div className="timeblock-container">
-				{showTimeError && <div className="time-error">{timeErrorMessage}</div>}
+				{/*showTimeError && <div className="time-error">{timeErrorMessage}</div>*/}
 				<li className="timeblock-container-selector">
-					<DaySelector changeBind={changeBind} classBind={classBind} />
-					<HourSelector changeBind={updateStart} dateBind={classBind.start} />
-					<HourSelector changeBind={updateEnd} dateBind={classBind.end} />
+					<DaySelector changeBind={changeBind} classBind={classBind} cambio={cambio} setCambio={setCambio}/>
+					<HourSelector changeBind={updateStart} dateBind={classBind.start} cambio={cambio} setCambio={setCambio}/>
+					<HourSelector changeBind={updateEnd} dateBind={classBind.end} cambio={cambio} setCambio={setCambio}/>
 				</li>
 			</div>
 			</>
@@ -299,6 +347,7 @@ function EditableSectionContainer({
 	const [nrc, setNRC] = React.useState(selectedSection.nrc);
 	const [teacher, setTeacher] = React.useState(selectedSection.teacher);
 	const [showNRCError, setShowNRCError] = React.useState(false);
+	const [cambioHora, setCambioHora] = React.useState(false);
 	const nrcErrorMessage = "NRC ya existente";
 	React.useEffect(() => {
 	if(cambio){
@@ -320,7 +369,9 @@ function EditableSectionContainer({
 	function updateClassTime(oldSession: ISession, newSession: ISession) {
 		if(updateClassBind(selectedSection, oldSession, newSession)===undefined){
 			return 1;
-		}else{return 0}	
+		}else{
+			setCambioHora(true);
+			return 0}	
 	}
 
 	function updateSectionNRC(event: any) {
@@ -356,8 +407,14 @@ function EditableSectionContainer({
 	function guardar() {
 		if(changedSection!==undefined){
 		saveDataBind(changedSection.oldSection, changedSection.newSection);
+		setChangedSection(undefined);
 		}else{
-			//pushNotification
+			if(!cambioHora){
+			toast("No se hicieron cambios para guardar", {icon:"☝️🥸"})
+			}else{
+				toast.success("Cambios guardados con éxito");
+				setCambioHora(false);
+			}
 		}
 	}
 
@@ -395,7 +452,7 @@ function EditableSectionContainer({
 				{selectedSection.sessionList.map((value) => {
 					return (
 						<div className="day-buttons">
-							<TimeBlock changeBind={updateClassTime} classBind={value} />
+							<TimeBlock changeBind={updateClassTime} classBind={value} cambio={cambio} setCambio={setCambio} />
 							<div className="delete-day">
 								<button onClick={() => removeClass(value)} type="button">
 									{" "}
@@ -629,7 +686,12 @@ export default function TimeBlockInterface() {
 			sessionList: [],
 			teacher: " ",
 		};
-		saveSectionToSubject(subject, createdSection);
+		toast.promise(saveSectionToSubject(subject, createdSection), {
+			loading: "Creando sección",
+			success: "Sección creada con éxito",
+			error: "Error al la crear sección",
+		});
+		//saveSectionToSubject(subject, createdSection);
 	}
 
 	async function deleteSectionFromDatabase(section: ISection) {
@@ -728,7 +790,13 @@ export default function TimeBlockInterface() {
 			console.log("Updating");
 			return false;
 		}
-		updateSectionServer(oldSection, newSection);
+		//updateSectionServer(oldSection, newSection);
+		toast.promise(updateSectionServer(oldSection, newSection), {
+			loading: "Actualizando seccion",
+			success: "Datos guardados con éxito",
+			error: "Error al actualizar seccion",
+		});
+		
 	}
 
 	async function deleteSessionFromSection(
@@ -798,7 +866,12 @@ export default function TimeBlockInterface() {
 		section.sessionList.push(newSession);
 
 		if (section.sessionList.includes(newSession)) {
-			saveNewSessionToSection(newSession, section);
+			toast.promise(saveNewSessionToSection(newSession, section), {
+				loading: "Creando clase",
+				success: "Clase creada con éxito",
+				error: "Error al crear clase",
+			});
+			//saveNewSessionToSection(newSession, section);
 		}
 		return section;
 	}
@@ -808,7 +881,12 @@ export default function TimeBlockInterface() {
 		session: ISession,
 	): ISection {
 		section.sessionList = section.sessionList.filter((y) => y !== session);
-		deleteSessionFromSection(session, section);
+		toast.promise(deleteSessionFromSection(session, section), {
+			loading: "Eliminando clase",
+			success: "Clase eliminada con éxito",
+			error: "Error al eliminar clase",
+		});
+		//deleteSessionFromSection(session, section);
 		return section;
 	}
 
@@ -884,7 +962,6 @@ export default function TimeBlockInterface() {
 				if (data === undefined) {return;}})
 			.finally(() => {
 				const newValue = allow_change ? newSubject : oldSubject;
-				//pushNotification
 				console.log(`Se actualizo el curso ${oldSubject.name} a ${newSubject.name}`);
 				setLoadedSubjects(
 					loadedSubjects?.map((x) => {
@@ -938,17 +1015,21 @@ export default function TimeBlockInterface() {
 
 	function saveSubjectServer(){
 		if(!puedeGuardar){
-			//pushNotification
+			toast.error("No se pueden guardar 2 cursos con el mismo nombre");
 			console.log("No se puede guardar, hay errores");
 			return;
 		}
 		if(changedSubjects.length===0){
-			//pushNotification
-			console.log("No se puede guardar, no hay cambios");
+			toast("No se realizó ningún cambio",{ icon: "🧐"});
 			return;
 		}
 		for(let x of changedSubjects){
-			updateSubjectServer(x.oldSubject, x.newSubject);
+			toast.promise(updateSubjectServer(x.oldSubject, x.newSubject), {
+				loading: "Actualizando curso...",
+				success: "Curso actualizado exitosamente",
+				error: "Error al actualizar curso"
+			});
+			//updateSubjectServer(x.oldSubject, x.newSubject);
 		}
 		setChangedSubjects([]);
 	}
@@ -986,7 +1067,12 @@ export default function TimeBlockInterface() {
 			name: generateName(),
 			sectionList: [],
 		};
-		addSubjectServer(newSubject);
+		toast.promise(addSubjectServer(newSubject), {
+			loading: "Creando curso...",
+			success: "Curso creado exitosamente",
+			error: "No se pudo crear el curso, intente mas tarde",
+		});
+		//addSubjectServer(newSubject);
 	
 	}
 
@@ -999,12 +1085,10 @@ export default function TimeBlockInterface() {
 			})
 			.then((data) => {
 				if (data === undefined) {
-					//pushNotification
 					console.error("No se pudo eliminar el curso");
 					return;
 				}
 				if(data.message==="Subject deleted successfully")
-					//pushNotification
 					console.log("Curso eliminado con exito");
 			})
 	}
@@ -1017,13 +1101,22 @@ export default function TimeBlockInterface() {
 		});
 		setLoadedSubjects(loadedSubjects?.filter((x) => x !== subject));
 		
-		deleteSubjectFromDatabase(subject);
+		toast.promise(deleteSubjectFromDatabase(subject), {
+			loading: "Eliminando curso...",
+			success: "Curso eliminado exitosamente",
+			error: "No se pudo eliminar el curso, intente mas tarde",
+		});
+		//deleteSubjectFromDatabase(subject);
 	}
 
 	return (
 		<div>
 			<NavigationBar />
 			<div className="main-container">
+			<Toaster
+				position="bottom-right"
+				reverseOrder={false}
+				/>
 				<div className="course-box-container">
 					<CourseSemesterContainer/>
 					<div>

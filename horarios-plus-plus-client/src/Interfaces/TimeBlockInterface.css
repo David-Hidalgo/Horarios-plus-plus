@@ -241,3 +241,30 @@ li {
 }
 
 
+.Not-Error button {
+  background-color: red;
+  animation: buttonAnimation 1s infinite;
+}
+
+.Not-Error button:hover {
+  background-color: rgb(254, 100, 100);
+}
+
+.Not-Error button:active {
+  background-color: rgb(255, 226, 226);
+}
+
+@keyframes buttonAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+
