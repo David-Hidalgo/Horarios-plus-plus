@@ -69,7 +69,7 @@ import Elysia, { t } from "elysia";
 				}
 
 				const newSession = new db.sessionModel({
-					day: 0,
+					day: 1,
 					start: query.start,
 					end: query.end,
 				});

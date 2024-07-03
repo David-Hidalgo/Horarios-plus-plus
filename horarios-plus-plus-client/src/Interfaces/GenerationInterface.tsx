@@ -517,19 +517,21 @@ export default function GenerationInterface() {
     if (dia!=="escoja") {
       setGeneratedSchedules(
         originalSchedules?.filter((schedule) => {
-      let va=true
-      // biome-ignore lint/complexity/noForEach: <explanation>
-      schedule.sectionList.forEach((section) => {
-        section.sessionList.forEach((session) => {
-          if(session.day===día){
-            va=false;
-          }
-        });
-      });
-      return va;
+            let va=true
+            // biome-ignore lint/complexity/noForEach: <explanation>
+          schedule.sectionList.forEach((section) => {
+            section.sessionList.forEach((session) => {
+              if(session.day===día){
+                va=false;
+              }
+            });
+          });
+          return va;
+        }
+        ))
+    }else{
+      setGeneratedSchedules(originalSchedules);
     }
-  ))
-  }
   }
 
   return (
@@ -563,7 +565,7 @@ export default function GenerationInterface() {
                 <option value="4">Jueves</option>
                 <option value="5">Viernes</option>
                 <option value="6">Sabado</option>
-                <option value="0">Domingo</option>
+                <option value="7">Domingo</option>
               </select>
             </div>
 
