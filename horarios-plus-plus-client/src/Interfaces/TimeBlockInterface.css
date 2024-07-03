@@ -186,9 +186,10 @@ li {
 }
 .save-subject {
   display: flex;
-  flex-flow: column;
+  flex-flow: wrap;
+  justify-content: center;
+  align-items: center;
   padding: 30px;
-  margin: 15px;
   border-radius: 15px;
   background-color: var(--background-semi-dark-color);
 }
@@ -202,31 +203,13 @@ li {
   margin-left: auto;
 }
 
-.save-subject-form {
-  display: flex;
-  flex-flow: column;
-  margin-top: 20px;
-}
 
-.save-subject-form input {
-  margin-bottom: 10px;
-  padding: 5px;
-}
-
-.save-subject-form button {
-  background-color: var(--background-semi-light-color);
-  padding: 10px 20px;
-  align-self: flex-start;
-}
-
-.save-subject-form button:hover {
-  background-color: var(--background-light-color);
-}
 .add-subject {
   display: flex;
-  flex-flow: column;
+  flex-flow: wrap;
+  justify-content: center;
+  align-items: center;
   padding: 30px;
-  margin: 15px;
   border-radius: 15px;
   background-color: var(--background-semi-dark-color);
 }
@@ -240,24 +223,21 @@ li {
   margin-left: auto;
 }
 
-.add-subject-form {
-  display: flex;
-  flex-flow: column;
-  margin-top: 20px;
-}
 
-.add-subject-form input {
-  margin-bottom: 10px;
-  padding: 5px;
-}
-
-.add-subject-form button {
-  background-color: var(--background-semi-light-color);
+.add-subject button {
   padding: 10px 20px;
   align-self: flex-start;
+  margin: 10px;
 }
 
-.add-subject-form button:hover {
-  background-color: var(--background-light-color);
+.save-subject button {
+  padding: 10px 20px;
+  align-self: flex-start;
+  margin: 10px;
 }
+
+.centrar {
+  padding: 15px;
+}
+
 

@@ -4,6 +4,7 @@ import CourseSemesterContainer from "./CourseSemesterContainer";
 import NavigationBar from "./NavigationBar";
 import "./TimeBlockInterface.css";
 import { set } from "mongoose";
+import { string } from "zod";
 
 
 interface ISession {
@@ -11,6 +12,11 @@ interface ISession {
 	start: Date;
 	end: Date;
 	section: ISection;
+}
+
+interface CISection {
+	newSection: ISection;
+	oldSection: ISection;
 }
 
 interface ISection {
@@ -33,11 +39,13 @@ interface ICareer {
 
 interface EditableSectionContainerProperties {
 	selectedSection: ISection;
-	updateSectionBind: any;
+	puedeActualizar: any;
 	addClassBind: any;
 	removeClassBind: any;
 	updateClassBind: any;
 	saveDataBind: any;
+	cambio: boolean;
+	setCambio: any;
 }
 
 interface HourSelectorProperties {
@@ -269,13 +277,28 @@ function SaveButton({ action }: ActionableButton) {
 
 function EditableSectionContainer({
 	selectedSection,
-	updateSectionBind,
+	puedeActualizar,
 	addClassBind,
 	removeClassBind,
 	updateClassBind,
 	saveDataBind,
+	cambio,
+	setCambio,
 }: EditableSectionContainerProperties ){
-	
+	const [changedSection,setChangedSection]=React.useState<CISection|undefined>(undefined);
+	const [nrc, setNRC] = React.useState(selectedSection.nrc);
+	const [teacher, setTeacher] = React.useState(selectedSection.teacher);
+	const [showNRCError, setShowNRCError] = React.useState(false);
+	const nrcErrorMessage = "NRC ya existente";
+	React.useEffect(() => {
+	if(cambio){
+		setNRC(selectedSection.nrc);
+		setTeacher(selectedSection.teacher)
+		setShowNRCError(false);
+		setChangedSection(undefined);
+		setCambio(false);
+	}}, [cambio]);
+
 	function addNewClass() {
 		addClassBind(selectedSection);
 	}
@@ -291,23 +314,41 @@ function EditableSectionContainer({
 	}
 
 	function updateSectionNRC(event: any) {
+		setNRC(event.target.value);
 		let newNRC = event.target.value;
 		let newSection: ISection = selectedSection;
 		newSection = {
 			...newSection,
 			nrc: newNRC,
 		};
-		updateSectionBind(selectedSection, newSection);
+		if(puedeActualizar(selectedSection, newSection)){
+			setShowNRCError(false);
+			setChangedSection({oldSection:selectedSection, newSection:newSection});
+		}else{
+			setShowNRCError(true);
+		}
 	}
 
 	function updateSectionTeacher(event: any) {
-		let newTeacher = event.target.value;
+		setTeacher(event.target.value);
+		let newTeacher = event.target.value
 		let newSection: ISection = selectedSection;
 		newSection = {
 			...newSection,
 			teacher: newTeacher,
 		};
-		updateSectionBind(selectedSection, newSection);
+		if(puedeActualizar(selectedSection, newSection)){
+			setChangedSection({oldSection:selectedSection, newSection:newSection});
+		}
+
+	}
+
+	function guardar() {
+		if(changedSection!==undefined){
+		saveDataBind(changedSection.oldSection, changedSection.newSection);
+		}else{
+			//pushNotification
+		}
 	}
 
 	
@@ -315,19 +356,24 @@ function EditableSectionContainer({
 		<div className="editable-section-container">
 			<div className="editable-section-header">
 				<div className="basic-info">{selectedSection.subject.name}</div>
+				{showNRCError&&(<div className="Nrc-error">{nrcErrorMessage}</div>)}
 				<div>
 					NRC:{" "}
 					<input
-						value={selectedSection.nrc}
+						value={nrc}
+						placeholder={selectedSection.nrc}
 						onChange={updateSectionNRC}
 						type="text"
+						
 					/>
+					
 				</div>
 			</div>
 			<div className="teacher-container">
 				Teacher:{" "}
 				<input
-					value={selectedSection.teacher}
+					value={teacher}
+					placeholder={selectedSection.teacher}
 					onChange={updateSectionTeacher}
 					type="text"
 				/>
@@ -350,7 +396,7 @@ function EditableSectionContainer({
 					);
 				})}
 			</div>
-			<SaveButton action={saveDataBind} />
+			<SaveButton action={()=>{guardar()}} />
 		</div>
 	);
 }
@@ -358,6 +404,7 @@ function EditableSectionContainer({
 export default function TimeBlockInterface() {
 	const [selectedSection, setSelectedSection] = React.useState<ISection | undefined>(undefined);
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
+	const [cambio, setCambio] = React.useState(false);
 
 	let updating = false;
 
@@ -386,10 +433,10 @@ export default function TimeBlockInterface() {
 
 	React.useEffect(() => {
 		(async () => {
-			if (loadedSubjects) {
+			if (loadedSubjects!==undefined) {
 				return;
-			}
-			setLoadedSubjects(await loadFromServer());
+			}else{setLoadedSubjects(await loadFromServer());}
+			
 		})();
 	});
 
@@ -501,7 +548,7 @@ export default function TimeBlockInterface() {
 					nrc: section.nrc,
 					teacher: section.teacher,
 					subject: section.subject,
-					sessionList:data.map((aSession) => {
+					sessionList:data.map((aSession: { day: any; start: string | number | Date; end: string | number | Date; }) => {
 						const newSession: ISession = {
 							day: aSession.day,
 							start: new Date(aSession.start),
@@ -520,6 +567,7 @@ export default function TimeBlockInterface() {
 				};
 				console.log(newSection.sessionList);
 				setSelectedSection(newSection);
+				setCambio(true);
 			});
 	}
 
@@ -636,26 +684,38 @@ export default function TimeBlockInterface() {
 			.finally(() => {
 				console.log("Updating section");
 				let newValue = allow_change ? newSection : oldSection;
-				setLoadedSubjects(
-					loadedSubjects?.map((x) => {
-						x.sectionList.forEach(element => {
-							if (element.nrc===oldSection.nrc){ 
-								x.sectionList[x.sectionList.indexOf(element)] = newValue;
-								console.log("Se actualizo la seccion "+element.nrc+" a "+newValue.nrc);
-								}
-								
-							});
-						return x;
-						})
-				);
-				setSelectedSection(newValue);
+				if(allow_change){
+					setLoadedSubjects(
+						loadedSubjects?.map((x) => {
+							x.sectionList.forEach(element => {
+								if (element.nrc===oldSection.nrc){ 
+									x.sectionList[x.sectionList.indexOf(element)] = newValue;
+									console.log("Se actualizo la seccion "+element.nrc+" a "+newValue.nrc);
+									}
+									
+								});
+							return x;
+							})
+					);
+					setSelectedSection(newValue);
+				}
 				updating = false;
 			});
 	}
 
+	function puedeActualizar(oldSection:ISection, newSection: ISection){
+		if(oldSection.nrc !== newSection.nrc){
+			if(loadedSubjects?.find((x) => x.sectionList.find((y) => y.nrc === newSection.nrc) !== undefined) !== undefined){
+				return false;
+			}
+		}
+		return true;
+	}
+
 	function updateSectionFromCourse(oldSection: ISection, newSection: ISection) {
 		if (updating) {
-			return;
+			console.log("Updating");
+			return false;
 		}
 		updateSectionServer(oldSection, newSection);
 	}
@@ -902,16 +962,12 @@ export default function TimeBlockInterface() {
 		deleteSubjectFromDatabase(subject);
 	}
 
-	function saveToServer(){
-
-	}
-
 	return (
 		<div>
 			<NavigationBar />
 			<div className="main-container">
 				<div className="course-box-container">
-					<CourseSemesterContainer />
+					<CourseSemesterContainer/>
 					<div>
 						{loadedSubjects?.map((value) => {
 							return (
@@ -931,12 +987,19 @@ export default function TimeBlockInterface() {
 						<button onClick={() => {addSubject()}} type="button">
 							Añadir Curso
 						</button>
+						<button onClick={() => {setEditable(true)}} type="button">
+							Editar Cursos
+						</button>
 
 					</div>)}
 					{editable && (<div className="save-subject">
-						<button onClick={() => {setEditable(false);}} type="button">
+						<button onClick={() => {addSubject()}} type="button">
+							Añadir Curso
+						</button>
+						<button className="guardar-button" onClick={() => {setEditable(false);}} type="button">
 							Guardar
 						</button>
+						<div className="centrar"/>
 
 						</div>)}
 					</div>
@@ -944,11 +1007,14 @@ export default function TimeBlockInterface() {
 					{selectedSection !== undefined && (
 						<EditableSectionContainer
 							selectedSection={selectedSection}
-							updateSectionBind={updateSectionFromCourse}
+							//updateSectionBind={updateSectionFromCourse}
+							puedeActualizar={puedeActualizar}
 							addClassBind={addClassToSection}
 							removeClassBind={removeClassFromSection}
 							updateClassBind={updateClassFromSection}
-							saveDataBind={() => {saveToServer()}}
+							saveDataBind={updateSectionFromCourse}
+							cambio={cambio}
+							setCambio={setCambio}
 						/>
 					)}
 				</div>
