@@ -8,6 +8,7 @@ import { pluginSession } from "./routes/sessions.routes";
 import { pluginSection } from "./routes/sections.routes";
 import { pluginSubject } from "./routes/subjects.routes";
 import { pluginUser } from "./routes/user.routes";
+import { pluginEvent } from "./routes/event.routes";
 
 const username = encodeURIComponent("DanCas");
 const password = encodeURIComponent("queso");
@@ -33,6 +34,7 @@ class main {
 			.use(pluginSection({ prefix: "Sections" }, controladordb))
 			.use(pluginSubject({ prefix: "Sections" }, controladordb))
 			.use(pluginUser({ prefix: "Sections" }, controladordb))
+			.use(pluginEvent({ prefix: "Events" }, controladordb))
 
 			.onError(({ code }) => {
 				if (code === "NOT_FOUND") return "Route not found :{";

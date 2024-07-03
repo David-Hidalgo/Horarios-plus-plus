@@ -1,8 +1,6 @@
 // plugin.ts
 import { Elysia } from "elysia";
 import type { DBStarter } from "../controllers/db";
-import { number } from "zod";
-import { forEachChild } from "typescript";
 import { Career, Schedule, Section, Session, Subject, User } from "../models/classes";
 
 // async function GenerateSchedules(sectionList, subjectCount) {
