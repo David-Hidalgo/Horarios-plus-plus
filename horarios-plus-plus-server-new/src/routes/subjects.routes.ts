@@ -10,6 +10,16 @@ export const pluginSubject = <T extends string>(
 		name: "userRoutes",
 		seed: config,
 	})
+		.get("/api/subjects/get_subject_from_nrc", async ({ query }) => {
+			const subject_list = await db.subjectModel
+				.find({})
+				
+			return subject_list;
+		},{
+			query: t.Object({
+				nrc: t.String(),
+			}),
+		})
 		.get("/api/subjects/get_subjects", async ({ query }) => {
 			const subject_list = await db.subjectModel
 				.find({})

@@ -514,8 +514,9 @@ export default function GenerationInterface() {
 
   function cambiarDiasLibres(dia: string){
     const día = Number.parseInt(dia);
-    setGeneratedSchedules(
-      originalSchedules?.filter((schedule) => {
+    if (dia!=="escoja") {
+      setGeneratedSchedules(
+        originalSchedules?.filter((schedule) => {
       let va=true
       // biome-ignore lint/complexity/noForEach: <explanation>
       schedule.sectionList.forEach((section) => {
@@ -527,7 +528,8 @@ export default function GenerationInterface() {
       });
       return va;
     }
-    ))
+  ))
+  }
   }
 
   return (
@@ -552,8 +554,9 @@ export default function GenerationInterface() {
         {generatedSchedules !== undefined && (
           <div className="schedule-box">
             <div className="action-buttons">
-              <select className="filter-button" onChange={(e)=>{cambiarDiasLibres(e.target.value)}}>
+              <select className="filter-button" defaultValue="escoja" onChange={(e)=>{cambiarDiasLibres(e.target.value)}}>
                 filtro Días Libres
+                <option value="escoja">escoja</option>
                 <option value="1">Lunes</option>
                 <option value="2">Martes</option>
                 <option value="3">Miercoles</option>

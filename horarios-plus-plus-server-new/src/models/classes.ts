@@ -221,7 +221,7 @@ class User implements iUser {
 		let materias = Subject.obtenerMaterias(sections);
 		materias = Subject.sortSubjectsBySectionLength(materias);
 		let schedules = new Array();
-		let scheduleInicial = new Schedule(this, []);
+		const scheduleInicial = new Schedule(this, []);
 		Schedule.recursiveSchedulePush(0, materias, scheduleInicial, schedules);
 		schedules = Schedule.filtrarHorariosPorMaterias(schedules, materias);
 		return schedules;

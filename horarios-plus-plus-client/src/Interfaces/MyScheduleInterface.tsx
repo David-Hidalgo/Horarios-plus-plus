@@ -41,6 +41,23 @@ export default function MySheduleInterface() {
 			});
 	}
 
+	async function fetchSubjectFromNRC(
+		id: string,
+		section: ISection,
+	): Promise<ISubject> {
+		return await fetch(
+			`http://127.0.0.1:4000/api/subjects/get_subject_from_nrc?id=${id}`,
+			{ headers: { Accept: "application/json" } },
+		)
+			.then((response) => response.json())
+			.then((data) => {
+				const newSubject: ISubject = {
+					color: undefined,
+					name: data.name,
+				};
+				return newSubject;
+			});
+	}
 	async function fetchSubjectFromId(
 		id: string,
 		section: ISection,
@@ -51,7 +68,7 @@ export default function MySheduleInterface() {
 		)
 			.then((response) => response.json())
 			.then((data) => {
-				let newSubject: ISubject = {
+				const newSubject: ISubject = {
 					color: undefined,
 					name: data.name,
 				};
