@@ -79,8 +79,9 @@ export const pluginSection = <T extends string>(
 					nrc: t.String(),
 					teacher: t.String(),
 					subjectName: t.String(),
+					papa:t.String(),
 				}),
-			 },
+			},
 		)
 		.get(
 			"/api/section/update_section",

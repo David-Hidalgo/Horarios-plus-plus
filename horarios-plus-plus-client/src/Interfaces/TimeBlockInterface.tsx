@@ -70,6 +70,10 @@ interface CourseProperties {
 	puedeCambiar: any;
 	setPuedeGuardar: any;
 	removeSubjectBind: any;
+	cambio: boolean;
+	setCambio: any;
+	hayRepetidos: any;
+	updateBind: any;
 }
 
 interface DaySelectorProperties {
@@ -95,12 +99,31 @@ function Course({
 	newSectionBind,
 	removeSectionBind,
 	selectSectionBind,
+	removeSubjectBind,
+	updateBind,
 	editable,
 	puedeCambiar,
 	setPuedeGuardar,
-	removeSubjectBind,
+	cambio,
+	setCambio,
+	hayRepetidos
 }: CourseProperties) {
 	const [subjectName, setSubjectName] = React.useState(displayCourse.name);
+
+	React.useEffect(() => {
+		if(cambio){
+			setSubjectName(displayCourse.name);
+			setCambio(false);
+			if(!puedeCambiar(displayCourse,displayCourse,true)){
+				setNameError(true);
+				setPuedeGuardar(false);
+			}else{
+				setPuedeGuardar(true);
+				setNameError(false);
+			}
+		}
+	},[cambio]);
+
 	function addNewSection() {
 		displayCourse = newSectionBind(displayCourse);
 	}
@@ -120,16 +143,19 @@ function Course({
 			...newCourse,
 			name: newSubject,
 		};
-		if(puedeCambiar(displayCourse,newCourse)){
-			setPuedeGuardar(true);
-			setNameError(false);
-		}else{
+		if(!puedeCambiar(displayCourse,newCourse,false)){
 			setNameError(true);
 			setPuedeGuardar(false);
+		}else{
+			updateBind(displayCourse, newCourse);
+			setPuedeGuardar(true);
+			setNameError(false);
 		}
 	}
 
+
 	function deleteSubject() {
+		hayRepetidos();
 		removeSubjectBind(displayCourse, displayCourse.sectionList[0]);
 	}
 
@@ -474,6 +500,8 @@ export default function TimeBlockInterface() {
 	const [cambio, setCambio] = React.useState(false);
 	const [changedSubjects, setChangedSubjects] = React.useState<CISubject[]>([]);
 	const [puedeGuardar, setPuedeGuardar] = React.useState(false);
+	const [elimino, setElimino] = React.useState(false);
+	const[cambioMensaje, setCambioMensaje] = React.useState(false);
 	let updating = false;
 
 	// 1- get every nrc and add to array
@@ -650,12 +678,13 @@ export default function TimeBlockInterface() {
 			return;
 		}
 		return await fetch(
-			`http://127.0.0.1:4000/api/section/add_section_to_subject?nrc=${section.nrc}&teacher=${section.teacher}&subjectName=${subject.name}`,
+			`http://127.0.0.1:4000/api/section/add_section_to_subject?nrc=${section.nrc}&teacher=${section.teacher}&subjectName=${subject.name}&papa=${1}`,
 			{headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
 				console.error(e);
+				toast.error("Error al agregar a la base de datos");
 				console.error("No se pudo agregar a la base de datos");
 			})
 			.then((data) => {
@@ -669,6 +698,7 @@ export default function TimeBlockInterface() {
 					}),
 				);
 				setSelectedSection(section);
+				toast.success("Sección creada con éxito");
 			})
 			.finally(() => {
 				updating = false;
@@ -686,12 +716,13 @@ export default function TimeBlockInterface() {
 			sessionList: [],
 			teacher: " ",
 		};
-		toast.promise(saveSectionToSubject(subject, createdSection), {
-			loading: "Creando sección",
-			success: "Sección creada con éxito",
-			error: "Error al la crear sección",
-		});
-		//saveSectionToSubject(subject, createdSection);
+		// toast.promise(saveSectionToSubject(subject, createdSection), {
+		// 	loading: "Creando sección",
+		// 	success: "Sección creada con éxito",
+		// 	error: "Error al la crear sección",
+		// });
+		saveSectionToSubject(subject, createdSection);
+
 	}
 
 	async function deleteSectionFromDatabase(section: ISection) {
@@ -745,6 +776,7 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				console.error("Error actualizando base de datos ", e);
 				allow_change = false;
+				return e;
 			})
 			.then((data) => {
 				if (data === undefined) {
@@ -816,6 +848,7 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				saved = false;
 				console.error("ERROR unable to delete session from section ", e);
+				return e;
 			})
 			.finally(() => {
 				if (saved) {
@@ -841,6 +874,7 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				saved = false;
 				console.error("ERROR unable to create section ", e);
+				return e;
 			})
 			.then((data) => {
 				if (saved) {
@@ -957,6 +991,7 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				console.error("Error actualizando base de datos ", e);
 				allow_change = false;
+				return e;
 			})
 			.then((data) => {
 				if (data === undefined) {return;}})
@@ -975,16 +1010,40 @@ export default function TimeBlockInterface() {
 		
 	}
 	
-	function puedeCambiarNombre(oldSubject: ISubject, newSubject: ISubject) {
-		if(oldSubject.name !== newSubject.name){
+	function puedeCambiarNombre(oldSubject: ISubject, newSubject: ISubject, mismo:boolean) {
+		if(mismo){
+			let repetidos:string[]=[];
+			loadedSubjects?.forEach((x) => {
+				if(x.name===newSubject.name){
+					repetidos.push(x.name);
+				}
+			});
+			if(repetidos.length>1){
+				return false;
+			}else{
+				return true;
+			}
+		}
+		if((oldSubject.name !== newSubject.name)){
 			if(loadedSubjects?.find((x) => x.name === newSubject.name) !== undefined){
 				return false;
 			}
 		}
-		saveSubjectLocal(oldSubject, newSubject);
 		return true;
 	
 	}
+
+	function hayNombre(){
+		let nombres = loadedSubjects?.map((x) => x.name);
+		return nombres?.length !== new Set(nombres).size;
+	}
+
+	function hayNombreRepetido(){
+		if(hayNombre()){
+			
+		}
+	}
+
 
 	function saveSubjectLocal(oldSubject:ISubject, newSubject:ISubject){
 		setLoadedSubjects(
@@ -996,6 +1055,7 @@ export default function TimeBlockInterface() {
 				return newSubject;
 			})
 		);
+		setElimino(true);
 		
 	}
 
@@ -1020,6 +1080,11 @@ export default function TimeBlockInterface() {
 			return;
 		}
 		if(changedSubjects.length===0){
+			if(cambioMensaje){
+				toast.success("Los datos se guardaron con éxito");
+				setCambioMensaje(false);
+				return
+			}
 			toast("No se realizó ningún cambio",{ icon: "🧐"});
 			return;
 		}
@@ -1041,6 +1106,7 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {				
 				console.error("Error al crear curso ", e);
+				return e;
 			})
 			.then((data) => {
 				console.log(data);
@@ -1070,8 +1136,10 @@ export default function TimeBlockInterface() {
 		toast.promise(addSubjectServer(newSubject), {
 			loading: "Creando curso...",
 			success: "Curso creado exitosamente",
-			error: "No se pudo crear el curso, intente mas tarde",
+			error: "No se pudo crear el curso, intente mas tarde o recargue la página",
 		});
+		setElimino(true);
+		setCambioMensaje(true);
 		//addSubjectServer(newSubject);
 	
 	}
@@ -1082,6 +1150,7 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {
 				console.error("Error al eliminar curso ", e);
+				return e;
 			})
 			.then((data) => {
 				if (data === undefined) {
@@ -1094,18 +1163,33 @@ export default function TimeBlockInterface() {
 	}
 
 	function deleteSubject(subject: ISubject){
+
 		subject.sectionList.forEach((x) => {
 			if (x === selectedSection) {
 				setSelectedSection(undefined);
 			}
 		});
 		setLoadedSubjects(loadedSubjects?.filter((x) => x !== subject));
-		
-		toast.promise(deleteSubjectFromDatabase(subject), {
-			loading: "Eliminando curso...",
-			success: "Curso eliminado exitosamente",
-			error: "No se pudo eliminar el curso, intente mas tarde",
-		});
+
+		setElimino(true);
+		setCambioMensaje(true);
+		if(changedSubjects.find((x) => x.newSubject === subject) !== undefined){
+			let oldSubject = changedSubjects.find((x) => x.newSubject === subject)?.oldSubject;
+			if(oldSubject !== undefined)
+			toast.promise(deleteSubjectFromDatabase(oldSubject), {
+				loading: "Eliminando curso...",
+				success: "Curso eliminado exitosamente",
+				error: "No se pudo eliminar el curso, intente mas tarde",
+			});
+		}else{
+			toast.promise(deleteSubjectFromDatabase(subject), {
+				loading: "Eliminando curso...",
+				success: "Curso eliminado exitosamente",
+				error: "No se pudo eliminar el curso, intente mas tarde",
+			});
+
+		}
+
 		//deleteSubjectFromDatabase(subject);
 	}
 
@@ -1127,10 +1211,14 @@ export default function TimeBlockInterface() {
 									newSectionBind={addSectionToCourse}
 									removeSectionBind={removeSectionFromCourse}
 									selectSectionBind={changeSelectedSection}
+									updateBind={saveSubjectLocal}
 									editable={editable}
 									puedeCambiar={puedeCambiarNombre}
 									setPuedeGuardar={setPuedeGuardar}
 									removeSubjectBind={() => {deleteSubject(value)}}
+									cambio={elimino}
+									setCambio={setElimino}
+									hayRepetidos={hayNombreRepetido}
 								/>
 							);
 						})}

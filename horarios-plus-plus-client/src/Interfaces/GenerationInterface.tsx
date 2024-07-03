@@ -485,6 +485,7 @@ export default function GenerationInterface() {
 
   async function saveScheduleToServer(schedule: ISchedule) {
     const nrcs = schedule.sectionList.map((section) => section.nrc).join(",");
+    console.log(nrcs);
     await fetch(
       `http://127.0.0.1:4000/api/schedules/save_schedule?owner=${email}&nrcs=${nrcs}`,
       { method:"put",headers: { Accept: "application/json" } }
@@ -492,6 +493,8 @@ export default function GenerationInterface() {
       .then((response) => response)
       .catch((e) => {
         console.error("ERROR SAVING schedule ", e);
+      }).then((data) => {
+        console.log(data);
       });
   }
 

@@ -54,25 +54,25 @@ export class DBStarter {
 		);
 		type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
 
-		interface ievent {
-			teacher: string;
+		interface iEvent {
+			name: string;
 			sessions: iSession[];
 		}
 		type EventHydratedDocument = mongoose.HydratedDocument< iSection,{ 
 			events: mongoose.Types.DocumentArray<iSession> }>;
 		
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-				type eventModelType = mongoose.Model<ievent, {}, {}, {}, EventHydratedDocument,ievent>;
+				type eventModelType = mongoose.Model<iEvent, {}, {}, {}, EventHydratedDocument,iEvent>;
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		const eventSchema = new mongoose.Schema<ievent,eventModelType,{},{},{},{},ievent>({
-			teacher: { type: String, required: true },
+		const eventSchema = new mongoose.Schema<iEvent,eventModelType,{},{},{},{},iEvent>({
+			name: { type: String, required: true },
 			sessions: [
 				sessionSchema
 			],
 		});
 
-		this.eventModel = mongoose.model<ievent,eventModelType>(
+		this.eventModel = mongoose.model<iEvent,eventModelType>(
 			"event",
 			eventSchema,
 		);
