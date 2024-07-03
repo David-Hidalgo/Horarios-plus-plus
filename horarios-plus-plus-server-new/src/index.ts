@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import mongoose, { type ConnectOptions } from "mongoose";
 import { cors } from "@elysiajs/cors";
-import { DBController } from "./controllers/db";
+import { DBStarter } from "./controllers/db";
 
 import { pluginSchedule } from "./routes/schedules.routes";
 import { pluginSession } from "./routes/sessions.routes";
@@ -13,16 +13,16 @@ const username = encodeURIComponent("DanCas");
 const password = encodeURIComponent("queso");
 
 const uri =
-	//"mongodb://127.0.0.1:27017/horariospp";															//Conexión a base de datos de manera local
-	`mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+	"mongodb://127.0.0.1:27017/horariospp";															//Conexión a base de datos de manera local
+	// `mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
 
 const clientOptions: ConnectOptions = {};
-const controladordb: DBController = await DBController.run(uri);
+const controladordb: DBStarter = await DBStarter.run(uri);
 
 class main {
 	public controller;
 	public dbController;
-	constructor(controladordb: DBController) {
+	constructor(controladordb: DBStarter) {
 		this.dbController = controladordb;
 		const controlador = new Elysia()
 			.use(cors())

@@ -1,10 +1,10 @@
 import type mongoose from "mongoose";
-import type { DBController } from "../controllers/db";
+import type { DBStarter } from "../controllers/db";
 import Elysia, { t } from "elysia";
 
 	export const pluginSession = <T extends string>(
 		config: { prefix: T },
-		db: DBController,
+		db: DBStarter,
 	) =>
 		new Elysia({
 			name: "my-Session-plugin",

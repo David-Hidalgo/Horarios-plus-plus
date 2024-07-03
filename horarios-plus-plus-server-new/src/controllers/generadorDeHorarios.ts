@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import { Section, Session, Subject, Schedule, User, Career } from "../models/classes";
 // Description: Archivo de funciones para el manejo de archivos
-import {DBController} from './db';
+import {DBStarter} from './db';
 
-	const dbController:DBController =await DBController.run("mongodb://127.0.0.1/test");
+	const dbController:DBStarter =await DBStarter.run("mongodb://127.0.0.1/test");
 	const fecha1 = new Date(2024, 1, 1, 8, 0);
 	const fecha2 = new Date(2024, 1, 1, 10, 0);
 	const fecha3 = new Date(2024, 1, 1, 9, 0);

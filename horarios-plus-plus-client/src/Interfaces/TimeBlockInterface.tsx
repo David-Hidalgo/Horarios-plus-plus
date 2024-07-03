@@ -837,6 +837,7 @@ export default function TimeBlockInterface() {
 		oldSession: ISession,
 		newSession: ISession,
 	) {
+		console.log(newSession.start)
 		if (
 			newSession.start.getHours() * 60 + newSession.start.getMinutes() >=
 			newSession.end.getHours() * 60 + newSession.end.getMinutes()

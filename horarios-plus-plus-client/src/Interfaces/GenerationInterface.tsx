@@ -471,7 +471,7 @@ export default function GenerationInterface() {
     const nrcs = schedule.sectionList.map((section) => section.nrc).join(",");
     await fetch(
       `http://127.0.0.1:4000/api/schedules/save_schedule?owner=${email}&nrcs=${nrcs}`,
-      { headers: { Accept: "application/json" } }
+      { method:"put",headers: { Accept: "application/json" } }
     )
       .then((response) => response)
       .catch((e) => {

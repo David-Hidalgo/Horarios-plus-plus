@@ -1,6 +1,6 @@
 // plugin.ts
 import { Elysia } from "elysia";
-import type { DBController } from "../controllers/db";
+import type { DBStarter } from "../controllers/db";
 import { number } from "zod";
 import { forEachChild } from "typescript";
 import { Career, Schedule, Section, Session, Subject, User } from "../models/classes";
@@ -111,7 +111,7 @@ async function instanciarTodo(materias:Array<any>, sectionsArr:Array<any>) {
 
 export const pluginSchedule = <T extends string>(
 	config: { prefix: T },
-	db: DBController,
+	db: DBStarter,
 ) =>
 	new Elysia({
 		name: "my-Schedule-plugin",
@@ -155,7 +155,7 @@ export const pluginSchedule = <T extends string>(
 
 			return JSON.stringify(schedules);
 		})
-		.get("/api/schedules/save_schedule", async ({ query }) => {
+		.put("/api/schedules/save_schedule", async ({ query }) => {
 			const owner = query.owner;
 			const nrcs = query.nrcs;
 
@@ -187,7 +187,10 @@ export const pluginSchedule = <T extends string>(
 				console.error("FAILED TO SAVE SCHEDULE: A section is not found");
 				return JSON.stringify(undefined);
 			}	
-			user.schedule=[];
+			user.schedule=horarios.map((section:any) => {
+				return section._id;
+			}
+			);
 
 			user.save();
 

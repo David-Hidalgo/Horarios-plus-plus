@@ -1,9 +1,9 @@
-import type { DBController } from "../controllers/db";
+import type { DBStarter } from "../controllers/db";
 import Elysia, { t } from "elysia";
 
 export const pluginSection = <T extends string>(
 	config: { prefix: T },
-	db: DBController,
+	db: DBStarter,
 ) =>
 	new Elysia({ name: "sectionRoutes", seed: config })
 		.get(`${config.prefix}/hi`, () => "Hi")

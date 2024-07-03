@@ -13,13 +13,14 @@ interface iSubjectSchema extends iSubject {
 			sections: mongoose.Types.ObjectId[];
 			careers: mongoose.Types.ObjectId[];
 		}
-export class DBController {
+export class DBStarter {
 	public db: mongoose.Mongoose;
 	public sessionModel;
 	public sectionModel;
 	public subjectModel;
 	public careerModel;
 	public userModel;
+	public eventModel;
 	private constructor(mongoosea: mongoose.Mongoose) {
 		this.db = mongoosea;
 
@@ -34,9 +35,9 @@ export class DBController {
 
 		type SectionHydratedDocument = mongoose.HydratedDocument< iSection,{ 
 			sessions: mongoose.Types.DocumentArray<iSession> }>;
-
-		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		type SectionModelType = mongoose.Model<iSection, {}, {}, {}, SectionHydratedDocument,iSection>;
+			
+			// biome-ignore lint/complexity/noBannedTypes: <explanation>
+			type SectionModelType = mongoose.Model<iSection, {}, {}, {}, SectionHydratedDocument,iSection>;
 
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		const sectionSchema = new mongoose.Schema<iSection,SectionModelType,{},{},{},{},iSection>({
@@ -52,6 +53,29 @@ export class DBController {
 			sectionSchema,
 		);
 		type TSectionSchema = mongoose.InferSchemaType<typeof sectionSchema>;
+
+		interface ievent {
+			teacher: string;
+			sessions: iSession[];
+		}
+		type EventHydratedDocument = mongoose.HydratedDocument< iSection,{ 
+			events: mongoose.Types.DocumentArray<iSession> }>;
+		
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
+				type eventModelType = mongoose.Model<ievent, {}, {}, {}, EventHydratedDocument,ievent>;
+
+		// biome-ignore lint/complexity/noBannedTypes: <explanation>
+		const eventSchema = new mongoose.Schema<ievent,eventModelType,{},{},{},{},ievent>({
+			teacher: { type: String, required: true },
+			sessions: [
+				sessionSchema
+			],
+		});
+
+		this.eventModel = mongoose.model<ievent,eventModelType>(
+			"event",
+			eventSchema,
+		);
 
 		
 
@@ -99,7 +123,7 @@ export class DBController {
 		);
 		mongoose.connection.on("error", console.error.bind(console, "connection error:"));
 		const db = await require("mongoose");
-		return new DBController(new db.Mongoose());
+		return new DBStarter(new db.Mongoose());
 	}
 
 	public static async disconnect() {
