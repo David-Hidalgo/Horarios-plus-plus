@@ -71,16 +71,18 @@ export default function MySheduleInterface() {
 				console.error("ERROR Loading section ", e);
 			})
 			.then(async (data) => {
-				let newSection: ISection = {
+				const newSection: ISection = {
 					nrc: data.nrc,
-					teacher: data.teacher,
 				};
+				newSection.sessionList= data.sessions.map((session) => {
+					return {
+						day: session.day,
+						start: new Date(session.start),
+						end: new Date(session.end),
+						section: newSection
+					};
+				})
 				newSection.subject = await fetchSubjectFromId(data.subject, newSection);
-				newSection.sessionList = await Promise.all(
-					data.sessions.map(async (id: string) => {
-						return await fetchSessionFromId(id, newSection);
-					}),
-				);
 				return newSection;
 			});
 		return section;
@@ -104,7 +106,7 @@ export default function MySheduleInterface() {
 				console.log(data);
 				let newSchedule: ISchedule = {
 					sectionList: await Promise.all(
-						data.sections.map(async (id: string) => {
+						data.map(async (id: string) => {
 							return await loadSectionFromID(id);
 						}),
 					),
@@ -119,7 +121,7 @@ export default function MySheduleInterface() {
 			if (loadedSchedule) {
 				return;
 			}
-			setLoadedSchedule(await getSchedule());
+			setLoadedSchedule(await getSchedule());			
 		})();
 	});
 

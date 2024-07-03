@@ -126,7 +126,7 @@ export function schedulesRoutes(app) {
 		
 // 	});
 
-	app.get("/api/schedules/save_schedule", async (req, res) => {
+	app.put("/api/schedules/save_schedule", async (req, res) => {
 		const owner = req.query.owner;
 		let nrcs = req.query.nrcs;
 

@@ -217,7 +217,7 @@ export default function ScheduleViewer({
 	return (
 		<div className="grid-container">
 			{dayHours.map((hour, index) => {
-				if (index == 0)
+				if (index === 0)
 					return (
 						<div
 							className="center-box-contents"
@@ -239,8 +239,8 @@ export default function ScheduleViewer({
 								height: "100%",
 								gridRow: "span 4",
 								boxSizing: "border-box",
-								borderTop: "1px solid " + borderColor,
-								borderBottom: "1px solid " + borderColor,
+								borderTop: `1px solid ${borderColor}`,
+								borderBottom: `1px solid ${borderColor}`,
 							}}
 						>
 							<div> {hour} </div>
@@ -260,10 +260,10 @@ export default function ScheduleViewer({
 				return empty.map((mock, index) => {
 					return (
 						<>
-							{index == 0 && (
+							{index === 0 && (
 								<div
 									className="center-box-contents day-grid"
-									style={{ height: "100%", border: "1px solid " + borderColor }}
+									style={{ height: "100%", border: `1px solid ${borderColor}` }}
 								>
 									<div> {dayName} </div>
 								</div>
