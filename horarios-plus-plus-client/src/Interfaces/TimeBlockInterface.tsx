@@ -32,6 +32,11 @@ interface ISubject {
 	//career: Array<ICareer>
 }
 
+interface CISubject {
+	newSubject: ISubject;
+	oldSubject: ISubject;
+}
+
 interface ICareer {
 	name: string;
 	subjects: Array<ISubject>
@@ -59,7 +64,8 @@ interface CourseProperties {
 	removeSectionBind: any;
 	selectSectionBind: any;
 	editable: boolean;
-	updateSelectedSubject: any;
+	puedeCambiar: any;
+	setPuedeGuardar: any;
 	removeSubjectBind: any;
 }
 
@@ -83,9 +89,11 @@ function Course({
 	removeSectionBind,
 	selectSectionBind,
 	editable,
-	updateSelectedSubject,
+	puedeCambiar,
+	setPuedeGuardar,
 	removeSubjectBind,
 }: CourseProperties) {
+	const [subjectName, setSubjectName] = React.useState(displayCourse.name);
 	function addNewSection() {
 		displayCourse = newSectionBind(displayCourse);
 	}
@@ -98,17 +106,19 @@ function Course({
 	const nameErrorMessage = "Nombre de curso ya existente";
 
 	function updateSubject(event: any) {
+		setSubjectName(event.target.value);
 		let newSubject = event.target.value;
 		let newCourse: ISubject = displayCourse;
 		newCourse = {
 			...newCourse,
 			name: newSubject,
 		};
-		if(updateSelectedSubject(displayCourse,newCourse)){
+		if(puedeCambiar(displayCourse,newCourse)){
+			setPuedeGuardar(true);
 			setNameError(false);
-			displayCourse = newCourse;
 		}else{
 			setNameError(true);
+			setPuedeGuardar(false);
 		}
 	}
 
@@ -132,7 +142,7 @@ function Course({
 					<div className="inputs">
 						{nameError && <div className="name-error">{nameErrorMessage}</div>}
 						<input className="course-name"
-							value={displayCourse.name}
+							value={subjectName}
 							onChange={updateSubject}
 							placeholder="Nombre de la materia"
 							type="text"
@@ -405,7 +415,8 @@ export default function TimeBlockInterface() {
 	const [selectedSection, setSelectedSection] = React.useState<ISection | undefined>(undefined);
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
 	const [cambio, setCambio] = React.useState(false);
-
+	const [changedSubjects, setChangedSubjects] = React.useState<CISubject[]>([]);
+	const [puedeGuardar, setPuedeGuardar] = React.useState(false);
 	let updating = false;
 
 	// 1- get every nrc and add to array
@@ -858,7 +869,7 @@ export default function TimeBlockInterface() {
 		updating = true;
 		let allow_change = true;
 		const newName= newSubject.name;
-		console.log(`Actualizando nombre de ${oldSubject.name} a '${newName}'`);
+		console.log(`actualizando nombre de ${oldSubject.name} a '${newName}'`);
 		
 		return await fetch(
 			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldSubject.name}&newname=${newName}&section=i`,
@@ -870,13 +881,15 @@ export default function TimeBlockInterface() {
 				allow_change = false;
 			})
 			.then((data) => {
-				console.log(data);
-			})
+				if (data === undefined) {return;}})
 			.finally(() => {
 				const newValue = allow_change ? newSubject : oldSubject;
+				//pushNotification
+				console.log(`Se actualizo el curso ${oldSubject.name} a ${newSubject.name}`);
 				setLoadedSubjects(
 					loadedSubjects?.map((x) => {
-						if (x !== oldSubject) return x;
+						if (x !== oldSubject){return x;}
+						
 						return newValue;
 					})
 				);
@@ -885,17 +898,59 @@ export default function TimeBlockInterface() {
 		
 	}
 	
-	function updateSubjectFromName(oldSubject: ISubject, newSubject: ISubject) {
+	function puedeCambiarNombre(oldSubject: ISubject, newSubject: ISubject) {
 		if(oldSubject.name !== newSubject.name){
 			if(loadedSubjects?.find((x) => x.name === newSubject.name) !== undefined){
 				return false;
 			}
-			updateSubjectServer(oldSubject, newSubject);
-			return true;
 		}
-		updateSubjectServer(oldSubject, newSubject);
+		saveSubjectLocal(oldSubject, newSubject);
 		return true;
 	
+	}
+
+	function saveSubjectLocal(oldSubject:ISubject, newSubject:ISubject){
+		setLoadedSubjects(
+			loadedSubjects?.map((x) => {
+				if (x !== oldSubject){
+					return x;
+				}
+				pushChangedSubjects(oldSubject, newSubject);
+				return newSubject;
+			})
+		);
+		
+	}
+
+
+	function pushChangedSubjects(oldSubject:ISubject, newSubject:ISubject){
+		if(changedSubjects.find((x) => (x.oldSubject === oldSubject)||(x.newSubject===oldSubject)) === undefined){
+			changedSubjects.push({oldSubject:oldSubject, newSubject:newSubject});
+		}else{
+			setChangedSubjects(changedSubjects.map((x) => {
+				if(x.newSubject === oldSubject){
+					return {oldSubject:x.oldSubject, newSubject:newSubject};
+				}
+				return x;
+			}));
+		}
+	}
+
+	function saveSubjectServer(){
+		if(!puedeGuardar){
+			//pushNotification
+			console.log("No se puede guardar, hay errores");
+			return;
+		}
+		if(changedSubjects.length===0){
+			//pushNotification
+			console.log("No se puede guardar, no hay cambios");
+			return;
+		}
+		for(let x of changedSubjects){
+			updateSubjectServer(x.oldSubject, x.newSubject);
+		}
+		setChangedSubjects([]);
 	}
 
 	async function addSubjectServer(newSubject: ISubject) {
@@ -944,10 +999,12 @@ export default function TimeBlockInterface() {
 			})
 			.then((data) => {
 				if (data === undefined) {
+					//pushNotification
 					console.error("No se pudo eliminar el curso");
 					return;
 				}
 				if(data.message==="Subject deleted successfully")
+					//pushNotification
 					console.log("Curso eliminado con exito");
 			})
 	}
@@ -978,7 +1035,8 @@ export default function TimeBlockInterface() {
 									removeSectionBind={removeSectionFromCourse}
 									selectSectionBind={changeSelectedSection}
 									editable={editable}
-									updateSelectedSubject={updateSubjectFromName}
+									puedeCambiar={puedeCambiarNombre}
+									setPuedeGuardar={setPuedeGuardar}
 									removeSubjectBind={() => {deleteSubject(value)}}
 								/>
 							);
@@ -997,7 +1055,7 @@ export default function TimeBlockInterface() {
 						<button onClick={() => {addSubject()}} type="button">
 							Añadir Curso
 						</button>
-						<button className="guardar-button" onClick={() => {setEditable(false);}} type="button">
+						<button className="guardar-button" onClick={() => {if(puedeGuardar){setEditable(false)} saveSubjectServer();}} type="button">
 							Guardar
 						</button>
 						<div className="centrar"/>

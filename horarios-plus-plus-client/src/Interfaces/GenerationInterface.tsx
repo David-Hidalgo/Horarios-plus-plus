@@ -62,16 +62,31 @@ interface CourseProperties {
 interface ScheduleContainerProperties {
   shownShedules: ISchedule[];
   saveScheduleBind: any;
+  deselected: boolean;
+  setDeselected: any;
 }
 
 function ScheduleContainer({
   shownShedules,
   saveScheduleBind,
+  deselected,
+  setDeselected
 }: ScheduleContainerProperties) {
   const [selectedButton1, setSelectedButton1] = React.useState("button");
   const [selectedButton2, setSelectedButton2] = React.useState("button");
   const [selectedButton3, setSelectedButton3] = React.useState("button");
   const [selectedButton4, setSelectedButton4] = React.useState("button");
+
+  React.useEffect(() => {
+    if(deselected){
+      setSelectedButton1("button");
+      setSelectedButton2("button");
+      setSelectedButton3("button");
+      setSelectedButton4("button");
+      setDeselected(false);
+
+    }}, [deselected]);
+
   return (
     <div className="schedule-container">
       <div className="schedule-flex">
@@ -221,6 +236,7 @@ export default function GenerationInterface() {
   });
 
   const [selectedSchedule, setSelectedSchedule] = React.useState<ISchedule>();
+  const [deselected, setDeselected] = React.useState<boolean>(false);
 
   const [scheduleIndex, setScheduleIndex] = React.useState<number>(0);
 
@@ -360,7 +376,7 @@ export default function GenerationInterface() {
           nrc: section.nrc,
           teacher: section.teacher,
           subject: section.subject,
-          sessionList:data.map((aSession) => {
+          sessionList:data.map((aSession:{day:number; start: Date, end:Date})=> {
 						const newSession: ISession = {
 							day: aSession.day,
 							start: new Date(aSession.start),
@@ -491,6 +507,7 @@ export default function GenerationInterface() {
       };
     }
     return async () => {
+      // pushNotification("Horario guardado", "success");
       await saveScheduleToServer(schedule);
     }
   }
@@ -553,18 +570,21 @@ export default function GenerationInterface() {
                 scheduleIndex,
                 scheduleIndex + 4
               )}
+              deselected={deselected}
+              setDeselected={setDeselected}
+            
             />
 
             <div className="nav-buttons">
               <div className="ll-button">
-                <button onClick={() => setScheduleIndex(0)} type="button">
+                <button onClick={() => {setScheduleIndex(0); setDeselected(true)}} type="button">
                   &lt;&lt;
                 </button>
               </div>
               <div className="l-button">
                 <button
                   onClick={() =>
-                    setScheduleIndex(Math.max(0, scheduleIndex - 4))
+                    {setScheduleIndex(Math.max(0, scheduleIndex - 4)); setDeselected(true)}
                   }
                   type="button"
                 >
@@ -572,17 +592,18 @@ export default function GenerationInterface() {
                 </button>
               </div>
               <div className="m-button">
-                <button onClick={saveSchedule(selectedSchedule)} type="button">Guardar</button>
+                <button onClick={()=>{saveSchedule(selectedSchedule);  setDeselected(true)}} type="button">Guardar</button>
               </div>
               <div className="r-button">
                 <button
-                  onClick={() =>
+                  onClick={() =>{
                     setScheduleIndex(
                       Math.min(
                         Math.floor(generatedSchedules.length / 4) * 4,
                         scheduleIndex + 4
                       )
-                    )
+                    );
+                    setDeselected(true);}
                   }
                   type="button"
                 >
@@ -591,10 +612,11 @@ export default function GenerationInterface() {
               </div>
               <div className="rr-button">
                 <button
-                  onClick={() =>
+                  onClick={() =>{
                     setScheduleIndex(
                       Math.floor(generatedSchedules.length / 4) * 4
-                    )
+                    );
+                    setDeselected(true);}
                   }
                   type="button"
                 >
