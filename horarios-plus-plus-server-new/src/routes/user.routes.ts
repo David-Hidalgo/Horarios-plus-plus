@@ -158,7 +158,7 @@ export const pluginUser = <T extends string>(
 					return { message: "Failed to delete user: User not found"};
 				}
 
-				user.deleteOne();
+				await db.userModel.deleteOne({ email: email });
 
 				return { message: "User deleted successfully"};
 			},

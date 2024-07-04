@@ -35,12 +35,12 @@ interface UserContainerParams {
 	user: IUser;
 	updatePermision: any;
 	updateRol: any;
+	setCambio: any;
 
 }
 
-function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
+function UserContainer({user,updatePermision,updateRol,setCambio}:UserContainerParams) {
 	const username = user.email.substring(0, user.email.indexOf("@"));
-	const [editable, setEditable] = React.useState(false);
 	const [rol, setRol] = React.useState(transformarRol(user));
 
 	function updatePermisionL(permiso:string){
@@ -63,6 +63,29 @@ function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 		}
 	}
 
+	function eliminarCuentaDB(email:string) {
+		fetch(`http://localhost:4000/api/deleteUser?email=${email}`, {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: email }),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log(data);
+				if(data.message === "User deleted successfully"){
+					toast.success("Usuario eliminado");
+					setCambio(true);
+				}
+			}
+		)
+		
+	}
+
+	function eliminarCuenta(mail:string){
+		// console.log(mail);
+		eliminarCuentaDB(mail);
+	}
+
 	return (
 		<div className="user">
 			<div className="user-email" id={rol}>{username}</div>
@@ -75,6 +98,9 @@ function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 				<option value="si">Sí</option>
 				<option value="no">No</option>
 			</select>
+			<button className="eliminar-button" onClick={()=>eliminarCuenta(user.email)} type="button">
+				Eliminar
+			</button>
 		</div>
 	);
 }
@@ -94,6 +120,16 @@ export default function PermsInterface() {
 				setLoadedUsers(await fetchUsers());
 			})();
 		});
+		React.useEffect(() => {
+			(async () => {
+				if (editable) {
+					setLoadedUsers(await fetchUsers());
+					setEditable(false);
+
+				}
+			})();
+		});
+
 
 	async function fetchUsers() {
 		const users = await fetch("http://localhost:4000/api/get_usuarios", {
@@ -219,7 +255,7 @@ export default function PermsInterface() {
 								{
 									loadedUsers?.map((user) => {
 										return (
-											<UserContainer user={user} updatePermision={updatePermision} updateRol={updateRol}/>
+											<UserContainer user={user} updatePermision={updatePermision} updateRol={updateRol} setCambio={setEditable}/>
 										);
 									})
 								}
