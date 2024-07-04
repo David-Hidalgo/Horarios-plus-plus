@@ -106,24 +106,41 @@ class Section implements iSection {
 		return false;
 	}
 	public static sonCompatibles(section1: Section, section2: Section) {
-		for (let i = 0; i < section1.sessions.length; i++) {
-			for (let j = 0; j < section2.sessions.length; j++) {
-				if (section1.sessions[i].day === section2.sessions[j].day) {
+		for (const session1 of section1.sessions) {
+			console.log("session1",session1);
+			
+			for (const session2 of section2.sessions) {
+				console.log("session2",session2);
+				
+				console.log("entre a comparar");
+				
 					if (
-						section1.sessions[i].start >= section2.sessions[j].start &&
-						section1.sessions[i].start <= section2.sessions[j].end
-					) {
+						(session1.start.getTime() >= session2.start.getTime()) &&
+						(session1.start.getTime() <= session2.end.getTime())
+					){
+						console.log("false");
 						return false;
 					}
-					if (
-						section1.sessions[i].end >= section2.sessions[j].start &&
-						section1.sessions[i].end <= section2.sessions[j].end
-					) {
+						// (
+						// 	(
+						// 		session1.start.getTime() >= session2.start.getTime() &&
+						// 		session1.start.getTime() >= session2.end.getTime()
+						// 	)&&(
+						// 		session1.end.getTime() >= session2.start.getTime() && 
+						// 		session1.end.getTime() >= session2.end.getTime())
+							
+						// )||
+					if(
+						(session1.end.getTime() >= session2.start.getTime()) && 
+						(session1.end.getTime() <= session2.end.getTime())
+					)
+					{
+						console.log("false");
 						return false;
 					}
-				}
 			}
 		}
+		console.log("true salida sin saber");
 		return true;
 	}
 }
@@ -142,8 +159,13 @@ class Schedule {
 	public static compararScheduleSection(schedule: Schedule, newSection: Section):boolean{
 		let booleano = true;
 		schedule.sections.forEach((section) => {
+			console.log("entre " + section.subject.name , newSection.subject.name,"\n");
+			console.log("entre ",Bun.inspect(section,{depth:4,colors:true}),Bun.inspect(newSection,{depth:4,colors:true}),"\n");
+			
 			if (!Section.sonCompatibles(section, newSection)) {
+				
 				booleano = false;
+				console.log("entre " + section.nrc + " y " + newSection.nrc,"son compatibles?:",booleano);
 			}
 		});
 		return booleano;

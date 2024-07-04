@@ -34,7 +34,7 @@ export default function SignUpInterface() {
 			setShowSuccesful(true);
 		}else{
 			setshowMessageP(false);
-			setErrorMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número");
+			setErrorMessage("Formato de contraseña inválido");
 			setShowError(true);
 		}
 	}
@@ -103,30 +103,50 @@ export default function SignUpInterface() {
 			<NavigationBar />
 			<div className="main-container">
 				<div className="signup-container">
-					<div className="signup-bg">
-						<div className="signup-header">Crea un Usuario</div>
-						{showError && <div className="login-error">{errorMessage}</div>}
-            			{showSuccessful && <div className="login-succesful">{successfulMessage}</div>}
-						<div className="signup-user">
-							<input
-								value={email}
-								onChange={handleEmail}
-								placeholder="Introduzca un email"
-								type="text"
-							/>
+					<div className="signup-content">
+						<div className="signup-bg">
+							<div className="signup-header">Crea un Usuario</div>
+							{showError && <div className="login-error">{errorMessage}</div>}
+							{showSuccessful && <div className="login-succesful">{successfulMessage}</div>}
+							<div className="signup-user">
+								<input
+									value={email}
+									onChange={handleEmail}
+									placeholder="Introduzca un email"
+									type="text"
+								/>
+							</div>
+							<div className="signup-password">
+								<input
+									value={password}
+									onChange={handlePassword}
+									placeholder="Introduzca una contraseña"
+									type="text"
+								/>
+							</div>
+							<div className="signup-button">
+								<button onClick={handleClick} type="button">
+									Crear Cuenta
+								</button>
+							</div>
 						</div>
-						<div className="signup-password">
-							<input
-								value={password}
-								onChange={handlePassword}
-								placeholder="Introduzca una contraseña"
-								type="text"
-							/>
+						<div className="formato-contraseña">
+							<div className="formato-contraseña-header">Formato de contraseña</div>
+							<div className="formato-contraseña-text">
+								<ul>
+									<li>Al menos 8 caracteres</li>
+									<li>Al menos una letra mayúscula</li>
+									<li>Al menos una letra minúscula</li>
+									<li>Al menos un número</li>
+									<li>Al menos un carácter especial</li>
+								</ul>
+							</div>
 						</div>
-						<div className="signup-button">
-							<button onClick={handleClick} type="button">
-								Crear Cuenta
-							</button>
+					</div>
+					<div className="signup-footer">
+						<div className="signup-footer-text">
+							Ya tienes una cuenta?
+							<a href="/login"> Inicia Sesión</a>
 						</div>
 					</div>
 				</div>

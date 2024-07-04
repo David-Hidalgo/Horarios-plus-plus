@@ -3,73 +3,6 @@ import { Elysia } from "elysia";
 import type { DBStarter } from "../controllers/db";
 import { Career, Schedule, Section, Session, Subject, User } from "../models/classes";
 
-// async function GenerateSchedules(sectionList, subjectCount) {
-// 	function hourIntersects(x, y) {
-// 		let start_x = new Date(x.start);
-// 		start_x = start_x.getHours() * 60 + start_x.getMinutes();
-// 		let start_y = new Date(y.start);
-// 		start_y = start_y.getHours() * 60 + start_y.getMinutes();
-
-// 		let end_x = new Date(x.end);
-// 		end_x = end_x.getHours() * 60 + end_x.getMinutes();
-// 		let end_y = new Date(y.end);
-// 		end_y = end_y.getHours() * 60 + end_y.getMinutes();
-
-// 		return start_x <= end_y && start_y <= end_x;
-// 	}
-
-// 	async function generageCombination(originalArray, passedArray, finalArray) {
-// 		if (passedArray.length >= subjectCount) {
-// 			finalArray.push(passedArray);
-// 			return;
-// 		}
-// 		console.log('el array que se anda pasando\n',passedArray,'\n y el original',originalArray,'\n y el final',finalArray);
-		
-// 		for (let i = 0; i < originalArray.length; i++) {
-// 			if (passedArray.includes(originalArray.at(i))) {
-// 				continue;
-// 			}
-// 			if (
-// 				passedArray.some((value) =>
-// 					value.subject.equals(originalArray.at(i).subject),
-// 				)
-// 			) {
-// 				continue;
-// 			}
-
-// 			const sessionList = passedArray.at(i).sessions
-
-// 			if (sessionList.length === 0) {
-// 				continue;
-// 			}
-// 			if (
-// 				sessionList.some((x) =>
-// 					sessionList.some((y) => {
-// 						if (x === y) return false;
-// 						return x.day === y.day ? hourIntersects(x, y) : false;
-// 					}),
-// 				)
-// 			) {
-// 				continue;
-// 			}
-
-// 			await generageCombination(
-// 				originalArray,
-// 				passedArray.concat(originalArray.at(i)),
-// 				finalArray,
-// 			);
-// 		}
-// 	}
-
-// 	const returnArray = [];
-// 	console.log(returnArray);
-
-// 	await generageCombination(sectionList, [], returnArray);
-// 	console.log(returnArray);
-// 	return returnArray;
-// }
-
-
 async function instanciarTodo(materias:Array<any>, sectionsArr:Array<any>) {
 	const a =new Career("Ingeniería en Computación");
 	let numeroSec = 0;
@@ -80,13 +13,13 @@ async function instanciarTodo(materias:Array<any>, sectionsArr:Array<any>) {
 	for await (const materia of materias) {
 		await materia.populate("sections");
 		const materiaTemp=new Subject(materia.name, [], a);
-		sessionsArr = [];
-		for await (const section of materia.sections) {
-			for await (const sección of sectionsArr) {
+		for  (const section of materia.sections) {
+			sessionsArr = [];
+			for  (const sección of sectionsArr) {
 				if (section._id.equals(sección._id)) {
 					numeroSec++;
 					sección.sessions.forEach((session:any) => {
-						sessionsArr.push(new Session(session.day, session.start, session.end));
+						sessionsArr.push(new Session(session.start, session.end, session.day));
 					});
 					sectionsArrTemp.push(new Section(sección.nrc, sección.teacher, sessionsArr, materiaTemp));
 				}
@@ -137,17 +70,30 @@ export const pluginSchedule = <T extends string>(
 			const materiasArr=await instanciarTodo(materias, sectionsArr);
 
 			// console.error(`Numero de materias: ${numeroSub}`, `Numero de secciones: ${sectionsArr.length}`);
-			console.log(materiasArr);
+			// console.log("Las Materias Son\n",materiasArr,"\n");
 			let schedules = new Array();
 			const scheduleInicial = new Schedule(new User(owner,"algo",4,[]), []);
+			console.log("Estos son las materias antes de recursivo \n",materiasArr,"\n");
+			
 			Schedule.recursiveSchedulePush(0, materiasArr, scheduleInicial, schedules);
+			// console.log("Estos son los horarios antes de filtrador \n",schedules,"\n");
 			schedules = Schedule.filtrarHorariosPorMaterias(schedules, materiasArr);
-			console.log("horarios\n",Bun.inspect(schedules,{colors:true,depth: 4}));
+			// schedules.filter((schedule) => {
+			// 	let coliciones = true;
+			// 	for (const section of schedule.sections) {
+			// 		if (section.sessions.length === 0) {
+			// 			return false;
+			// 		}else {
+			// 			return true;
+			// 		}
+			// 	}
+			// });
+			console.log("\nhorarios después de filtrados\n",Bun.inspect(schedules,{colors:true,depth: 5}));
 			
 			// const schedules = await GenerateSchedules(sectionsArr, numeroSub);
 			for (const schedule of schedules) {
 				for (const section of schedule.sections) {
-					section.subject =[];
+					section.subject.sections = [];
 				}
 			}
 
@@ -216,7 +162,6 @@ export const pluginSchedule = <T extends string>(
 				return JSON.stringify(undefined);
 			}
 
-			console.log(user);
 			return JSON.stringify(user.schedule);
 		});
 

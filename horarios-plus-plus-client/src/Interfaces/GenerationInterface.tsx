@@ -5,6 +5,8 @@ import CourseSemesterContainer from "./CourseSemesterContainer";
 import "./GenerationInterface.css";
 import ScheduleViewer from "./ScheduleViewer.tsx";
 import { Subject, type Schedule, type Section } from "../../../horarios-plus-plus-server-new/src/models/classes.ts";
+import toast, { Toaster } from "react-hot-toast";
+import { set } from "mongoose";
 
 const email = sessionStorage.getItem("login");
 
@@ -435,8 +437,8 @@ export default function GenerationInterface() {
     if (sections.length === 0) {
       return undefined;
     }
-    sections = sections.map((section) => section.nrc);
-		const nrcString: string = sections.join(",");
+    const sectionsNRCs = sections.map((section) => section.nrc);
+		const nrcString: string = sectionsNRCs.join(",");
 
 		const owner = email;
 		await fetch(
@@ -446,18 +448,19 @@ export default function GenerationInterface() {
 			.then((response) => response.json())
 			.then(async (data) => {
 				let scheduleList: ISchedule[] = [];
-        console.log(data);
+        console.log("pedro",data);
 				scheduleList = await Promise.all(
 					data.map(async (schedule:Schedule) => {
 						const newSchedule: ISchedule = {
 							sectionList: await Promise.all(
 								schedule.sections.map(async (section:Section) => {
+                  const materiaActual={name: section.subject.name, sectionList: [], color: undefined, enabled: true};
 									let newSection: ISection = {
 										nrc: section.nrc,
 										teacher: section.teacher,
 										enabled: true,
                     sessionList: [],
-                    subject: {name: section.subject.name, sectionList: [], color: undefined, enabled: true},
+                    subject: materiaActual,
 									};
                   newSection.subject = {name: section.subject.name, sectionList: [newSection], color: undefined, enabled: true};
 									// newSection.subject = await fetchSubjectFromId(
@@ -479,13 +482,13 @@ export default function GenerationInterface() {
 				);
 				setGeneratedSchedules(scheduleList);
         setOriginalSchedules(scheduleList);
-        console.log(scheduleList);
 			});
 	}
 
   async function saveScheduleToServer(schedule: ISchedule) {
+    console.log("pepe",schedule);
+    
     const nrcs = schedule.sectionList.map((section) => section.nrc).join(",");
-    console.log(nrcs);
     await fetch(
       `http://127.0.0.1:4000/api/schedules/save_schedule?owner=${email}&nrcs=${nrcs}`,
       { method:"put",headers: { Accept: "application/json" } }
@@ -503,16 +506,17 @@ export default function GenerationInterface() {
   }
 
   function saveSchedule(schedule?: ISchedule) {
+    
     if (schedule === undefined) {
-      return async () => {
-        // pushNotification("No se ha seleccionado un horario", "error");tr
-        console.error("No se ha seleccionado un horario");
-      };
+       toast.error("No se ha seleccionado un horario");
+      return
     }
-    return async () => {
-      // pushNotification("Horario guardado", "success");
-      await saveScheduleToServer(schedule);
-    }
+    console.log(schedule);
+    
+      let horario = saveScheduleToServer(schedule);
+      toast.success("Horario guardado correctamente");
+      return  
+    
   }
 
   function cambiarDiasLibres(dia: string){
@@ -531,14 +535,21 @@ export default function GenerationInterface() {
           });
           return va;
         }
-        ))
+      ))
+      toast.success("Filtro aplicado correctamente");
     }else{
       setGeneratedSchedules(originalSchedules);
+      toast("Filtro eliminados", { icon: '🔃☑️' })
     }
+    setDeselected(true);
   }
 
   return (
     <div>
+      <Toaster
+				position="bottom-right"
+				reverseOrder={false}
+				/>
       <NavigationBar />
       <div className="main-container">
         <div className="course-box">
@@ -559,9 +570,9 @@ export default function GenerationInterface() {
         {generatedSchedules !== undefined && (
           <div className="schedule-box">
             <div className="action-buttons">
+              <div>Filtrar por Días Libres</div>
               <select className="filter-button" defaultValue="escoja" onChange={(e)=>{cambiarDiasLibres(e.target.value)}}>
-                filtro Días Libres
-                <option value="escoja">escoja</option>
+                <option value="escoja">Ninguno</option>
                 <option value="1">Lunes</option>
                 <option value="2">Martes</option>
                 <option value="3">Miercoles</option>

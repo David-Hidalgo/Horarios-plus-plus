@@ -19,6 +19,7 @@
 }
 
 .login-bg {
+  margin-top: 125px;
   display: flex;
   flex-flow: column;
   background-color: var(--background-medium-color);
@@ -47,6 +48,7 @@
   font-size: 30px;
   padding: 10px 15px;
   background-color: var(--background-semi-light-color);
+  margin-top: 20px;
 }
 
 .login-button button:hover {

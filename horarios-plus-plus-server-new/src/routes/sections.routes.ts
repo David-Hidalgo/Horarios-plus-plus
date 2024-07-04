@@ -139,7 +139,6 @@ export const pluginSection = <T extends string>(
 				return undefined;
 			}
 			console.log("Deleting section ", section);
-			await db.sectionModel.deleteOne({ nrc: toDeleteNRC });
 			const subject= await db.subjectModel.findOne({sections: section.id});
 			if (subject === undefined || subject === null) {
 				console.log(
@@ -148,11 +147,14 @@ export const pluginSection = <T extends string>(
 				);
 				return undefined;
 			}
-			await db.subjectModel.findOneAndUpdate(
-				{ sections: subject.sections.filter((id) => !id.equals(section.id)) },
+			subject.sections = subject.sections.filter(
+				(sectionA) => {
+					return (sectionA.toString() !== section._id.toString())
+				}
 			);
+			await subject.save();
 			console.log("Deleted section ", section, " from subject ", subject);
+			await db.sectionModel.deleteOne({ nrc: toDeleteNRC });
 			
-			subject.sections
-			return JSON.stringify(true);
+			return true;
 		});

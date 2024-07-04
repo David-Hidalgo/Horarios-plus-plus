@@ -112,6 +112,12 @@ const regexHandler = new RegExp(regExpEmail);
 							</button>
 						</div>
 					</div>
+          <div className="login-footer">
+						<div className="login-footer-text">
+							No tienes cuenta?
+							<a href="/sign_up"> Crear Usuario</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

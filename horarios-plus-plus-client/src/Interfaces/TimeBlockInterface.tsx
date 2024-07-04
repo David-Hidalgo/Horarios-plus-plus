@@ -499,7 +499,7 @@ export default function TimeBlockInterface() {
 	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
 	const [cambio, setCambio] = React.useState(false);
 	const [changedSubjects, setChangedSubjects] = React.useState<CISubject[]>([]);
-	const [puedeGuardar, setPuedeGuardar] = React.useState(false);
+	const [puedeGuardar, setPuedeGuardar] = React.useState(true);
 	const [elimino, setElimino] = React.useState(false);
 	const[cambioMensaje, setCambioMensaje] = React.useState(false);
 	let updating = false;
@@ -721,19 +721,29 @@ export default function TimeBlockInterface() {
 		// 	success: "Sección creada con éxito",
 		// 	error: "Error al la crear sección",
 		// });
+		toast.loading("Creando sección", {duration:1500});	
 		saveSectionToSubject(subject, createdSection);
 
 	}
 
 	async function deleteSectionFromDatabase(section: ISection) {
-		await await fetch(
+		await fetch(
 			`http://127.0.0.1:4000/api/section/delete_section?nrc=${section.nrc}`,
 			{ method:"DELETE", headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
+				toast.error("Error al eliminar la sección");
 				console.error("ERROR while trying to remove section ", section);
 				console.error(e);
+			})
+			.then((data) => {
+				if (data === undefined) {
+					console.error("No se pudo eliminar la seccion");
+					toast.error("No se pudo eliminar la seccion");
+					return;
+				}
+				toast.success("Sección eliminada con éxito");
 			});
 	}
 
@@ -752,7 +762,7 @@ export default function TimeBlockInterface() {
 				return ret;
 			}),
 		);
-
+		toast.loading("Eliminando sección", {duration:1500});
 		deleteSectionFromDatabase(section);
 
 		if (section === selectedSection) {
@@ -776,14 +786,15 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				console.error("Error actualizando base de datos ", e);
 				allow_change = false;
-				return e;
+				toast.error("Error al actualizar la sección");
+				return;
 			})
 			.then((data) => {
 				if (data === undefined) {
 					console.error("No se pudo actualizar la seccion");
+					toast.error("No se pudo actualizar la seccion");
 					return;
 				}
-				console.log(data);
 				allow_change = true;
 			})
 			.finally(() => {
@@ -803,6 +814,7 @@ export default function TimeBlockInterface() {
 							})
 					);
 					setSelectedSection(newValue);
+					toast.success("Sección actualizada con éxito");
 				}
 				updating = false;
 			});
@@ -822,12 +834,13 @@ export default function TimeBlockInterface() {
 			console.log("Updating");
 			return false;
 		}
-		//updateSectionServer(oldSection, newSection);
-		toast.promise(updateSectionServer(oldSection, newSection), {
-			loading: "Actualizando seccion",
-			success: "Datos guardados con éxito",
-			error: "Error al actualizar seccion",
-		});
+		toast.loading("Actualizando sección", {duration:1500});
+		updateSectionServer(oldSection, newSection);
+		// toast.promise(updateSectionServer(oldSection, newSection), {
+		// 	loading: "Actualizando seccion",
+		// 	success: "Datos guardados con éxito",
+		// 	error: "Error al actualizar seccion",
+		// });
 		
 	}
 
@@ -847,11 +860,13 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {
 				saved = false;
+				toast.error("Error al eliminar la clase");
 				console.error("ERROR unable to delete session from section ", e);
 				return e;
 			})
 			.finally(() => {
 				if (saved) {
+					toast.success("Clase eliminada con éxito");
 					changeSelectedSection(section);
 				}
 			});
@@ -874,10 +889,12 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				saved = false;
 				console.error("ERROR unable to create section ", e);
+				toast.error("Error al crear la clase");
 				return e;
 			})
 			.then((data) => {
 				if (saved) {
+					toast.success("Clase creada con éxito");
 					changeSelectedSection(section);
 				}
 			});
@@ -900,12 +917,13 @@ export default function TimeBlockInterface() {
 		section.sessionList.push(newSession);
 
 		if (section.sessionList.includes(newSession)) {
-			toast.promise(saveNewSessionToSection(newSession, section), {
-				loading: "Creando clase",
-				success: "Clase creada con éxito",
-				error: "Error al crear clase",
-			});
-			//saveNewSessionToSection(newSession, section);
+			// toast.promise(saveNewSessionToSection(newSession, section), {
+			// 	loading: "Creando clase",
+			// 	success: "Clase creada con éxito",
+			// 	error: "Error al crear clase",
+			// });
+			toast.loading("Creando clase", {duration:1500});
+			saveNewSessionToSection(newSession, section);
 		}
 		return section;
 	}
@@ -915,12 +933,13 @@ export default function TimeBlockInterface() {
 		session: ISession,
 	): ISection {
 		section.sessionList = section.sessionList.filter((y) => y !== session);
-		toast.promise(deleteSessionFromSection(session, section), {
-			loading: "Eliminando clase",
-			success: "Clase eliminada con éxito",
-			error: "Error al eliminar clase",
-		});
-		//deleteSessionFromSection(session, section);
+		// toast.promise(deleteSessionFromSection(session, section), {
+		// 	loading: "Eliminando clase",
+		// 	success: "Clase eliminada con éxito",
+		// 	error: "Error al eliminar clase",
+		// });
+		toast.loading("Eliminando clase", {duration:1500});
+		deleteSessionFromSection(session, section);
 		return section;
 	}
 
@@ -991,6 +1010,7 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				console.error("Error actualizando base de datos ", e);
 				allow_change = false;
+				toast.error("Error al actualizar el curso");
 				return e;
 			})
 			.then((data) => {
@@ -1005,6 +1025,9 @@ export default function TimeBlockInterface() {
 						return newValue;
 					})
 				);
+				if (allow_change){
+					toast.success("Curso actualizado con éxito");
+				}
 				updating = false;
 			});
 		
@@ -1089,12 +1112,12 @@ export default function TimeBlockInterface() {
 			return;
 		}
 		for(let x of changedSubjects){
-			toast.promise(updateSubjectServer(x.oldSubject, x.newSubject), {
-				loading: "Actualizando curso...",
-				success: "Curso actualizado exitosamente",
-				error: "Error al actualizar curso"
-			});
-			//updateSubjectServer(x.oldSubject, x.newSubject);
+			// toast.promise(updateSubjectServer(x.oldSubject, x.newSubject), {
+			// 	loading: "Actualizando curso...",
+			// 	success: "Curso actualizado exitosamente",
+			// 	error: "Error al actualizar curso"
+			// });
+			updateSubjectServer(x.oldSubject, x.newSubject);
 		}
 		setChangedSubjects([]);
 	}
@@ -1106,16 +1129,19 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {				
 				console.error("Error al crear curso ", e);
+				toast.error("Error al crear el curso");
 				return e;
 			})
 			.then((data) => {
 				console.log(data);
 				if (data === undefined) {
 					console.error("No se pudo crear el curso");
+					toast.error("No se pudo crear el curso");
 					return;
 				}
 				console.log(data);
 				setLoadedSubjects(loadedSubjects?.concat([newSubject]));
+				toast.success("Curso creado exitosamente");
 			})
 	}
 	function generateName(){
@@ -1133,14 +1159,15 @@ export default function TimeBlockInterface() {
 			name: generateName(),
 			sectionList: [],
 		};
-		toast.promise(addSubjectServer(newSubject), {
-			loading: "Creando curso...",
-			success: "Curso creado exitosamente",
-			error: "No se pudo crear el curso, intente mas tarde o recargue la página",
-		});
+		// toast.promise(addSubjectServer(newSubject), {
+		// 	loading: "Creando curso...",
+		// 	success: "Curso creado exitosamente",
+		// 	error: "No se pudo crear el curso, intente mas tarde o recargue la página",
+		// });
+		toast.loading("Creando curso...", {duration:1500});
+		addSubjectServer(newSubject);
 		setElimino(true);
 		setCambioMensaje(true);
-		//addSubjectServer(newSubject);
 	
 	}
 
@@ -1150,15 +1177,19 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {
 				console.error("Error al eliminar curso ", e);
+				toast.error("Error al eliminar el curso");
 				return e;
 			})
 			.then((data) => {
 				if (data === undefined) {
+					toast.error("No se pudo eliminar el curso");
 					console.error("No se pudo eliminar el curso");
 					return;
 				}
-				if(data.message==="Subject deleted successfully")
+				if(data.message==="Subject deleted successfully"){
 					console.log("Curso eliminado con exito");
+					toast.success("Curso eliminado con éxito");
+				}
 			})
 	}
 
@@ -1175,19 +1206,23 @@ export default function TimeBlockInterface() {
 		setCambioMensaje(true);
 		if(changedSubjects.find((x) => x.newSubject === subject) !== undefined){
 			let oldSubject = changedSubjects.find((x) => x.newSubject === subject)?.oldSubject;
-			if(oldSubject !== undefined)
-			toast.promise(deleteSubjectFromDatabase(oldSubject), {
-				loading: "Eliminando curso...",
-				success: "Curso eliminado exitosamente",
-				error: "No se pudo eliminar el curso, intente mas tarde",
-			});
+			if(oldSubject !== undefined){
+				toast.loading("Eliminando curso...", {duration:1500});
+			// 	toast.promise(deleteSubjectFromDatabase(oldSubject), {
+			// 	loading: "Eliminando curso...",
+			// 	success: "Curso eliminado exitosamente",
+			// 	error: "No se pudo eliminar el curso, intente mas tarde",
+			// });
+				deleteSubjectFromDatabase(oldSubject);
+			}
 		}else{
-			toast.promise(deleteSubjectFromDatabase(subject), {
-				loading: "Eliminando curso...",
-				success: "Curso eliminado exitosamente",
-				error: "No se pudo eliminar el curso, intente mas tarde",
-			});
-
+			// toast.promise(deleteSubjectFromDatabase(subject), {
+			// 	loading: "Eliminando curso...",
+			// 	success: "Curso eliminado exitosamente",
+			// 	error: "No se pudo eliminar el curso, intente mas tarde",
+			// });
+			toast.loading("Eliminando curso...", {duration:1500});
+			deleteSubjectFromDatabase(subject);
 		}
 
 		//deleteSubjectFromDatabase(subject);

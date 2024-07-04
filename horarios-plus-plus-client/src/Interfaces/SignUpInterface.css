@@ -15,7 +15,7 @@
 
 
 .signup-container {
-  display: grid;
+  display:grid;
   width: 100%;
   place-items: center;
 }
@@ -55,3 +55,28 @@
 .signup-button button:active {
   background-color: white;
 }
+
+.formato-contraseña {
+  
+  display: flex;
+  flex-flow: column;
+  background-color: var(--background-medium-color) ;
+  padding: 20px;
+  font-size: 20px;
+  border-radius: 4px;
+  border: 2px solid black;
+  margin-left: 30px;
+}
+
+.formato-contraseña label {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.signup-content {
+  margin-top: 100px;
+  display: flex;
+  flex-flow: wrap;
+  align-items: center;
+}
+
