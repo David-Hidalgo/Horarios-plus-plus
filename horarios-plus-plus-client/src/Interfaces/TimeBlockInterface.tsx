@@ -1029,6 +1029,7 @@ export default function TimeBlockInterface() {
 					toast.success("Curso actualizado con éxito");
 				}
 				updating = false;
+				//setSelectedSection(loadedSubjects?.find((x)=>x===newValue)?.sectionList[0])
 			});
 		
 	}
@@ -1237,7 +1238,7 @@ export default function TimeBlockInterface() {
 				reverseOrder={false}
 				/>
 				<div className="course-box-container">
-					<CourseSemesterContainer/>
+					{/* <CourseSemesterContainer/> */}
 					<div>
 						{loadedSubjects?.map((value) => {
 							return (
