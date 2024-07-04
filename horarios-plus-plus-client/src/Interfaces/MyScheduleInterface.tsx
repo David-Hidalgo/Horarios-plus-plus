@@ -15,55 +15,14 @@ import ScheduleViewer from "./ScheduleViewer.tsx";
 const email = sessionStorage.getItem("login");
 
 export default function MySheduleInterface() {
-	const [loadedSchedule, setLoadedSchedule] = React.useState();
-
-	async function fetchSessionFromId(
-		id: string,
-		section: ISection,
-	): Promise<ISession> {
-		return await fetch(
-			`http://127.0.0.1:4000/api/session/get_sessions_from_id?id=${id}`,
-			{ headers: { Accept: "application/json" } },
-		)
-			.then((response) => response.json())
-			.catch((e) => {
-				console.error(e);
-			})
-			.then((data) => {
-				console.log(data);
-				const newSession: ISession = {
-					day: data.day,
-					start: new Date(data.start),
-					end: new Date(data.end),
-					section: section,
-				};
-				return newSession;
-			});
-	}
+	const [loadedSchedule, setLoadedSchedule] = React.useState<ISchedule | undefined>();
 
 	async function fetchSubjectFromNRC(
-		id: string,
+		nrc: string,
 		section: ISection,
 	): Promise<ISubject> {
 		return await fetch(
-			`http://127.0.0.1:4000/api/subjects/get_subject_from_nrc?id=${id}`,
-			{ headers: { Accept: "application/json" } },
-		)
-			.then((response) => response.json())
-			.then((data) => {
-				const newSubject: ISubject = {
-					color: undefined,
-					name: data.name,
-				};
-				return newSubject;
-			});
-	}
-	async function fetchSubjectFromId(
-		id: string,
-		section: ISection,
-	): Promise<ISubject> {
-		return await fetch(
-			`http://127.0.0.1:4000/api/subjects/get_subjects_from_id?id=${id}`,
+			`http://127.0.0.1:4000/api/subjects/get_subject_from_nrc?nrc=${nrc}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
@@ -78,7 +37,7 @@ export default function MySheduleInterface() {
 
 	async function loadSectionFromID(id: string): Promise<ISection> {
 		let fetched = true;
-		let section: ISection = await fetch(
+		const section: ISection = await fetch(
 			`http://127.0.0.1:4000/api/section/get_sections_from_id?id=${id}`,
 			{ headers: { Accept: "application/json" } },
 		)
@@ -90,16 +49,18 @@ export default function MySheduleInterface() {
 			.then(async (data) => {
 				const newSection: ISection = {
 					nrc: data.nrc,
+					sessionList: [],
+					subject:{color: undefined, name: ""},
 				};
-				newSection.sessionList= data.sessions.map((session) => {
+				newSection.sessionList= data.sessions.map((session:ISession) => {
 					return {
 						day: session.day,
 						start: new Date(session.start),
 						end: new Date(session.end),
 						section: newSection
 					};
-				})
-				newSection.subject = await fetchSubjectFromId(data.subject, newSection);
+				})				
+				newSection.subject = await fetchSubjectFromNRC(data.nrc, newSection);
 				return newSection;
 			});
 		return section;
@@ -121,7 +82,7 @@ export default function MySheduleInterface() {
 					return { sectionList: [] };
 				}
 				console.log(data);
-				let newSchedule: ISchedule = {
+				const newSchedule: ISchedule = {
 					sectionList: await Promise.all(
 						data.map(async (id: string) => {
 							return await loadSectionFromID(id);

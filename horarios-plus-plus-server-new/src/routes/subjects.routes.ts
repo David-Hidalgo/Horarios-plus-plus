@@ -12,9 +12,16 @@ export const pluginSubject = <T extends string>(
 	})
 		.get("/api/subjects/get_subject_from_nrc", async ({ query }) => {
 			const subject_list = await db.subjectModel
-				.find({})
-				
-			return subject_list;
+				.find({}).populate("sections").exec();
+				console.log("subject_list", subject_list);
+				for (const subject of subject_list) {
+					for (const section of subject.sections) {
+						if (section.nrc === query.nrc) {
+							return JSON.stringify(subject);
+						}
+					}
+					
+				}
 		},{
 			query: t.Object({
 				nrc: t.String(),
@@ -138,17 +145,5 @@ export const pluginSubject = <T extends string>(
 			console.log("Updated subject ", oldSubject, " to ", newSubject);
 			return JSON.stringify(newSubject);
 
-		})
-		.get("/api/subjects/get_subjects_from_id", async ( {query}) => {
-			if (query.id === undefined) {
-				return undefined
-			}
-
-			const subject = await db.subjectModel.findById(query.id);
-			if (subject === undefined) {
-				console.log("Could not find subject with id ", query.id);
-				return undefined
-			}
-
-			return JSON.stringify(subject);
 		});
+
