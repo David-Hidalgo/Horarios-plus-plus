@@ -140,4 +140,31 @@ export const pluginUser = <T extends string>(
 					password: t.String(),
 				}),
 			},
+		)
+		.delete("/api/deleteUser",
+			async ({ query }) => {
+				const email = query.email;
+				if (email === undefined) {
+					console.log("Failed to delete user: A value is undefined");
+
+					return { message: "Failed to delete user: A value is undefined"};
+				}
+
+				const user = await db.userModel.findOne({ email: email });
+
+				if (user === null) {
+					console.log("Failed to delete user: User not found");
+
+					return { message: "Failed to delete user: User not found"};
+				}
+
+				user.deleteOne();
+
+				return { message: "User deleted successfully"};
+			},
+			{
+				query: t.Object({
+					email: t.String(),
+				}),
+			},
 		);
