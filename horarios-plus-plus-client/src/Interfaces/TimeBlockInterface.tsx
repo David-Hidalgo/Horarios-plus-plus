@@ -7,9 +7,6 @@ import { set } from "mongoose";
 import { string } from "zod";
 import toast, {Toaster} from "react-hot-toast";
 
-
-
-
 interface ISession {
 	day: number;
 	start: Date;
@@ -729,8 +726,9 @@ export default function TimeBlockInterface() {
 	}
 
 	async function deleteSectionFromDatabase(section: ISection) {
+		const mail = sessionStorage.getItem("login");
 		await fetch(
-			`http://127.0.0.1:4000/api/section/delete_section?nrc=${section.nrc}`,
+			`http://127.0.0.1:4000/api/section/delete_section?nrc=${section.nrc}&mail=${mail}`,
 			{ method:"DELETE", headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())

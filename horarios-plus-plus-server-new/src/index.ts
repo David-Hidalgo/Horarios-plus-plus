@@ -45,6 +45,13 @@ class main {
 		);
 		this.controller = controlador;
 	}
+	/**
+	 * run
+	 */
+	static run() {
+		const app = new main(controladordb);
+		
+	}
 }
 
-const app = new main(controladordb);
+main.run();
