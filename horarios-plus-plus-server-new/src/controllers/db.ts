@@ -58,8 +58,9 @@ export class DBStarter {
 			name: string;
 			sessions: iSession[];
 		}
-		type EventHydratedDocument = mongoose.HydratedDocument< iSection,{ 
-			events: mongoose.Types.DocumentArray<iSession> }>;
+		type EventHydratedDocument = mongoose.HydratedDocument<iEvent,{ 
+			events: mongoose.Types.DocumentArray<iSession>
+		}>;
 		
 		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 				type eventModelType = mongoose.Model<iEvent, {}, {}, {}, EventHydratedDocument,iEvent>;

@@ -9,30 +9,31 @@ export const pluginEvent = <T extends string>(
 		name: "my-Event-plugin",
 		seed: config,
 	})
-        .get("/get_events_from_id", async ({query}) => {
+        .get(`${config.prefix}/get_events_from_id`, async ({query}) => {
             const { id } = query;
             const event = await db.eventModel.findById(id);
             return JSON.stringify(event);
         }
         )
-        .get("/get_all_events", async ({query}) => {
+        .get(`${config.prefix}/get_all_events`, async ({query}) => {
+            console.log("get_all_events");
+            
             const events = await db.eventModel.find();
             return JSON.stringify(events);
         }
         )
-        .post("/create_event", async ({query, body}) => {
-            const { name, session } = body;
+        .post(`${config.prefix}/create_event/`, async ({query}) => {
+            const { name } = query;
             const event = new db.eventModel({
                 name,
-                session,
+                sessions: [],
             });
             await event.save();
             return JSON.stringify(event);
         },{
             //así defines lo que pasas como body en el fetch hay que cambiar lo que tengo abajo para que parezca lo que sería el evento
-            body: t.Object({
+            query: t.Object({
                 name: t.String(),
-                session: t.String(),
             }),
         }
         )
@@ -65,3 +66,48 @@ export const pluginEvent = <T extends string>(
                 name:t.String()
             })
         })
+        .get("/api/subjects/update_subject", async ( {query}) => {
+			const oldName = query.oldname;
+			const newName = query.newname;
+			if (oldName === undefined) {
+				console.log("Could not update subject, OLDNAME is undefined");
+				return undefined
+			}
+			if (newName === undefined) {
+				console.log("Could not update subject, NEWNAME is undefined");
+				return undefined
+			}
+
+
+			const filter = { name: oldName };
+			const newSubject = {name: newName};
+			const oldSubject = await db.subjectModel.findOneAndUpdate(filter, newSubject);
+			if (oldSubject === undefined) {
+				console.log("Could not find and update oldName: ", oldName);
+				return JSON.stringify(oldSubject);
+			}
+			console.log("Updated subject ", oldSubject, " to ", newSubject);
+			return JSON.stringify(newSubject);
+
+		})
+        .delete(`${config.prefix}/delete_event`,async({query})=>{
+            const name=query.eventName
+            console.log(name);
+            
+            try {
+                
+                const aMatar=await db.eventModel.findOneAndDelete({name:name})
+                console.log(aMatar);
+				return {message: "Event deleted successfully"};
+			} catch (e) {
+				console.error("Failed deleting Event ", e);
+				return undefined
+			}
+
+        },{
+            query: t.Object({
+                eventName:t.String(),
+                event:t.String()
+            })
+        })
+

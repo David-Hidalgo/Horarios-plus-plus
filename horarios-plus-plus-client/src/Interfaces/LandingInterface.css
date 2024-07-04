@@ -87,3 +87,26 @@
   font-size: 1rem;
 }
 
+@keyframes colorAnimation {
+  0% {
+    color: red;
+  }
+  25% {
+    color: rgb(0, 204, 255);
+  }
+  50% {
+    color: green;
+  }
+  75% {
+    color: rgb(255, 217, 0);
+  }
+  100% {
+    color: purple;
+  }
+}
+
+.description-container h1 {
+  margin: unset;
+  font-size: 7.5rem;
+  animation: colorAnimation 8s infinite;
+}

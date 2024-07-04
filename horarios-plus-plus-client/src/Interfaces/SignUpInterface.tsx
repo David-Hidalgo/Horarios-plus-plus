@@ -78,7 +78,7 @@ export default function SignUpInterface() {
 					setSuccesfulMessage("Usuario registrado exitosamente. Redirigiendo a la página de inicio de sesión.");
 					setShowSuccesful(true);
 					await timeout(2000);
-					 window.location.href = "/login";
+					//window.location.href = "/login";
 				}else {
 					if (data.message === "User already exist") {
 						setErrorMessage("Este usuario ya está registrado");

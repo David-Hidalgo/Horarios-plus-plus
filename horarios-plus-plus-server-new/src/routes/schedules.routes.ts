@@ -78,16 +78,15 @@ export const pluginSchedule = <T extends string>(
 			Schedule.recursiveSchedulePush(0, materiasArr, scheduleInicial, schedules);
 			// console.log("Estos son los horarios antes de filtrador \n",schedules,"\n");
 			schedules = Schedule.filtrarHorariosPorMaterias(schedules, materiasArr);
-			// schedules.filter((schedule) => {
-			// 	let coliciones = true;
-			// 	for (const section of schedule.sections) {
-			// 		if (section.sessions.length === 0) {
-			// 			return false;
-			// 		}else {
-			// 			return true;
-			// 		}
-			// 	}
-			// });
+			schedules=schedules.filter((schedule) => {
+				for (const section of schedule.sections) {
+					if (section.sessions.length === 0) {
+						return false;
+					}else {
+						return true;
+					}
+				}
+			});
 			console.log("\nhorarios después de filtrados\n",Bun.inspect(schedules,{colors:true,depth: 5}));
 			
 			// const schedules = await GenerateSchedules(sectionsArr, numeroSub);

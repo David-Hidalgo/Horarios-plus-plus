@@ -1,49 +1,97 @@
-.permsPage {
+.main-container {
+	display: flex;
+	flex-direction: wrap;
+	
+	padding: 20px;
+}
+
+.perms-container {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	justify-content: start;
-	padding: 20px;
-	background-color: #f5f5f5;
+	justify-content: center;
+	align-items:center;
+	font-size: 25px;
 }
 
-.permsPage-header {
-	font-size: 24px;
-	color: #333;
-	margin-bottom: 20px;
-}
-
-.permsPage-content {
-	width: 100%;
-	max-width: 600px;
-	background-color: #fff;
-	border-radius: 8px;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-	padding: 20px;
-}
-
-.permsPage-item {
+.Usuarios{
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 10px 0;
-	border-bottom: 1px solid #eee;
+	flex-direction: column;
+	align-items: right;
+	justify-content: center;
+	padding: 20px;
+	margin-left: 275px;
 }
 
-.permsPage-item:last-child {
-	border-bottom: none;
+.Usuarios h2 {
+	font-size: 40px;
 }
 
-.permsPage-label {
-	font-size: 16px;
-	color: #666;
+#estudiante {color: rgb(255, 255, 255);}
+#estudiante-eventos {color : rgb(255, 252, 68);}
+#profesor {color: rgb(95, 255, 95);}
+#profesor-eventos {color: rgb(255, 160, 18);}	
+#admin {color: rgb(255, 0, 0);}
+
+
+.lista-usuarios {
+	
+	justify-content: flex-end;
+	align-items:flex-end;
+	margin-top: 20px;
+	font-size: 25px;
+	height: 500px;
+	overflow-y: scroll;
 }
 
-.permsPage-action {
+.user {
+	width: 500px;
 	display: flex;
-	align-items: center;
+	flex-direction: wrap;
+	justify-content: flex-end;
+	padding: 15px 0px;
+	font-size: 25px;
 }
 
-.permsPage-switch {
+#permiso{
+	margin-right: 10px;
+}
+
+.Usuarios button {
+	font-size: 20px;
+	padding: auto;
+	margin-top: 20px;
+	align-self: flex-end;
+}
+
+.lista-usuarios :hover {
+	background-color: var(--background-semi-dark-color);
+	color: white;
+}
+
+.user-email {
 	margin-left: 10px;
+	margin-right: auto;
+}
+
+.Titulo {
+	align-self: flex-start;
+}
+
+.Titulo {
+	font-size: 40px;
+    color: transparent;
+    background-image: linear-gradient(to left, #FFD700, #7B68EE, #3498db, #2ecc71, #FFD700);    
+    background-clip: text;
+    animation: color 3s linear infinite;
+    background-size: 500%;    
+}
+
+@keyframes color {
+    from {
+        background-position: 0% 50%;
+    }
+
+    to {
+        background-position: 100% 50%;
+    }
 }

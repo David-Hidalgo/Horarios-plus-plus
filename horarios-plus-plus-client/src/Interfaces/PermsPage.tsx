@@ -3,6 +3,8 @@ import "./PermsPage.css";
 import React from "react";
 import { useState } from "react";
 import { regExpEmail } from "./helpers.tsx";
+import { set } from "mongoose";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ISection {
 	nrc: number;
@@ -39,19 +41,31 @@ interface UserContainerParams {
 function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 	const username = user.email.substring(0, user.email.indexOf("@"));
 	const [editable, setEditable] = React.useState(false);
+	const [rol, setRol] = React.useState(transformarRol(user));
 
 	function updatePermisionL(permiso:string){
 		updatePermision(user.email,permiso);
+		setRol(transformarRol(user));
 
 	}
 
 	function updateRolL(rol:string){
 		updateRol(user.email,rol);
+		setRol(transformarRol(user));
+	}
+
+	function transformarRol(user:IUser){
+
+		if (user.permiso) {
+			return user.tipo === "estudiante" ?  "estudiante-eventos": user.tipo === "profesor" ? "profesor-eventos" : "admin";
+		}else{
+			return user.tipo === "estudiante" ? "estudiante" : user.tipo === "profesor" ? "profesor" : "admin";
+		}
 	}
 
 	return (
-		<section className="user">
-			<div className="user-email">{username}</div>
+		<div className="user">
+			<div className="user-email" id={rol}>{username}</div>
 			<select form="formUsuarios" name="roles-usuario" defaultValue={user.tipo} id="roles-usuario" onChange={(e)=>{updateRolL(e.target.value)}}>
 				<option value="estudiante">Estudiante</option>
 				<option value="profesor">Profesor</option>
@@ -61,7 +75,7 @@ function UserContainer({user,updatePermision,updateRol}:UserContainerParams) {
 				<option value="si">Sí</option>
 				<option value="no">No</option>
 			</select>
-		</section>
+		</div>
 	);
 }
 
@@ -90,8 +104,7 @@ export default function PermsInterface() {
 				console.log("no se pudo cargar la lista de usuarios");
 			})
 			.then((data) => {
-				console.log("a ver si llego aquí",data);
-				
+					
 				return data.map(async (user:{email:string,tipo:number}) => {
 					let tipo="estudiante";
 					let permiso=false;
@@ -123,7 +136,6 @@ export default function PermsInterface() {
 
 	function updateChangedUser(user:IUser){
 		if (!changedUsers?.includes(user)) {
-			console.log("entré");
 			setChangedUsers([...changedUsers, user]);
 		}
 		console.log(changedUsers);
@@ -181,27 +193,37 @@ export default function PermsInterface() {
 		console.log(transformarEnEnviar());
 		
 
-    fetch('http://127.0.0.1:4000/api/update_users', { method: "PUT", body: JSON.stringify(transformarEnEnviar()) });
+    fetch('http://127.0.0.1:4000/api/update_users', { method: "PUT", body: JSON.stringify(transformarEnEnviar()) })
+	.catch((e) => {
+		toast.error("No se pudieron guardar los cambios");
+		return;
+	})
+	toast.success("Cambios guardados");
     // Puedes generar una URL de él, como hace el navegador por defecto:
 	}
 
 	return (
 		<div>
+			<Toaster
+				position="bottom-right"
+				reverseOrder={false}
+				/>
 			<NavigationBar />
 			<main className="main-container">
+				<div className="Titulo"><h1>Permisos</h1></div>
 				<div className="perms-container">
-					<div className="Titulo"><h1>Permisos</h1></div>
-					
 					<section className="Usuarios">
 						<form id="formUsuarios" method="PUT" onSubmit={handleSubmit} >
 							<h2>Usuarios</h2>
-							{
-								loadedUsers?.map((user) => {
-									return (
-										<UserContainer user={user} updatePermision={updatePermision} updateRol={updateRol}/>
-									);
-								})
-							}
+							<div className="lista-usuarios">
+								{
+									loadedUsers?.map((user) => {
+										return (
+											<UserContainer user={user} updatePermision={updatePermision} updateRol={updateRol}/>
+										);
+									})
+								}
+							</div>
 							<button type="submit">Guardar</button>
 						</form>
 					</section>

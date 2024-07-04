@@ -28,13 +28,12 @@ class main {
 		const controlador = new Elysia()
 			.use(cors())
 			.get("/", () => "Hello Elysia")
-			.post("/hi", () => "hi")
 			.use(pluginSchedule({ prefix: "Schedules" }, controladordb))
 			.use(pluginSession({ prefix: "Sessions" }, controladordb))
 			.use(pluginSection({ prefix: "Sections" }, controladordb))
 			.use(pluginSubject({ prefix: "Sections" }, controladordb))
 			.use(pluginUser({ prefix: "Sections" }, controladordb))
-			.use(pluginEvent({ prefix: "Events" }, controladordb))
+			.use(pluginEvent({ prefix: "/api/events" }, controladordb))
 
 			.onError(({ code }) => {
 				if (code === "NOT_FOUND") return "Route not found :{";
