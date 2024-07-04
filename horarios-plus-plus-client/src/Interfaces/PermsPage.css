@@ -45,12 +45,17 @@
 
 .user {
 	width: 500px;
+	height: 30px;
 	display: flex;
 	flex-direction: wrap;
 	justify-content: flex-end;
-	
+
 	padding: 15px 0px;
 	font-size: 25px;
+}
+
+.user select{
+	height: auto;
 }
 
 #permiso{

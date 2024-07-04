@@ -437,10 +437,10 @@ export default function GenerationInterface() {
     if (sections.length === 0) {
       return undefined;
     }
-    if(sections.find((section)=>section.sessionList.length===0) !== undefined){
-      toast.error("Una de las secciones seleccionadas no tiene ninguna clase asignadas\n No será tomada en cuenta en la generación de horarios");
+    // if(sections.find((section)=>section.sessionList.length===0) !== undefined){
+    //   toast.error("Una de las secciones seleccionadas no tiene ninguna clase asignadas\n No será tomada en cuenta en la generación de horarios");
 
-    }
+    //}
     const sectionsNRCs = sections.map((section) => section.nrc);
 		const nrcString: string = sectionsNRCs.join(",");
 
