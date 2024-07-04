@@ -6,7 +6,6 @@ import "./GenerationInterface.css";
 import ScheduleViewer from "./ScheduleViewer.tsx";
 import { Subject, type Schedule, type Section } from "../../../horarios-plus-plus-server-new/src/models/classes.ts";
 import toast, { Toaster } from "react-hot-toast";
-import { set } from "mongoose";
 
 const email = sessionStorage.getItem("login");
 
