@@ -128,6 +128,7 @@ export const pluginSection = <T extends string>(
 		)
 		.delete("/api/section/delete_section", async ({ query }) => {
 			const toDeleteNRC = query.nrc;
+			const mail = query.mail;
 			if (toDeleteNRC === undefined) {
 				console.log("DELETE_SECTION ERROR: nrc is undefined ", toDeleteNRC);
 				return undefined;
@@ -154,11 +155,11 @@ export const pluginSection = <T extends string>(
 			);
 			await subject.save();
 
-			const user= await db.userModel.findOne({email: query.email});
+			const user= await db.userModel.findOne({email: mail});
 			if (user === undefined || user === null) {
 				console.log(
-					"DELETE_SECTION ERROR: no user has section ",
-					section,
+					"DELETE_SECTION ERROR: no user has email ",
+					mail,
 				);
 				return undefined;
 			}

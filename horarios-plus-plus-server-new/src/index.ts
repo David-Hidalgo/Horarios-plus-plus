@@ -14,8 +14,8 @@ const username = encodeURIComponent("DanCas");
 const password = encodeURIComponent("queso");
 
 const uri =
-	//"mongodb://127.0.0.1:27017/horariospp";															//Conexión a base de datos de manera local
-	  `mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
+"mongodb://127.0.0.1:27017/horariospp";															//Conexión a base de datos de manera local
+//`mongodb+srv://${username}:${password}@horariosplus.pktabwe.mongodb.net/?retryWrites=true&w=majority`; //Conexión a base de datos de manera remota
 
 const clientOptions: ConnectOptions = {};
 const controladordb: DBStarter = await DBStarter.run(uri);
@@ -45,6 +45,13 @@ class main {
 		);
 		this.controller = controlador;
 	}
+	/**
+	 * run
+	 */
+	static run() {
+		const app = new main(controladordb);
+		
+	}
 }
 
-const app = new main(controladordb);
+main.run();
