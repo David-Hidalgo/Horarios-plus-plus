@@ -517,12 +517,12 @@ export default function GenerationInterface() {
   function saveSchedule(schedule?: ISchedule) {
     
     if (schedule === undefined) {
-       toast.error("No se ha seleccionado un horario");
+      toast.error("No se ha seleccionado un horario");
       return
     }
     console.log(schedule);
     
-      let horario = saveScheduleToServer(schedule);
+      const horario = saveScheduleToServer(schedule);
       toast.success("Horario guardado correctamente");
       return  
     

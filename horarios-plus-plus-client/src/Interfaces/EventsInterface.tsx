@@ -134,7 +134,7 @@ function Course({
 
 	function updateSubject(event: any) {
 		setSubjectName(event.target.value);
-		let newEvent = event.target.value;
+		const newEvent = event.target.value;
 		let newCourse: IEvent = displayEvent;
 		newCourse = {
 			...newCourse,
@@ -300,21 +300,21 @@ function DaySelector({ classBind, changeBind, cambio, setCambio }: DaySelectorPr
 
 
 function TimeBlock({ changeBind, classBind, cambio, setCambio }: TimeBlockProperties) {
-	 const [showTimeError, setShowTimeError] = React.useState(false);
+	const [showTimeError, setShowTimeError] = React.useState(false);
 	// const timeErrorMessage = "La hora de inicio no puede ser mayor a la hora de fin";
 	function updateStart(start: Date) {
 		if(changeBind(classBind, { ...classBind, start: start })===1){
 			toast.error(
 				(t) => (
-				  <span className="Not-Error">
+					<span className="Not-Error">
 					La hora de inicio no puede ser mayor a la hora de fin{"		"}
-					<button onClick={() => toast.dismiss(t.id)}>OK</button>
-				  </span>
+					<button onClick={() => toast.dismiss(t.id)} type="button">OK</button>
+					</span>
 				),
 				{
-				  duration: Infinity
+					duration: Infinity
 				}
-			  );
+			);
 		}else{setShowTimeError(false);}
 	}
 
@@ -322,15 +322,15 @@ function TimeBlock({ changeBind, classBind, cambio, setCambio }: TimeBlockProper
 		if(changeBind(classBind, { ...classBind, end: end })===1){
 			toast.error(
 				(t) => (
-				  <span className="Not-Error">
+					<span className="Not-Error">
 					La hora de inicio no puede ser mayor a la hora de fin{"		"}
-					<button onClick={() => toast.dismiss(t.id)}>OK</button>
-				  </span>
+					<button onClick={() => toast.dismiss(t.id)} type="button">OK</button>
+					</span>
 				),
 				{
-				  duration: Infinity
+					duration: Number.POSITIVE_INFINITY
 				}
-			  );
+			);
 		}else{setShowTimeError(false);}
 	}
 
@@ -392,39 +392,9 @@ function EditableSectionContainer({
 	function updateClassTime(oldSession: ISession, newSession: ISession) {
 		if(updateClassBind(selectedEvent, oldSession, newSession)===undefined){
 			return 1;
-		}else{
+		}
 			setCambioHora(true);
-			return 0}	
-	}
-
-	function updateSectionNRC(event: any) {
-		setNRC(event.target.value);
-		let newNRC = event.target.value;
-		let newSection: ISection = selectedEvent;
-		newSection = {
-			...newSection,
-			nrc: newNRC,
-		};
-		if(puedeActualizar(selectedEvent, newSection)){
-			setShowNRCError(false);
-			setChangedSection({oldSection:selectedEvent, newSection:newSection});
-		}else{
-			setShowNRCError(true);
-		}
-	}
-
-	function updateSectionTeacher(event: any) {
-		setTeacher(event.target.value);
-		let newTeacher = event.target.value
-		let newSection: ISection = selectedEvent;
-		newSection = {
-			...newSection,
-			teacher: newTeacher,
-		};
-		if(puedeActualizar(selectedEvent, newSection)){
-			setChangedSection({oldSection:selectedEvent, newSection:newSection});
-		}
-
+			return 0
 	}
 
 	function guardar() {
@@ -610,7 +580,7 @@ export default function EventsInterface() {
 				console.error(e);
 			})
 			.then((data) => {
-				let newSession: ISession = {
+				const newSession: ISession = {
 					day: data.day,
 					start: new Date(data.start),
 					end: new Date(data.end),
@@ -702,7 +672,7 @@ export default function EventsInterface() {
 		if (updating === true) {
 			return;
 		}
-		let createdSection: ISection = {
+		const createdSection: ISection = {
 			subject: subject,
 			nrc: findFreeNRC().toString(),
 			sessionList: [],
@@ -992,15 +962,15 @@ export default function EventsInterface() {
 	}
 	const [editable, setEditable] = React.useState(false);
 
-	async function updateSubjectServer(oldEvent: IEvent, newEvent: IEvent) {
+	async function updateEventServer(oldEvent: IEvent, newEvent: IEvent) {
 		updating = true;
 		let allow_change = true;
 		const newName= newEvent.name;
 		console.log(`actualizando nombre de ${oldEvent.name} a '${newName}'`);
 		
 		return await fetch(
-			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldEvent.name}&newname=${newName}&event=i`,
-			{ headers: { Accept: "application/json" } },
+			`http://127.0.0.1:4000/api/events/update_event?oldname=${oldEvent.name}&newname=${newName}&event=i`,
+			{ method:"put",headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -1031,7 +1001,7 @@ export default function EventsInterface() {
 	
 	function puedeCambiarNombre(oldEvent: IEvent, newEvent: IEvent, mismo:boolean) {
 		if(mismo){
-			let repetidos:string[]=[];
+			const repetidos:string[]=[];
 			loadedEvents?.forEach((x) => {
 				if(x.name===newEvent.name){
 					repetidos.push(x.name);
@@ -1039,9 +1009,8 @@ export default function EventsInterface() {
 			});
 			if(repetidos.length>1){
 				return false;
-			}else{
-				return true;
 			}
+				return true;
 		}
 		if((oldEvent.name !== newEvent.name)){
 			if(loadedEvents?.find((x) => x.name === newEvent.name) !== undefined){
@@ -1107,13 +1076,13 @@ export default function EventsInterface() {
 			toast("No se realizó ningún cambio",{ icon: "🧐"});
 			return;
 		}
-		for(let x of changedEvents){
-			// toast.promise(updateSubjectServer(x.oldEvent, x.newEvent), {
+		for(const x of changedEvents){
+			// toast.promise(updateEventServer(x.oldEvent, x.newEvent), {
 			// 	loading: "Actualizando curso...",
 			// 	success: "Curso actualizado exitosamente",
 			// 	error: "Error al actualizar curso"
 			// });
-			updateSubjectServer(x.oldEvent, x.newEvent);
+			updateEventServer(x.oldEvent, x.newEvent);
 		}
 		setChangedEvents([]);
 	}
@@ -1200,7 +1169,7 @@ export default function EventsInterface() {
 		setElimino(true);
 		setCambioMensaje(true);
 		if(changedEvents.find((x) => x.newEvent === evento) !== undefined){
-			let oldEvent = changedEvents.find((x) => x.newEvent === evento)?.oldEvent;
+			const oldEvent = changedEvents.find((x) => x.newEvent === evento)?.oldEvent;
 			if(oldEvent !== undefined){
 				toast.loading("Eliminando evento...", {duration:1500});
 			// 	toast.promise(deleteEventFromDatabase(oldEvent), {

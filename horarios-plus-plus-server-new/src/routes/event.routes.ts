@@ -66,28 +66,28 @@ export const pluginEvent = <T extends string>(
                 name:t.String()
             })
         })
-        .get("/api/subjects/update_subject", async ( {query}) => {
+        .put(`${config.prefix}/update_event`, async ( {query}) => {
 			const oldName = query.oldname;
 			const newName = query.newname;
 			if (oldName === undefined) {
-				console.log("Could not update subject, OLDNAME is undefined");
+				console.log("Could not update event, OLDNAME is undefined");
 				return undefined
 			}
 			if (newName === undefined) {
-				console.log("Could not update subject, NEWNAME is undefined");
+				console.log("Could not update event, NEWNAME is undefined");
 				return undefined
 			}
 
 
 			const filter = { name: oldName };
-			const newSubject = {name: newName};
-			const oldSubject = await db.subjectModel.findOneAndUpdate(filter, newSubject);
-			if (oldSubject === undefined) {
+			const newEvent = {name: newName};
+			const oldEvent = await db.eventModel.findOneAndUpdate(filter, newEvent);
+			if (oldEvent === undefined) {
 				console.log("Could not find and update oldName: ", oldName);
-				return JSON.stringify(oldSubject);
+				return JSON.stringify(oldEvent);
 			}
-			console.log("Updated subject ", oldSubject, " to ", newSubject);
-			return JSON.stringify(newSubject);
+			console.log("Updated event ", oldEvent, " to ", newEvent);
+			return JSON.stringify(newEvent);
 
 		})
         .delete(`${config.prefix}/delete_event`,async({query})=>{

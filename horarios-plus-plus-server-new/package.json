@@ -10,7 +10,7 @@
   "dependencies": {
     "@elysiajs/cors": "^1.0.2",
     "elysia": "latest",
-    "mongoose": "^8.4.3",
+    "mongoose": "^8.4.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
