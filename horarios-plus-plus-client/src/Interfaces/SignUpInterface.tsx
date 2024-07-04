@@ -58,7 +58,7 @@ export default function SignUpInterface() {
 				return data;
 			})
 			.finally(() => {
-				// window.location.href = "/login";
+				window.location.href = "/login";
 			});
 	}
 	const handleClick =() => {

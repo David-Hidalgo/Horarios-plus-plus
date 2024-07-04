@@ -8,6 +8,8 @@ import { string } from "zod";
 import toast, {Toaster} from "react-hot-toast";
 
 
+
+
 interface ISession {
 	day: number;
 	start: Date;
@@ -24,7 +26,7 @@ interface ISection {
 	nrc: string;
 	teacher: string;
 	subject: ISubject;
-	sessionList: Array<ISession>;
+	sessions: Array<ISession>;
 }
 
 interface ISubject {
@@ -475,7 +477,7 @@ function EditableSectionContainer({
 				Dias: <button onClick={() => addNewClass()} type="button">Añadir</button>
 			</div>
 			<div>
-				{selectedSection.sessionList.map((value) => {
+				{selectedSection.sessions.map((value) => {
 					return (
 						<div className="day-buttons">
 							<TimeBlock changeBind={updateClassTime} classBind={value} cambio={cambio} setCambio={setCambio} />
@@ -554,7 +556,7 @@ export default function TimeBlockInterface() {
 				const newSection: ISection = {
 					nrc: data.nrc,
 					teacher: data.teacher,
-					sessionList: [],
+					sessions: [],
 					subject: subject,
 				};
 				return newSection;
@@ -644,7 +646,7 @@ export default function TimeBlockInterface() {
 					nrc: section.nrc,
 					teacher: section.teacher,
 					subject: section.subject,
-					sessionList:data.map((aSession: { day: any; start: string | number | Date; end: string | number | Date; }) => {
+					sessions:data.map((aSession: { day: any; start: string | number | Date; end: string | number | Date; }) => {
 						const newSession: ISession = {
 							day: aSession.day,
 							start: new Date(aSession.start),
@@ -653,7 +655,7 @@ export default function TimeBlockInterface() {
 						};
 						return newSession;
 					}),
-					// sessionList: await Promise.all(
+					// sessions: await Promise.all(
 					// 	data.map(async (aSession) => {
 					// 		console.log(aSession);
 					// 		await fetchSessionFromId(aSession._id, section);
@@ -661,7 +663,7 @@ export default function TimeBlockInterface() {
 					// ),
 					
 				};
-				console.log(newSection.sessionList);
+				console.log(newSection.sessions);
 				setSelectedSection(newSection);
 				setCambio(true);
 			});
@@ -713,7 +715,7 @@ export default function TimeBlockInterface() {
 		let createdSection: ISection = {
 			subject: subject,
 			nrc: findFreeNRC().toString(),
-			sessionList: [],
+			sessions: [],
 			teacher: " ",
 		};
 		// toast.promise(saveSectionToSubject(subject, createdSection), {
@@ -914,9 +916,9 @@ export default function TimeBlockInterface() {
 			start: ReturnDate(6, 0),
 			section: section,
 		};
-		section.sessionList.push(newSession);
+		section.sessions.push(newSession);
 
-		if (section.sessionList.includes(newSession)) {
+		if (section.sessions.includes(newSession)) {
 			// toast.promise(saveNewSessionToSection(newSession, section), {
 			// 	loading: "Creando clase",
 			// 	success: "Clase creada con éxito",
@@ -932,7 +934,7 @@ export default function TimeBlockInterface() {
 		section: ISection,
 		session: ISession,
 	): ISection {
-		section.sessionList = section.sessionList.filter((y) => y !== session);
+		section.sessions = section.sessions.filter((y) => y !== session);
 		// toast.promise(deleteSessionFromSection(session, section), {
 		// 	loading: "Eliminando clase",
 		// 	success: "Clase eliminada con éxito",
@@ -988,7 +990,7 @@ export default function TimeBlockInterface() {
 		}
 		if (oldSession !== newSession) {
 			let newSection: ISection = section;
-			newSection.sessionList[newSection.sessionList.indexOf(oldSession)] =
+			newSection.sessions[newSection.sessions.indexOf(oldSession)] =
 				newSession;
 			updateClassFromServer(oldSession, newSession, newSection);
 		}
@@ -1258,7 +1260,7 @@ export default function TimeBlockInterface() {
 							);
 						})}
 					</div>
-					{!editable && (<div className="add-subject">
+					{(!editable )&& (<div className="add-subject">
 						<button onClick={() => {addSubject()}} type="button">
 							Añadir Curso
 						</button>
@@ -1267,7 +1269,7 @@ export default function TimeBlockInterface() {
 						</button>
 
 					</div>)}
-					{editable && (<div className="save-subject">
+					{(editable )&& (<div className="save-subject">
 						<button onClick={() => {addSubject()}} type="button">
 							Añadir Curso
 						</button>

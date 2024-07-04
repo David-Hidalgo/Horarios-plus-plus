@@ -884,7 +884,7 @@ export default function EventsInterface() {
 			// 	success: "Clase creada con éxito",
 			// 	error: "Error al crear clase",
 			// });
-			toast.loading("Creando clase", {duration:1500});
+			toast.loading("Creando momento para el evento", {duration:1500});
 			saveNewSessionToEvent(newSession, event);
 		}
 		return event;
@@ -1201,7 +1201,7 @@ export default function EventsInterface() {
 				reverseOrder={false}
 				/>
 				<div className="course-box-container">
-					<CourseSemesterContainer/>
+					
 					<div>
 						{loadedEvents?.map((value) => {
 							return (
@@ -1227,7 +1227,7 @@ export default function EventsInterface() {
 							Añadir Evento
 						</button>
 						<button onClick={() => {setEditable(true)}} type="button">
-							Editar Cursos
+							Editar Eventos
 						</button>
 
 					</div>)}

@@ -1,5 +1,7 @@
 import NavigationBar from "./NavigationBar";
 import "./LandingInterface.css";
+import toast, {Toaster} from "react-hot-toast";
+import React, { type MouseEventHandler } from "react";
 
 // TODO: Cambiar tagline
 function Description() {
@@ -50,8 +52,20 @@ function Developers() {
 }
 
 export default function LandingInterface() {
+	const fallo = sessionStorage.getItem("failedSchedule");
+
+	React.useEffect(() => {
+		if(fallo === "true") {
+			toast.error("No se ha generado un horario para este usuario.");
+			sessionStorage.setItem("failedSchedule", "false");
+		}}, [fallo]);
+
 	return (
 		<div>
+			<Toaster
+				position="bottom-right"
+				reverseOrder={false}
+				/>
 			<NavigationBar />
 			<div className="screen-container">
 				<Description />

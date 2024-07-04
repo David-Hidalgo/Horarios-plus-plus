@@ -36,7 +36,7 @@ export default function NavigationBar() {
 			</div>
 			{(loggedIn)&& (
 				<>
-					{(tipo===0||tipo===1||tipo===4)&&(<> {/*EL tipo 4 se pone aqui solo en la etapa de pruebas, quitar después*/}
+					{(<> {/*EL tipo 4 se pone aqui solo en la etapa de pruebas, quitar después*/}
 					<div>
 						<a href="/schedule">Mi Horario</a>
 					</div>
