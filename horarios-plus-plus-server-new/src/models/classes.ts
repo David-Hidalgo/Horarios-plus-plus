@@ -239,7 +239,7 @@ class User implements iUser {
 			return 0; // Invalid email
 		}
 	}
-	public setSchedules(sections: Section[]):Schedule[] {
+	public getSchedules(sections: Section[]):Schedule[] {
 		let materias = Subject.obtenerMaterias(sections);
 		materias = Subject.sortSubjectsBySectionLength(materias);
 		let schedules = new Array();

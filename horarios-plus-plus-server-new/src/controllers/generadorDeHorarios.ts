@@ -38,7 +38,7 @@ import {DBStarter} from './db';
 	const sections = [section1, section3];
 
 
-	const a = usuario.setSchedules(sections);
+	const a = usuario.getSchedules(sections);
 
 	usuario.schedule = a[0].sections;
 
