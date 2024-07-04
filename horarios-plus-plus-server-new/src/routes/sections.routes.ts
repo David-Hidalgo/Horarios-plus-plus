@@ -153,6 +153,24 @@ export const pluginSection = <T extends string>(
 				}
 			);
 			await subject.save();
+
+			const user= await db.userModel.findOne({email: query.email});
+			if (user === undefined || user === null) {
+				console.log(
+					"DELETE_SECTION ERROR: no user has section ",
+					section,
+				);
+				return undefined;
+			}
+			if (user.schedule !== undefined && user.schedule !== null) {
+				user.schedule = user.schedule.filter(
+					(sectionA) => {
+						return (sectionA.toString() !== section._id.toString())
+					}
+				);
+				await user.save();
+			}
+			
 			console.log("Deleted section ", section, " from subject ", subject);
 			await db.sectionModel.deleteOne({ nrc: toDeleteNRC });
 			
