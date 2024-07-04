@@ -138,7 +138,6 @@ export default function SignUpInterface() {
 									<li>Al menos una letra mayúscula</li>
 									<li>Al menos una letra minúscula</li>
 									<li>Al menos un número</li>
-									<li>Al menos un carácter especial</li>
 								</ul>
 							</div>
 						</div>
