@@ -2,16 +2,15 @@ import React, { type MouseEventHandler } from "react";
 
 import CourseSemesterContainer from "./CourseSemesterContainer";
 import NavigationBar from "./NavigationBar";
-import "./TimeBlockInterface.css";
-import { set } from "mongoose";
-import { string } from "zod";
+import "./EventsInterface.css";
 import toast, {Toaster} from "react-hot-toast";
+
 
 interface ISession {
 	day: number;
 	start: Date;
 	end: Date;
-	section: ISection;
+	event: IEvent;
 }
 
 interface CISection {
@@ -22,28 +21,27 @@ interface CISection {
 interface ISection {
 	nrc: string;
 	teacher: string;
-	subject: ISubject;
-	sessions: Array<ISession>;
+	subject: IEvent;
+	sessionList: Array<ISession>;
 }
 
-interface ISubject {
+interface IEvent {
 	name: string;
-	sectionList: Array<ISection>;
-	//career: Array<ICareer>
+	sessionLista: Array<ISession>;
 }
 
-interface CISubject {
-	newSubject: ISubject;
-	oldSubject: ISubject;
+interface CIEvent {
+	newEvent: IEvent;
+	oldEvent: IEvent;
 }
 
 interface ICareer {
 	name: string;
-	subjects: Array<ISubject>
+	subjects: Array<IEvent>
 }
 
 interface EditableSectionContainerProperties {
-	selectedSection: ISection;
+	selectedEvent: IEvent;
 	puedeActualizar: any;
 	addClassBind: any;
 	removeClassBind: any;
@@ -61,14 +59,14 @@ interface HourSelectorProperties {
 }
 
 interface CourseProperties {
-	displayCourse: ISubject;
+	displayEvent: IEvent;
 	newSectionBind: any;
 	removeSectionBind: any;
 	selectSectionBind: any;
 	editable: boolean;
 	puedeCambiar: any;
 	setPuedeGuardar: any;
-	removeSubjectBind: any;
+	removeEventBind: any;
 	cambio: boolean;
 	setCambio: any;
 	hayRepetidos: any;
@@ -94,11 +92,11 @@ interface ActionableButton {
 }
 
 function Course({
-	displayCourse,
+	displayEvent,
 	newSectionBind,
 	removeSectionBind,
 	selectSectionBind,
-	removeSubjectBind,
+	removeEventBind,
 	updateBind,
 	editable,
 	puedeCambiar,
@@ -107,13 +105,13 @@ function Course({
 	setCambio,
 	hayRepetidos
 }: CourseProperties) {
-	const [subjectName, setSubjectName] = React.useState(displayCourse.name);
+	const [subjectName, setSubjectName] = React.useState(displayEvent.name);
 
 	React.useEffect(() => {
 		if(cambio){
-			setSubjectName(displayCourse.name);
+			setSubjectName(displayEvent.name);
 			setCambio(false);
-			if(!puedeCambiar(displayCourse,displayCourse,true)){
+			if(!puedeCambiar(displayEvent,displayEvent,true)){
 				setNameError(true);
 				setPuedeGuardar(false);
 			}else{
@@ -124,11 +122,11 @@ function Course({
 	},[cambio]);
 
 	function addNewSection() {
-		displayCourse = newSectionBind(displayCourse);
+		displayEvent = newSectionBind(displayEvent);
 	}
 
-	function removeExistingSection(section: ISection) {
-		displayCourse = removeSectionBind(displayCourse, section);
+	function removeExistingSection(event: IEvent) {
+		displayEvent = removeSectionBind(displayEvent, event);
 	}
 
 	const [nameError, setNameError] = React.useState(false);
@@ -136,36 +134,36 @@ function Course({
 
 	function updateSubject(event: any) {
 		setSubjectName(event.target.value);
-		let newSubject = event.target.value;
-		let newCourse: ISubject = displayCourse;
+		const newEvent = event.target.value;
+		let newCourse: IEvent = displayEvent;
 		newCourse = {
 			...newCourse,
-			name: newSubject,
+			name: newEvent,
 		};
-		if(!puedeCambiar(displayCourse,newCourse,false)){
+		if(!puedeCambiar(displayEvent,newCourse,false)){
 			setNameError(true);
 			setPuedeGuardar(false);
 		}else{
-			updateBind(displayCourse, newCourse);
+			updateBind(displayEvent, newCourse);
 			setPuedeGuardar(true);
 			setNameError(false);
 		}
 	}
 
 
-	function deleteSubject() {
+	function deleteEvent() {
 		hayRepetidos();
-		removeSubjectBind(displayCourse, displayCourse.sectionList[0]);
+		removeEventBind(displayEvent, displayEvent.sessionLista[0]);
 	}
 
 	return (
 		<div>
 			<div className="course">
 				{!editable && (
-				<><div className="course-name">{displayCourse.name}</div>
+				<><div className="course-name">{displayEvent.name}</div>
 				<div className="add-section">
-					<button onClick={addNewSection} type="button">
-						Añadir Seccion
+					<button onClick={() => selectSectionBind(displayEvent)} type="button">
+						Ver Evento
 					</button>
 				</div></>
 				)}
@@ -181,15 +179,15 @@ function Course({
 						/>
 					</div>
 					<div className="delete-section">
-						<button onClick={deleteSubject} type="button">
-							Remover Curso
+						<button onClick={deleteEvent} type="button">
+							Remover Evento
 						</button>
 					</div></>
 				)}
 				
 			</div>
 			<div>
-				{displayCourse?.sectionList.map((value) => {
+				{displayEvent?.sessionLista.map((value) => {
 					return (
 						<div className="section">
 							<div>
@@ -302,21 +300,21 @@ function DaySelector({ classBind, changeBind, cambio, setCambio }: DaySelectorPr
 
 
 function TimeBlock({ changeBind, classBind, cambio, setCambio }: TimeBlockProperties) {
-	 const [showTimeError, setShowTimeError] = React.useState(false);
+	const [showTimeError, setShowTimeError] = React.useState(false);
 	// const timeErrorMessage = "La hora de inicio no puede ser mayor a la hora de fin";
 	function updateStart(start: Date) {
 		if(changeBind(classBind, { ...classBind, start: start })===1){
 			toast.error(
 				(t) => (
-				  <span className="Not-Error">
+					<span className="Not-Error">
 					La hora de inicio no puede ser mayor a la hora de fin{"		"}
-					<button onClick={() => toast.dismiss(t.id)}>OK</button>
-				  </span>
+					<button onClick={() => toast.dismiss(t.id)} type="button">OK</button>
+					</span>
 				),
 				{
-				  duration: Infinity
+					duration: Infinity
 				}
-			  );
+			);
 		}else{setShowTimeError(false);}
 	}
 
@@ -324,15 +322,15 @@ function TimeBlock({ changeBind, classBind, cambio, setCambio }: TimeBlockProper
 		if(changeBind(classBind, { ...classBind, end: end })===1){
 			toast.error(
 				(t) => (
-				  <span className="Not-Error">
+					<span className="Not-Error">
 					La hora de inicio no puede ser mayor a la hora de fin{"		"}
-					<button onClick={() => toast.dismiss(t.id)}>OK</button>
-				  </span>
+					<button onClick={() => toast.dismiss(t.id)} type="button">OK</button>
+					</span>
 				),
 				{
-				  duration: Infinity
+					duration: Number.POSITIVE_INFINITY
 				}
-			  );
+			);
 		}else{setShowTimeError(false);}
 	}
 
@@ -359,7 +357,7 @@ function SaveButton({ action }: ActionableButton) {
 }
 
 function EditableSectionContainer({
-	selectedSection,
+	selectedEvent,
 	puedeActualizar,
 	addClassBind,
 	removeClassBind,
@@ -369,64 +367,34 @@ function EditableSectionContainer({
 	setCambio,
 }: EditableSectionContainerProperties ){
 	const [changedSection,setChangedSection]=React.useState<CISection|undefined>(undefined);
-	const [nrc, setNRC] = React.useState(selectedSection.nrc);
-	const [teacher, setTeacher] = React.useState(selectedSection.teacher);
+	const [nrc, setNRC] = React.useState(selectedEvent.name);
+	const [teacher, setTeacher] = React.useState(selectedEvent.teacher);
 	const [showNRCError, setShowNRCError] = React.useState(false);
 	const [cambioHora, setCambioHora] = React.useState(false);
 	const nrcErrorMessage = "NRC ya existente";
 	React.useEffect(() => {
 	if(cambio){
-		setNRC(selectedSection.nrc);
-		setTeacher(selectedSection.teacher)
+		setNRC(selectedEvent.name);
+		setTeacher(selectedEvent.teacher)
 		setShowNRCError(false);
 		setChangedSection(undefined);
 		setCambio(false);
 	}}, [cambio]);
 
 	function addNewClass() {
-		addClassBind(selectedSection);
+		addClassBind(selectedEvent);
 	}
 
 	function removeClass(session: ISession) {
-		removeClassBind(selectedSection, session);
+		removeClassBind(selectedEvent, session);
 	}
 
 	function updateClassTime(oldSession: ISession, newSession: ISession) {
-		if(updateClassBind(selectedSection, oldSession, newSession)===undefined){
+		if(updateClassBind(selectedEvent, oldSession, newSession)===undefined){
 			return 1;
-		}else{
+		}
 			setCambioHora(true);
-			return 0}	
-	}
-
-	function updateSectionNRC(event: any) {
-		setNRC(event.target.value);
-		let newNRC = event.target.value;
-		let newSection: ISection = selectedSection;
-		newSection = {
-			...newSection,
-			nrc: newNRC,
-		};
-		if(puedeActualizar(selectedSection, newSection)){
-			setShowNRCError(false);
-			setChangedSection({oldSection:selectedSection, newSection:newSection});
-		}else{
-			setShowNRCError(true);
-		}
-	}
-
-	function updateSectionTeacher(event: any) {
-		setTeacher(event.target.value);
-		let newTeacher = event.target.value
-		let newSection: ISection = selectedSection;
-		newSection = {
-			...newSection,
-			teacher: newTeacher,
-		};
-		if(puedeActualizar(selectedSection, newSection)){
-			setChangedSection({oldSection:selectedSection, newSection:newSection});
-		}
-
+			return 0
 	}
 
 	function guardar() {
@@ -447,34 +415,34 @@ function EditableSectionContainer({
 	return (
 		<div className="editable-section-container">
 			<div className="editable-section-header">
-				<div className="basic-info">{selectedSection.subject.name}</div>
-				{showNRCError&&(<div className="Nrc-error">{nrcErrorMessage}</div>)}
+				<div className="basic-info">{selectedEvent.name}</div>
+				{/* {showNRCError&&(<div className="Nrc-error">{nrcErrorMessage}</div>)}
 				<div>
 					NRC:{" "}
 					<input
 						value={nrc}
-						placeholder={selectedSection.nrc}
+						placeholder={selectedEvent.name}
 						onChange={updateSectionNRC}
 						type="text"
 						
 					/>
 					
-				</div>
+				</div> */}
 			</div>
-			<div className="teacher-container">
+			{/* <div className="teacher-container">
 				Teacher:{" "}
 				<input
 					value={teacher}
-					placeholder={selectedSection.teacher}
+					placeholder={selectedEvent.teacher}
 					onChange={updateSectionTeacher}
 					type="text"
 				/>
-			</div>
+			</div> */}
 			<div className="day-container">
 				Dias: <button onClick={() => addNewClass()} type="button">Añadir</button>
 			</div>
 			<div>
-				{selectedSection.sessions.map((value) => {
+				{selectedEvent.sessionLista.map((value) => {
 					return (
 						<div className="day-buttons">
 							<TimeBlock changeBind={updateClassTime} classBind={value} cambio={cambio} setCambio={setCambio} />
@@ -493,11 +461,11 @@ function EditableSectionContainer({
 	);
 }
 
-export default function TimeBlockInterface() {
-	const [selectedSection, setSelectedSection] = React.useState<ISection | undefined>(undefined);
-	const [loadedSubjects, setLoadedSubjects] = React.useState<Array<ISubject>>();
+export default function EventsInterface() {
+	const [selectedEvent, setSelectedEvent] = React.useState<setSelectedEvent | undefined>(undefined);
+	const [loadedEvents, setLoadedEvents] = React.useState<Array<IEvent>>();
 	const [cambio, setCambio] = React.useState(false);
-	const [changedSubjects, setChangedSubjects] = React.useState<CISubject[]>([]);
+	const [changedEvents, setChangedEvents] = React.useState<CIEvent[]>([]);
 	const [puedeGuardar, setPuedeGuardar] = React.useState(true);
 	const [elimino, setElimino] = React.useState(false);
 	const[cambioMensaje, setCambioMensaje] = React.useState(false);
@@ -511,8 +479,8 @@ export default function TimeBlockInterface() {
 	function findFreeNRC(): Number {
 		let newNRC = 1;
 		let sectionNRC: string[] = [];
-		loadedSubjects?.forEach((x) => {
-			x.sectionList.forEach((w) => {
+		loadedEvents?.forEach((x) => {
+			x.sessionLista.forEach((w) => {
 				sectionNRC.push(w.nrc);
 			});
 		});
@@ -528,18 +496,18 @@ export default function TimeBlockInterface() {
 
 	React.useEffect(() => {
 		(async () => {
-			if (loadedSubjects!==undefined) {
+			if (loadedEvents!==undefined) {
 				return;
-			}else{setLoadedSubjects(await loadFromServer());}
+			}else{setLoadedEvents(await loadFromServer());}
 			
 		})();
 	});
 
 	async function loadSectionFromID(
-		subject: ISubject,
+		subject: IEvent,
 		id: string,
 	): Promise<ISection> {
-		const section: ISection = await fetch(
+		const event: IEvent = await fetch(
 			`http://127.0.0.1:4000/api/section/get_sections_from_id?id=${id}`,
 			{ headers: { Accept: "application/json" } },
 		)
@@ -553,15 +521,15 @@ export default function TimeBlockInterface() {
 				const newSection: ISection = {
 					nrc: data.nrc,
 					teacher: data.teacher,
-					sessions: [],
+					sessionList: [],
 					subject: subject,
 				};
 				return newSection;
 			});
-		return section;
+		return event;
 	}
 
-	async function loadSectionsFromIdList(subject: ISubject, Ids: string[]) {
+	async function loadSectionsFromIdList(subject: IEvent, Ids: string[]) {
 		if (Ids === undefined || Ids.length === 0) {
 			return [];
 		}
@@ -571,9 +539,9 @@ export default function TimeBlockInterface() {
 		return Promise.all(promises);
 	}
 
-	async function loadFromServer(): Promise<ISubject[]> {
-		const subjects: Promise<ISubject>[] = await fetch(
-			"http://127.0.0.1:4000/api/subjects/get_subjects",
+	async function loadFromServer(): Promise<IEvent[]> {
+		const events: Promise<IEvent>[] = await fetch(
+			"http://127.0.0.1:4000/api/events/get_all_events",
 			{
 				headers: { Accept: "application/json" },
 			},
@@ -585,26 +553,23 @@ export default function TimeBlockInterface() {
 			.then((data: any[]) => {
 				console.log("a ver si llego aquí",data);
 				
-				return data.map(async (subject) => {
-					const newSubject: ISubject = {
+				return data.map(async (event) => {
+					const newEvent: IEvent = {
 						//career: [],
-						name: subject.name,
-						// sectionList: subject.sections
-						sectionList: await loadSectionsFromIdList(
-							subject,
-							subject.sections,
-						),
+						name: event.name,
+						// sessionLista: event.sections
+						sessionLista: []
 					};
-					console.log(newSubject);
-					return newSubject;
+					console.log(newEvent);
+					return newEvent;
 				});
 			});
-		return Promise.all(subjects);
+		return Promise.all(events);
 	}
 
 	async function fetchSessionFromId(
 		id: string,
-		section: ISection,
+		event: IEvent,
 	): Promise<ISession> {
 		return await fetch(
 			`http://127.0.0.1:4000/api/session/get_sessions_from_id?id=${id}`,
@@ -615,19 +580,19 @@ export default function TimeBlockInterface() {
 				console.error(e);
 			})
 			.then((data) => {
-				let newSession: ISession = {
+				const newSession: ISession = {
 					day: data.day,
 					start: new Date(data.start),
 					end: new Date(data.end),
-					section: section,
+					event: event,
 				};
 				return newSession;
 			});
 	}
 
-	async function fetchSessionsFromSection(section: ISection) {
+	async function fetchSessionsFromEvent(event: IEvent) {
 		return await fetch(
-			`http://127.0.0.1:4000/api/session/get_sessions_from_section?nrc=${section.nrc}`,
+			`http://127.0.0.1:4000/api/session/get_sessions_from_event?name=${event.name}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
@@ -639,40 +604,38 @@ export default function TimeBlockInterface() {
 					console.error(data);
 					return;
 				}
-				const newSection: ISection = {
-					nrc: section.nrc,
-					teacher: section.teacher,
-					subject: section.subject,
-					sessions:data.map((aSession: { day: any; start: string | number | Date; end: string | number | Date; }) => {
+				const newEvent: IEvent = {
+					name: event.name,
+					sessionLista:data.map((aSession: { day: any; start: string | number | Date; end: string | number | Date; }) => {
 						const newSession: ISession = {
 							day: aSession.day,
 							start: new Date(aSession.start),
 							end: new Date(aSession.end),
-							section: section,
+							event: event,
 						};
 						return newSession;
 					}),
-					// sessions: await Promise.all(
+					// sessionList: await Promise.all(
 					// 	data.map(async (aSession) => {
 					// 		console.log(aSession);
-					// 		await fetchSessionFromId(aSession._id, section);
+					// 		await fetchSessionFromId(aSession._id, event);
 					// 	}),
 					// ),
 					
 				};
-				console.log(newSection.sessions);
-				setSelectedSection(newSection);
+				console.log(newEvent.sessionLista);
+				setSelectedEvent(newEvent);
 				setCambio(true);
 			});
 	}
 
-	function changeSelectedSection(section: ISection) {
-		fetchSessionsFromSection(section);
+	function changeSelectedEvent(event: IEvent) {
+		fetchSessionsFromEvent(event);
 	}
 
-	async function saveSectionToSubject(subject: ISubject, section: ISection) {
+	async function saveSectionToSubject(subject: IEvent, event: IEvent) {
 		updating = true;
-		if (subject === undefined || section === undefined) {
+		if (subject === undefined || event === undefined) {
 			updating = false;
 			return;
 		}
@@ -690,13 +653,13 @@ export default function TimeBlockInterface() {
 				if (data === undefined) {
 					return;
 				}
-				setLoadedSubjects(
-					loadedSubjects?.map((x) => {
+				setLoadedEvents(
+					loadedEvents?.map((x) => {
 						if (x !== subject) return x;
-						return { ...x, sectionList: x.sectionList.concat([section]) };
+						return { ...x, sessionLista: x.sessionLista.concat([event]) };
 					}),
 				);
-				setSelectedSection(section);
+				setSelectedEvent(event);
 				toast.success("Sección creada con éxito");
 			})
 			.finally(() => {
@@ -705,14 +668,14 @@ export default function TimeBlockInterface() {
 	}
 
 	// Adds new section to a specified course
-	function addSectionToCourse(subject: ISubject) {
+	function addSectionToCourse(subject: IEvent) {
 		if (updating === true) {
 			return;
 		}
-		let createdSection: ISection = {
+		const createdSection: ISection = {
 			subject: subject,
 			nrc: findFreeNRC().toString(),
-			sessions: [],
+			sessionList: [],
 			teacher: " ",
 		};
 		// toast.promise(saveSectionToSubject(subject, createdSection), {
@@ -725,16 +688,15 @@ export default function TimeBlockInterface() {
 
 	}
 
-	async function deleteSectionFromDatabase(section: ISection) {
-		const mail = sessionStorage.getItem("login");
+	async function deleteSectionFromDatabase(event: setSelectedEvent) {
 		await fetch(
-			`http://127.0.0.1:4000/api/section/delete_section?nrc=${section.nrc}&mail=${mail}`,
+			`http://127.0.0.1:4000/api/event/delete_section?nrc=${event.name}`,
 			{ method:"DELETE", headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
 				toast.error("Error al eliminar la sección");
-				console.error("ERROR while trying to remove section ", section);
+				console.error("ERROR while trying to remove event ", event);
 				console.error(e);
 			})
 			.then((data) => {
@@ -748,25 +710,25 @@ export default function TimeBlockInterface() {
 	}
 
 	function removeSectionFromCourse(
-		course: ISubject,
-		section: ISection,
-	): ISubject {
-		let ret: ISubject = course;
-		setLoadedSubjects(
-			loadedSubjects?.map((x) => {
+		course: IEvent,
+		event: setSelectedEvent,
+	): IEvent {
+		let ret: IEvent = course;
+		setLoadedEvents(
+			loadedEvents?.map((x) => {
 				if (x !== course) return x;
 				ret = {
 					...x,
-					sectionList: x.sectionList.filter((y) => y !== section),
+					sessionLista: x.sessionLista.filter((y) => y !== event),
 				};
 				return ret;
 			}),
 		);
 		toast.loading("Eliminando sección", {duration:1500});
-		deleteSectionFromDatabase(section);
+		deleteSectionFromDatabase(event);
 
-		if (section === selectedSection) {
-			setSelectedSection(loadedSubjects?.[0]?.sectionList[0]);
+		if (event === selectedEvent) {
+			setSelectedEvent(loadedEvents?.[0]?.sessionLista[0]);
 		}
 		return ret;
 	}
@@ -779,7 +741,7 @@ export default function TimeBlockInterface() {
 
 		let allow_change = true;
 		return await fetch(
-			`http://127.0.0.1:4000/api/section/update_section?oldnrc=${oldSection.nrc}&nrc=${newSection.nrc}&teacher=${newSection.teacher}`,
+			`http://127.0.0.1:4000/api/event/update_section?oldnrc=${oldSection.nrc}&nrc=${newSection.nrc}&teacher=${newSection.teacher}`,
 			{ headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
@@ -798,14 +760,14 @@ export default function TimeBlockInterface() {
 				allow_change = true;
 			})
 			.finally(() => {
-				console.log("Updating section");
+				console.log("Updating event");
 				let newValue = allow_change ? newSection : oldSection;
 				if(allow_change){
-					setLoadedSubjects(
-						loadedSubjects?.map((x) => {
-							x.sectionList.forEach(element => {
+					setLoadedEvents(
+						loadedEvents?.map((x) => {
+							x.sessionLista.forEach(element => {
 								if (element.nrc===oldSection.nrc){ 
-									x.sectionList[x.sectionList.indexOf(element)] = newValue;
+									x.sessionLista[x.sessionLista.indexOf(element)] = newValue;
 									console.log("Se actualizo la seccion "+element.nrc+" a "+newValue.nrc);
 									}
 									
@@ -813,7 +775,7 @@ export default function TimeBlockInterface() {
 							return x;
 							})
 					);
-					setSelectedSection(newValue);
+					setSelectedEvent(newValue);
 					toast.success("Sección actualizada con éxito");
 				}
 				updating = false;
@@ -822,7 +784,7 @@ export default function TimeBlockInterface() {
 
 	function puedeActualizar(oldSection:ISection, newSection: ISection){
 		if(oldSection.nrc !== newSection.nrc){
-			if(loadedSubjects?.find((x) => x.sectionList.find((y) => y.nrc === newSection.nrc) !== undefined) !== undefined){
+			if(loadedEvents?.find((x) => x.sessionLista.find((y) => y.nrc === newSection.nrc) !== undefined) !== undefined){
 				return false;
 			}
 		}
@@ -846,12 +808,12 @@ export default function TimeBlockInterface() {
 
 	async function deleteSessionFromSection(
 		session: ISession,
-		section: ISection,
+		event: IEvent,
 	) {
 		let saved = true;
 		await fetch(
-			`http://127.0.0.1:4000/api/session/delete_session?nrc=${
-				section.nrc
+			`http://127.0.0.1:4000/api/session/delete_session_from_event?name=${
+				event.name
 			}&day=${
 				session.day
 			}&start=${session.start.getTime()}&end=${session.end.getTime()}`,
@@ -861,24 +823,24 @@ export default function TimeBlockInterface() {
 			.catch((e) => {
 				saved = false;
 				toast.error("Error al eliminar la clase");
-				console.error("ERROR unable to delete session from section ", e);
+				console.error("ERROR unable to delete session from event ", e);
 				return e;
 			})
 			.finally(() => {
 				if (saved) {
 					toast.success("Clase eliminada con éxito");
-					changeSelectedSection(section);
+					changeSelectedEvent(event);
 				}
 			});
 	}
 
-	async function saveNewSessionToSection(session: ISession, section: ISection) {
+	async function saveNewSessionToEvent(session: ISession, event: IEvent) {
 		let saved = true;
 		await fetch(
-			`http://127.0.0.1:4000/api/session/add_session_to_section?day=${
+			`http://127.0.0.1:4000/api/session/add_session_to_event?day=${
 				session.day
-			}&start=${session.start.getTime()}&end=${session.end.getTime()}&nrc=${
-				section.nrc
+			}&start=${session.start.getTime()}&end=${session.end.getTime()}&name=${
+				event.name
 			}`,
 			{
 				method: "POST",
@@ -888,19 +850,19 @@ export default function TimeBlockInterface() {
 			.then((response) => response.json())
 			.catch((e) => {
 				saved = false;
-				console.error("ERROR unable to create section ", e);
+				console.error("ERROR unable to create event ", e);
 				toast.error("Error al crear la clase");
 				return e;
 			})
 			.then((data) => {
 				if (saved) {
 					toast.success("Clase creada con éxito");
-					changeSelectedSection(section);
+					changeSelectedEvent(event);
 				}
 			});
 	}
 
-	function addClassToSection(section: ISection): ISection {
+	function addClassToEvent(event: IEvent): IEvent {
 		function ReturnDate(hours: number, minutes: number): Date {
 			let ret = new Date(0);
 			ret.setHours(hours);
@@ -912,41 +874,41 @@ export default function TimeBlockInterface() {
 			day: 1,
 			end: ReturnDate(6, 15),
 			start: ReturnDate(6, 0),
-			section: section,
+			event: event,
 		};
-		section.sessions.push(newSession);
+		event.sessionLista.push(newSession);
 
-		if (section.sessions.includes(newSession)) {
-			// toast.promise(saveNewSessionToSection(newSession, section), {
+		if (event.sessionLista.includes(newSession)) {
+			// toast.promise(saveNewSessionToEvent(newSession, event), {
 			// 	loading: "Creando clase",
 			// 	success: "Clase creada con éxito",
 			// 	error: "Error al crear clase",
 			// });
-			toast.loading("Creando clase", {duration:1500});
-			saveNewSessionToSection(newSession, section);
+			toast.loading("Creando momento para el evento", {duration:1500});
+			saveNewSessionToEvent(newSession, event);
 		}
-		return section;
+		return event;
 	}
 
-	function removeClassFromSection(
-		section: ISection,
+	function removeClassFromEvent(
+		event: IEvent,
 		session: ISession,
-	): ISection {
-		section.sessions = section.sessions.filter((y) => y !== session);
-		// toast.promise(deleteSessionFromSection(session, section), {
+	): IEvent {
+		event.sessionLista = event.sessionLista.filter((y) => y !== session);
+		// toast.promise(deleteSessionFromSection(session, event), {
 		// 	loading: "Eliminando clase",
 		// 	success: "Clase eliminada con éxito",
 		// 	error: "Error al eliminar clase",
 		// });
 		toast.loading("Eliminando clase", {duration:1500});
-		deleteSessionFromSection(session, section);
-		return section;
+		deleteSessionFromSection(session, event);
+		return event;
 	}
 
 	async function updateClassFromServer(
 		oldSession: ISession,
 		newSession: ISession,
-		section: ISection,
+		event: IEvent,
 	) {
 		const variables:string =
 			`oldday=${oldSession.day}&` +
@@ -955,27 +917,31 @@ export default function TimeBlockInterface() {
 			`newday=${newSession.day}&` +
 			`newstart=${newSession.start.getTime()}&` +
 			`newend=${newSession.end.getTime()}&` +
-			`nrc=${section.nrc}`;
+			`nrc=${event.name}`;
 
-		const uri:string=`http://127.0.0.1:4000/api/session/updateSession?${variables}`
+		const uri:string=`http://127.0.0.1:4000/api/session/updateSession_from_event?${variables}`
 		console.log(uri);
 		
 		let changed = true;
 		await fetch(uri,
-			{ headers: { Accept: "application/json" } },
+			{ method:"put",headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
+			.then((data) => {
+				console.log(data);
+			})
+				
 			.catch((e) => {
 				changed = false;
 				console.error("ERROR updating session ", e);
 			})
 			.finally(() => {
-				changeSelectedSection(section);
+				changeSelectedEvent(event);
 			});
 	}
 
 	function updateClassFromSection(
-		section: ISection,
+		event: IEvent,
 		oldSession: ISession,
 		newSession: ISession,
 	) {
@@ -987,24 +953,24 @@ export default function TimeBlockInterface() {
 			return undefined;
 		}
 		if (oldSession !== newSession) {
-			let newSection: ISection = section;
-			newSection.sessions[newSection.sessions.indexOf(oldSession)] =
+			let newEvent: IEvent = event	;
+			newEvent.sessionLista[newEvent.sessionLista.indexOf(oldSession)] =
 				newSession;
-			updateClassFromServer(oldSession, newSession, newSection);
+			updateClassFromServer(oldSession, newSession, newEvent);
 		}
-		return section;
+		return event;
 	}
 	const [editable, setEditable] = React.useState(false);
 
-	async function updateSubjectServer(oldSubject: ISubject, newSubject: ISubject) {
+	async function updateEventServer(oldEvent: IEvent, newEvent: IEvent) {
 		updating = true;
 		let allow_change = true;
-		const newName= newSubject.name;
-		console.log(`actualizando nombre de ${oldSubject.name} a '${newName}'`);
+		const newName= newEvent.name;
+		console.log(`actualizando nombre de ${oldEvent.name} a '${newName}'`);
 		
 		return await fetch(
-			`http://127.0.0.1:4000/api/subjects/update_subject?oldname=${oldSubject.name}&newname=${newName}&section=i`,
-			{ headers: { Accept: "application/json" } },
+			`http://127.0.0.1:4000/api/events/update_event?oldname=${oldEvent.name}&newname=${newName}&event=i`,
+			{ method:"put",headers: { Accept: "application/json" } },
 		)
 			.then((response) => response.json())
 			.catch((e) => {
@@ -1016,11 +982,11 @@ export default function TimeBlockInterface() {
 			.then((data) => {
 				if (data === undefined) {return;}})
 			.finally(() => {
-				const newValue = allow_change ? newSubject : oldSubject;
-				console.log(`Se actualizo el curso ${oldSubject.name} a ${newSubject.name}`);
-				setLoadedSubjects(
-					loadedSubjects?.map((x) => {
-						if (x !== oldSubject){return x;}
+				const newValue = allow_change ? newEvent : oldEvent;
+				console.log(`Se actualizo el curso ${oldEvent.name} a ${newEvent.name}`);
+				setLoadedEvents(
+					loadedEvents?.map((x) => {
+						if (x !== oldEvent){return x;}
 						
 						return newValue;
 					})
@@ -1029,27 +995,25 @@ export default function TimeBlockInterface() {
 					toast.success("Curso actualizado con éxito");
 				}
 				updating = false;
-				//setSelectedSection(loadedSubjects?.find((x)=>x===newValue)?.sectionList[0])
 			});
 		
 	}
 	
-	function puedeCambiarNombre(oldSubject: ISubject, newSubject: ISubject, mismo:boolean) {
+	function puedeCambiarNombre(oldEvent: IEvent, newEvent: IEvent, mismo:boolean) {
 		if(mismo){
-			let repetidos:string[]=[];
-			loadedSubjects?.forEach((x) => {
-				if(x.name===newSubject.name){
+			const repetidos:string[]=[];
+			loadedEvents?.forEach((x) => {
+				if(x.name===newEvent.name){
 					repetidos.push(x.name);
 				}
 			});
 			if(repetidos.length>1){
 				return false;
-			}else{
-				return true;
 			}
+				return true;
 		}
-		if((oldSubject.name !== newSubject.name)){
-			if(loadedSubjects?.find((x) => x.name === newSubject.name) !== undefined){
+		if((oldEvent.name !== newEvent.name)){
+			if(loadedEvents?.find((x) => x.name === newEvent.name) !== undefined){
 				return false;
 			}
 		}
@@ -1058,7 +1022,7 @@ export default function TimeBlockInterface() {
 	}
 
 	function hayNombre(){
-		let nombres = loadedSubjects?.map((x) => x.name);
+		let nombres = loadedEvents?.map((x) => x.name);
 		return nombres?.length !== new Set(nombres).size;
 	}
 
@@ -1069,14 +1033,14 @@ export default function TimeBlockInterface() {
 	}
 
 
-	function saveSubjectLocal(oldSubject:ISubject, newSubject:ISubject){
-		setLoadedSubjects(
-			loadedSubjects?.map((x) => {
-				if (x !== oldSubject){
+	function saveSubjectLocal(oldEvent:IEvent, newEvent:IEvent){
+		setLoadedEvents(
+			loadedEvents?.map((x) => {
+				if (x !== oldEvent){
 					return x;
 				}
-				pushChangedSubjects(oldSubject, newSubject);
-				return newSubject;
+				pushChangedSubjects(oldEvent, newEvent);
+				return newEvent;
 			})
 		);
 		setElimino(true);
@@ -1084,13 +1048,13 @@ export default function TimeBlockInterface() {
 	}
 
 
-	function pushChangedSubjects(oldSubject:ISubject, newSubject:ISubject){
-		if(changedSubjects.find((x) => (x.oldSubject === oldSubject)||(x.newSubject===oldSubject)) === undefined){
-			changedSubjects.push({oldSubject:oldSubject, newSubject:newSubject});
+	function pushChangedSubjects(oldEvent:IEvent, newEvent:IEvent){
+		if(changedEvents.find((x) => (x.oldEvent === oldEvent)||(x.newEvent===oldEvent)) === undefined){
+			changedEvents.push({oldEvent:oldEvent, newEvent:newEvent});
 		}else{
-			setChangedSubjects(changedSubjects.map((x) => {
-				if(x.newSubject === oldSubject){
-					return {oldSubject:x.oldSubject, newSubject:newSubject};
+			setChangedEvents(changedEvents.map((x) => {
+				if(x.newEvent === oldEvent){
+					return {oldEvent:x.oldEvent, newEvent:newEvent};
 				}
 				return x;
 			}));
@@ -1103,7 +1067,7 @@ export default function TimeBlockInterface() {
 			console.log("No se puede guardar, hay errores");
 			return;
 		}
-		if(changedSubjects.length===0){
+		if(changedEvents.length===0){
 			if(cambioMensaje){
 				toast.success("Los datos se guardaron con éxito");
 				setCambioMensaje(false);
@@ -1112,121 +1076,120 @@ export default function TimeBlockInterface() {
 			toast("No se realizó ningún cambio",{ icon: "🧐"});
 			return;
 		}
-		for(let x of changedSubjects){
-			// toast.promise(updateSubjectServer(x.oldSubject, x.newSubject), {
+		for(const x of changedEvents){
+			// toast.promise(updateEventServer(x.oldEvent, x.newEvent), {
 			// 	loading: "Actualizando curso...",
 			// 	success: "Curso actualizado exitosamente",
 			// 	error: "Error al actualizar curso"
 			// });
-			updateSubjectServer(x.oldSubject, x.newSubject);
+			updateEventServer(x.oldEvent, x.newEvent);
 		}
-		setChangedSubjects([]);
+		setChangedEvents([]);
 	}
 
-	async function addSubjectServer(newSubject: ISubject) {
+	async function addEventServer(newEvent: IEvent) {
 		updating = true;
-		return await fetch(`http://127.0.0.1:4000/api/subjects/create_subject?name=${newSubject.name}`,
-			{ headers: { Accept: "application/json" } },)
+		return await fetch(`http://127.0.0.1:4000/api/events/create_event/?name=${newEvent.name}`,
+			{ method:"post",headers: { Accept: "application/json" } },)
 			.then((response) => response.json())
 			.catch((e) => {				
-				console.error("Error al crear curso ", e);
-				toast.error("Error al crear el curso");
+				console.error("Error al crear evento ", e);
+				toast.error("Error al crear el evento");
 				return e;
 			})
 			.then((data) => {
 				console.log(data);
 				if (data === undefined) {
-					console.error("No se pudo crear el curso");
-					toast.error("No se pudo crear el curso");
+					console.error("No se pudo crear el evento");
+					toast.error("No se pudo crear el evento");
 					return;
 				}
 				console.log(data);
-				setLoadedSubjects(loadedSubjects?.concat([newSubject]));
-				toast.success("Curso creado exitosamente");
+				setLoadedEvents(loadedEvents?.concat([newEvent]));
+				toast.success("Evento creado exitosamente");
 			})
 	}
 	function generateName(){
-		let name = "Nuevo Curso ";
+		let name = "Nuevo Evento ";
 		let i = 1;
-		while(loadedSubjects?.find((x) => x.name === name+i) !== undefined){
+		while(loadedEvents?.find((x) => x.name === name+i) !== undefined){
 			i++;
 		}
 		return name+i;
 	}
-	function addSubject(){
+	function addEvent(){
 		setEditable(true);
-		let newSubject: ISubject = {
+		let newEvent: IEvent = {
 			//career: [],
 			name: generateName(),
-			sectionList: [],
+			sessionLista: [],
 		};
-		// toast.promise(addSubjectServer(newSubject), {
+		// toast.promise(addEventServer(newEvent), {
 		// 	loading: "Creando curso...",
 		// 	success: "Curso creado exitosamente",
 		// 	error: "No se pudo crear el curso, intente mas tarde o recargue la página",
 		// });
-		toast.loading("Creando curso...", {duration:1500});
-		addSubjectServer(newSubject);
+		toast.loading("Creando evento...", {duration:1500});
+		addEventServer(newEvent);
 		setElimino(true);
 		setCambioMensaje(true);
 	
 	}
 
-	async function deleteSubjectFromDatabase(subject: ISubject){
-		return await fetch(`http://127.0.0.1:4000/api/subjects/delete_subject?subjectName=${subject.name}&subject=${subject}`,
-			{ headers: { Accept: "application/json" } },)
+	async function deleteEventFromDatabase(event: IEvent){
+		return await fetch(`http://127.0.0.1:4000/api/events/delete_event?eventName=${event.name}&event=a`,
+			{ method:"delete",headers: { Accept: "application/json" } },)
 			.then((response) => response.json())
 			.catch((e) => {
 				console.error("Error al eliminar curso ", e);
-				toast.error("Error al eliminar el curso");
+				toast.error("Error al eliminar el evento");
 				return e;
 			})
 			.then((data) => {
 				if (data === undefined) {
 					toast.error("No se pudo eliminar el curso");
-					console.error("No se pudo eliminar el curso");
+					console.error("No se pudo eliminar el evento");
 					return;
 				}
-				if(data.message==="Subject deleted successfully"){
-					console.log("Curso eliminado con exito");
-					toast.success("Curso eliminado con éxito");
+				if(data.message==="Event deleted successfully"){
+					console.log("Evento eliminado con exito");
+					toast.success("Evento eliminado con éxito");
 				}
 			})
 	}
 
-	function deleteSubject(subject: ISubject){
+	function deleteEvent(evento: IEvent){
 
-		subject.sectionList.forEach((x) => {
-			if (x === selectedSection) {
-				setSelectedSection(undefined);
-			}
-		});
-		setLoadedSubjects(loadedSubjects?.filter((x) => x !== subject));
+		if (evento === selectedEvent) {
+			setSelectedEvent(undefined);
+		}
+
+		setLoadedEvents(loadedEvents?.filter((x) => x !== evento));
 
 		setElimino(true);
 		setCambioMensaje(true);
-		if(changedSubjects.find((x) => x.newSubject === subject) !== undefined){
-			let oldSubject = changedSubjects.find((x) => x.newSubject === subject)?.oldSubject;
-			if(oldSubject !== undefined){
-				toast.loading("Eliminando curso...", {duration:1500});
-			// 	toast.promise(deleteSubjectFromDatabase(oldSubject), {
+		if(changedEvents.find((x) => x.newEvent === evento) !== undefined){
+			const oldEvent = changedEvents.find((x) => x.newEvent === evento)?.oldEvent;
+			if(oldEvent !== undefined){
+				toast.loading("Eliminando evento...", {duration:1500});
+			// 	toast.promise(deleteEventFromDatabase(oldEvent), {
 			// 	loading: "Eliminando curso...",
 			// 	success: "Curso eliminado exitosamente",
 			// 	error: "No se pudo eliminar el curso, intente mas tarde",
 			// });
-				deleteSubjectFromDatabase(oldSubject);
+				deleteEventFromDatabase(oldEvent);
 			}
 		}else{
-			// toast.promise(deleteSubjectFromDatabase(subject), {
+			// toast.promise(deleteEventFromDatabase(evento), {
 			// 	loading: "Eliminando curso...",
 			// 	success: "Curso eliminado exitosamente",
 			// 	error: "No se pudo eliminar el curso, intente mas tarde",
 			// });
-			toast.loading("Eliminando curso...", {duration:1500});
-			deleteSubjectFromDatabase(subject);
+			toast.loading("Eliminando evento...", {duration:1500});
+			deleteEventFromDatabase(evento);
 		}
 
-		//deleteSubjectFromDatabase(subject);
+		//deleteEventFromDatabase(evento);
 	}
 
 	return (
@@ -1238,20 +1201,20 @@ export default function TimeBlockInterface() {
 				reverseOrder={false}
 				/>
 				<div className="course-box-container">
-					{/* <CourseSemesterContainer/> */}
+					
 					<div>
-						{loadedSubjects?.map((value) => {
+						{loadedEvents?.map((value) => {
 							return (
 								<Course
-									displayCourse={value}
+									displayEvent={value}
 									newSectionBind={addSectionToCourse}
 									removeSectionBind={removeSectionFromCourse}
-									selectSectionBind={changeSelectedSection}
+									selectSectionBind={changeSelectedEvent}
 									updateBind={saveSubjectLocal}
 									editable={editable}
 									puedeCambiar={puedeCambiarNombre}
 									setPuedeGuardar={setPuedeGuardar}
-									removeSubjectBind={() => {deleteSubject(value)}}
+									removeEventBind={() => {deleteEvent(value)}}
 									cambio={elimino}
 									setCambio={setElimino}
 									hayRepetidos={hayNombreRepetido}
@@ -1259,18 +1222,18 @@ export default function TimeBlockInterface() {
 							);
 						})}
 					</div>
-					{(!editable )&& (<div className="add-subject">
-						<button onClick={() => {addSubject()}} type="button">
-							Añadir Curso
+					{!editable && (<div className="add-subject">
+						<button onClick={() => {addEvent()}} type="button">
+							Añadir Evento
 						</button>
 						<button onClick={() => {setEditable(true)}} type="button">
-							Editar Cursos
+							Editar Eventos
 						</button>
 
 					</div>)}
-					{(editable )&& (<div className="save-subject">
-						<button onClick={() => {addSubject()}} type="button">
-							Añadir Curso
+					{editable && (<div className="save-subject">
+						<button onClick={() => {addEvent()}} type="button">
+							Añadir Evento
 						</button>
 						<button className="guardar-button" onClick={() => {if(puedeGuardar){setEditable(false)} saveSubjectServer();}} type="button">
 							Guardar
@@ -1280,13 +1243,13 @@ export default function TimeBlockInterface() {
 						</div>)}
 					</div>
 				<div className="section-edit-container">
-					{selectedSection !== undefined && (
+					{selectedEvent !== undefined && (
 						<EditableSectionContainer
-							selectedSection={selectedSection}
+							selectedEvent={selectedEvent}
 							//updateSectionBind={updateSectionFromCourse}
 							puedeActualizar={puedeActualizar}
-							addClassBind={addClassToSection}
-							removeClassBind={removeClassFromSection}
+							addClassBind={addClassToEvent}
+							removeClassBind={removeClassFromEvent}
 							updateClassBind={updateClassFromSection}
 							saveDataBind={updateSectionFromCourse}
 							cambio={cambio}

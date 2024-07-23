@@ -1,15 +1,18 @@
 {
   "name": "horarios-plus-plus",
   "module": "index.ts",
-  "type": "module",
   "devDependencies": {
-    "@biomejs/biome": "^1.7.3",
+    "@biomejs/biome": "^1.8.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.4.5"
   },
-  "trustedDependencies": [
-    "@biomejs/biome"
-  ]
+  "scripts": {
+    "startOld": "bun run ./horarios-plus-plus-server/index.js",
+    "server": "bun run ./horarios-plus-plus-server-new/src/index.ts",
+    "client": "cd ./horarios-plus-plus-client;bun run start"
+  },
+  "trustedDependencies": ["@biomejs/biome"],
+  "type": "module"
 }

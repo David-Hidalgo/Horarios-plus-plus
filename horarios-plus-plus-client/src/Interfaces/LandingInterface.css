@@ -41,8 +41,8 @@
   flex-flow: row wrap;
   overflow: hidden;
 
-  justify-content: space-evenly;
-  align-items: stretch;
+  justify-content: center;
+  align-items: center;
   
   margin-top: auto;
   font-size: 2rem;
@@ -52,23 +52,61 @@
 .developer-box {
   display: flex;
   flex-flow: column nowrap;
-  overflow: hidden;
+  
+  justify-content: center;
+  margin-left: 10rem;
+  width: 15rem;
 
-  width: 20rem;
+  
 }
 
 .developer-box h2 {
   margin: unset;
-  font-size: 2rem;
+  font-size: 1rem;
+  
 }
 
 .developer-box a {
   margin: unset;
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .developer-box p {
   margin: unset;
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
+.developer-box-title {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1rem;
+}
+
+@keyframes colorAnimation {
+  0% {
+    color: red;
+  }
+  25% {
+    color: rgb(0, 204, 255);
+  }
+  50% {
+    color: green;
+  }
+  75% {
+    color: rgb(255, 217, 0);
+  }
+  100% {
+    color: purple;
+  }
+}
+
+.description-container h1 {
+  margin: unset;
+  font-size: 7.5rem;
+  animation: colorAnimation 8s infinite;
+}
