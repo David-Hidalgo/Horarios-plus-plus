@@ -11,7 +11,7 @@ import type {
 	ISession,
 } from "./ScheduleViewer.tsx";
 import ScheduleViewer from "./ScheduleViewer.tsx";
-import type { Session } from "../../../horarios-plus-plus-server-new/src/models/classes.ts";
+import type { Session } from "../../../horarios-plus-plus-server/src/models/classes.ts";
 
 interface visorEntradaProperties {
 	horarioEntrada: ISchedule;

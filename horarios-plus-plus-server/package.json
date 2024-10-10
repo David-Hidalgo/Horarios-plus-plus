@@ -1,5 +1,5 @@
 {
-  "name": "horarios-plus-plus-server-new",
+  "name": "horarios-plus-plus-server",
   "version": "1.0.50",
   "scripts": {
     "dev": "bun --watch src/index.ts",

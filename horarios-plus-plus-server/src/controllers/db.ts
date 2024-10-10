@@ -1,5 +1,5 @@
 import mongoose, { mongo } from "mongoose";
-import type {
+import {
 	iSession,
 	iSection,
 	iSubject,
@@ -7,7 +7,7 @@ import type {
 	iCareer,
 	Section,
 } from "./../models/classes";
-import { Schedule, User } from "./../models/classes";
+import { Career, Schedule, Session, Subject, User } from "./../models/classes";
 
 interface iSubjectSchema extends iSubject {
 			sections: mongoose.Types.ObjectId[];
@@ -166,6 +166,87 @@ export class DBStarter {
 		return this.subjectModel.find().populate<iSection>("sections");
 	}
 	//MARK: Careers
+	static async instanciarTodo(materias:Array<any>, sectionsArr:Array<any>) {
+		const a =new Career("Ingeniería en Computación");
+		let numeroSec = 0;
+		let numeroSub = 0;
+		const materiasArr = [];
+		let sessionsArr: Session[] = [];
+		let sectionsArrTemp = [];
+		for await (const materia of materias) {
+			await materia.populate("sections");
+			const materiaTemp=new Subject(materia.name, [], a);
+			for  (const section of materia.sections) {
+				sessionsArr = [];
+				for  (const sección of sectionsArr) {
+					if (section._id.equals(sección._id)) {
+						numeroSec++;
+						sección.sessions.forEach((session:any) => {
+							sessionsArr.push(new Session(session.start, session.end, session.day));
+						});
+						sectionsArrTemp.push(new Section(sección.nrc, sección.teacher, sessionsArr, materiaTemp));
+					}
+				}
+			}
+			if (numeroSec > 0) {
+				materiaTemp.sections = sectionsArrTemp;
+				numeroSub++;
+				materiasArr.push(materiaTemp);
+			}
+			sectionsArrTemp = [];
+			numeroSec = 0;
+		}
+	
+		if(numeroSub < 1){
+			throw new Error("FAILED TO GENERATE SCHEDULES: A subject is not found");
+		}
+		return materiasArr;
+	}
+	public async saveSchedule(owner:string,nrcs:string) {
+		if (owner === undefined || nrcs === undefined) {
+			console.error("FAILED TO GENERATE SCHEDULES: A value is undefined");
+			return JSON.stringify(undefined);
+		}
 
-	public saveSchedule(user: iUser, sections: Section[]) {}
+		const failed = false;
+		const sections = await Promise.all(
+			nrcs.split(",").map(async (nrc) => {
+				return await this.sectionModel.find({ nrc: nrc });
+			}),
+		);
+		const sectionsArr = sections.flat();
+		//una busqueda en this.subjectModel para buscar el número de materias que contengan las secciones
+		const materias = await this.subjectModel.find({});
+
+		const materiasArr=await DBStarter.instanciarTodo(materias, sectionsArr);
+
+		// console.error(`Numero de materias: ${numeroSub}`, `Numero de secciones: ${sectionsArr.length}`);
+		// console.log("Las Materias Son\n",materiasArr,"\n");
+		let schedules = new Array();
+		const scheduleInicial = new Schedule(new User(owner,"algo",4,[]), []);
+		console.log("Estos son las materias antes de recursivo \n",materiasArr,"\n");
+		
+		Schedule.recursiveSchedulePush(0, materiasArr, scheduleInicial, schedules);
+		// console.log("Estos son los horarios antes de filtrador \n",schedules,"\n");
+		schedules = Schedule.filtrarHorariosPorMaterias(schedules, materiasArr);
+		schedules=schedules.filter((schedule) => {
+			for (const section of schedule.sections) {
+				if (section.sessions.length === 0) {
+					return false;
+				}else {
+					return true;
+				}
+			}
+		});
+		console.log("\nhorarios después de filtrados\n",Bun.inspect(schedules,{colors:true,depth: 5}));
+		
+		// const schedules = await GenerateSchedules(sectionsArr, numeroSub);
+		for (const schedule of schedules) {
+			for (const section of schedule.sections) {
+				section.subject.sections = [];
+			}
+		}
+
+		return JSON.stringify(schedules);
+	}
 }
