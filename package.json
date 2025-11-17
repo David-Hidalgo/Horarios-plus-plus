@@ -8,12 +8,18 @@
     "@types/bun": "1.3.0",
     "typescript": "^4.9.5"
   },
-  "workspaces": ["horarios-plus-plus-client/", "horarios-plus-plus-server/"],
+  "workspaces": [
+    "horarios-plus-plus-client/",
+    "horarios-plus-plus-server/"
+  ],
   "scripts": {
     "server": "bun run -F *server dev",
     "client": "cd ./horarios-plus-plus-client;bun run start",
     "build": "bun run -F '*' build",
-    "start": "bun run -F '*' start"
+    "start": "bun run -F '*' start",
+    "test": "bun test"
   },
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }

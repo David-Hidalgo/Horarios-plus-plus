@@ -27,9 +27,9 @@ import {DBStarter} from './db';
 	const subject1 = new Subject("Matematica", [],inf );
 	const subject2 = new Subject("Fisica", [], inf);
 
-	const section1 = new Section(1, "teacher1", [], subject1);
-	const section2 = new Section(2, "teacher2", [], subject2);
-	const section3 = new Section(3, "teacher3", [], subject1);
+	const section1 = new Section("1", "teacher1", [], subject1);
+	const section2 = new Section("2", "teacher2", [], subject2);
+	const section3 = new Section("3", "teacher3", [], subject1);
 
 	section1.sessions = [session1, session2];
 	section2.sessions = [session3, session4];
